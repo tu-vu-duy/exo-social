@@ -21,6 +21,7 @@ package org.exoplatform.social.core.chromattic.entity;
 
 import org.chromattic.api.annotations.*;
 import org.chromattic.ext.ntdef.NTFile;
+import org.exoplatform.social.core.storage.query.PropertyLiteralExpression;
 
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,10 @@ public abstract class ProfileEntity {
 
   @Properties
   public abstract Map<String, Object> getProperties();
+  public static final PropertyLiteralExpression firstName = new PropertyLiteralExpression(String.class, "firstName");
+  public static final PropertyLiteralExpression fullName = new PropertyLiteralExpression(String.class, "fullName");
+  public static final PropertyLiteralExpression position = new PropertyLiteralExpression(String.class, "position");
+  public static final PropertyLiteralExpression gender = new PropertyLiteralExpression(String.class, "gender");
 
   @Create
   public abstract NTFile createAvatar();

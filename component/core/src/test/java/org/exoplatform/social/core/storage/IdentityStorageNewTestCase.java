@@ -1,0 +1,657 @@
+/*
+* Copyright (C) 2003-2009 eXo Platform SAS.
+*
+* This is free software; you can redistribute it and/or modify it
+* under the terms of the GNU Lesser General Public License as
+* published by the Free Software Foundation; either version 2.1 of
+* the License, or (at your option) any later version.
+*
+* This software is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+* Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public
+* License along with this software; if not, write to the Free
+* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+* 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+*/
+
+package org.exoplatform.social.core.storage;
+
+import org.exoplatform.social.core.chromattic.entity.IdentityEntity;
+import org.exoplatform.social.core.identity.model.Identity;
+import org.exoplatform.social.core.identity.model.Profile;
+import org.exoplatform.social.core.model.AvatarAttachment;
+import org.exoplatform.social.core.profile.ProfileFilter;
+import org.exoplatform.social.core.storage.exception.NodeAlreadyExistsException;
+import org.exoplatform.social.core.storage.exception.NodeNotFoundException;
+import org.exoplatform.social.core.test.AbstractCoreTest;
+
+import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
+ * @version $Revision$
+ */
+public class IdentityStorageNewTestCase extends AbstractCoreTest {
+  private IdentityStorage storage;
+  private List<String> tearDownIdentityList;
+
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    storage = (IdentityStorage) getContainer().getComponentInstanceOfType(IdentityStorage.class);
+    tearDownIdentityList = new ArrayList<String>();
+    assertNotNull(storage);
+  }
+
+  @Override
+  public void tearDown() throws Exception {
+    for (String id : tearDownIdentityList) {
+      storage.deleteIdentity(new Identity(id));
+    }
+    super.tearDown();
+  }
+
+  public void testCreateIdentitty() throws Exception {
+    Identity newIdentity = new Identity("organization", "new");
+
+    //
+    storage._createIdentity(newIdentity);
+    String generatedId = newIdentity.getId();
+    assertNotNull(generatedId);
+    assertEquals("organization", newIdentity.getProviderId());
+    assertEquals(false, newIdentity.isDeleted());
+    assertEquals("new", newIdentity.getRemoteId());
+    tearDownIdentityList.add(newIdentity.getId());
+
+    //
+    newIdentity.setRemoteId("new2");
+    storage._createIdentity(newIdentity);
+    assertNotNull(newIdentity.getId());
+    assertNotSame(generatedId, newIdentity.getId());
+    generatedId = newIdentity.getId();
+    assertEquals("organization", newIdentity.getProviderId());
+    assertEquals(false, newIdentity.isDeleted());
+    assertEquals("new2", newIdentity.getRemoteId());
+    tearDownIdentityList.add(newIdentity.getId());
+  }
+
+  public void testCreateIdentittyExits() throws Exception {
+    Identity newIdentity = new Identity("organization", "newDuplicate");
+
+    //
+    storage._createIdentity(newIdentity);
+    tearDownIdentityList.add(newIdentity.getId());
+
+    //
+    try {
+      storage._createIdentity(newIdentity);
+      fail();
+    }
+    catch (NodeAlreadyExistsException e) {
+      // ok
+    }
+  }
+
+  public void testFindByIdDoesntExists() throws Exception {
+
+    try {
+      storage._findById(IdentityEntity.class, "doesn't exists");
+      fail();
+    }
+    catch (NodeNotFoundException e) {
+      // ok
+    }
+  }
+
+  public void testFindByIdExists() throws Exception {
+    Identity newIdentity = new Identity("organization", "exists");
+
+    //
+    storage._createIdentity(newIdentity);
+    String generatedId = newIdentity.getId();
+    assertNotNull(generatedId);
+    assertEquals("organization", newIdentity.getProviderId());
+    assertEquals(false, newIdentity.isDeleted());
+    assertEquals("exists", newIdentity.getRemoteId());
+
+    //
+    IdentityEntity got = storage._findById(IdentityEntity.class, generatedId);
+    assertEquals("organization", got.getProviderId());
+    assertEquals(Boolean.FALSE, got.isDeleted());
+    assertEquals("exists", got.getRemoteId());
+
+    tearDownIdentityList.add(newIdentity.getId());
+  }
+
+  public void testDeleteIdentityExists() throws Exception {
+    Identity newIdentity = new Identity("organization", "newToDelete");
+
+    //
+    storage._createIdentity(newIdentity);
+    String generatedId = newIdentity.getId();
+    assertNotNull(generatedId);
+    assertEquals("organization", newIdentity.getProviderId());
+    assertEquals(false, newIdentity.isDeleted());
+    assertEquals("newToDelete", newIdentity.getRemoteId());
+
+    //
+    storage._deleteIdentity(newIdentity);
+
+    //
+    try {
+      storage._findIdentity("organization", "newToDelete");
+      fail();
+    }
+    catch (NodeNotFoundException e) {
+      // ok
+    }
+  }
+
+  public void testDeleteIdentityDoesntExists() throws Exception {
+    Identity newIdentity = new Identity("organization", "doesn't exists");
+    newIdentity.setId("fakeId");
+
+    //
+    try {
+      storage._deleteIdentity(newIdentity);
+      fail();
+    }
+    catch (NodeNotFoundException e) {
+      // ok
+    }
+  }
+
+  public void testDeleteInvalidIdentity() throws Exception {
+    Identity newIdentity = new Identity("organization", "doesn't exists");
+
+    //
+    try {
+      storage._deleteIdentity(newIdentity);
+      fail();
+    }
+    catch (IllegalArgumentException e) {
+      // ok
+    }
+
+    //
+    try {
+      storage._deleteIdentity(null);
+      fail();
+    }
+    catch (IllegalArgumentException e) {
+      // ok
+    }
+  }
+
+  public void testCreateProfile() throws Exception {
+    Identity newIdentity = new Identity("organization", "identityForProfile");
+
+    //
+    storage._createIdentity(newIdentity);
+    String generatedId = newIdentity.getId();
+    assertNotNull(generatedId);
+    assertEquals("organization", newIdentity.getProviderId());
+    assertEquals(false, newIdentity.isDeleted());
+    assertEquals("identityForProfile", newIdentity.getRemoteId());
+
+    //
+    Profile profile = new Profile(newIdentity);
+    storage._createProfile(profile);
+    assertNotNull(profile.getId());
+
+    tearDownIdentityList.add(newIdentity.getId());
+  }
+
+  public void testLoadProfileExists() throws Exception {
+    Identity newIdentity = new Identity("organization", "identityForLoadProfile");
+
+    //
+    storage._createIdentity(newIdentity);
+    String generatedId = newIdentity.getId();
+    assertNotNull(generatedId);
+    assertEquals("organization", newIdentity.getProviderId());
+    assertEquals(false, newIdentity.isDeleted());
+    assertEquals("identityForLoadProfile", newIdentity.getRemoteId());
+
+    //
+    Profile profile = new Profile(newIdentity);
+    storage._createProfile(profile);
+    assertNotNull(profile.getId());
+
+    //
+    storage._loadProfile(profile);
+    assertNotNull(profile.getId());
+
+    //
+    tearDownIdentityList.add(newIdentity.getId());
+  }
+
+  public void testLoadProfileDoesntExists() throws Exception {
+    Identity newIdentity = new Identity("organization", "identityForLoadProfile");
+
+    //
+    storage._createIdentity(newIdentity);
+    String generatedId = newIdentity.getId();
+    assertNotNull(generatedId);
+    assertEquals("organization", newIdentity.getProviderId());
+    assertEquals(false, newIdentity.isDeleted());
+    assertEquals("identityForLoadProfile", newIdentity.getRemoteId());
+
+    //
+    Profile profile = new Profile(newIdentity);
+    try {
+      storage._loadProfile(profile);
+      fail();
+    }
+    catch (NodeNotFoundException e) {
+      // ok
+    }
+
+    tearDownIdentityList.add(newIdentity.getId());
+  }
+
+  public void testGetIdentityNoProvider() throws Exception {
+    Identity newIdentity = new Identity("organization", "checkProviderNotFound");
+
+    //
+    storage._createIdentity(newIdentity);
+    String generatedId = newIdentity.getId();
+    assertNotNull(generatedId);
+    assertEquals("organization", newIdentity.getProviderId());
+    assertEquals(false, newIdentity.isDeleted());
+    assertEquals("checkProviderNotFound", newIdentity.getRemoteId());
+
+    //
+    try {
+      storage._findIdentity("providerDoesntExists", "checkProviderNotFound");
+      fail();
+    }
+    catch (NodeNotFoundException e) {
+      // ok
+    }
+
+    //
+    tearDownIdentityList.add(newIdentity.getId());
+  }
+
+  public void testGetIdentityNoRemote() throws Exception {
+    Identity newIdentity = new Identity("organization", "checkRemoteNotFound");
+
+    //
+    storage._createIdentity(newIdentity);
+    String generatedId = newIdentity.getId();
+    assertNotNull(generatedId);
+    assertEquals("organization", newIdentity.getProviderId());
+    assertEquals(false, newIdentity.isDeleted());
+    assertEquals("checkRemoteNotFound", newIdentity.getRemoteId());
+
+    //
+    try {
+      storage._findIdentity("organization", "not-found");
+      fail();
+    }
+    catch (NodeNotFoundException e) {
+      // ok
+    }
+
+    //
+    tearDownIdentityList.add(newIdentity.getId());
+  }
+
+  public void testGetIdentity() throws Exception {
+    Identity newIdentity = new Identity("organization", "remoteid");
+
+    //
+    storage._createIdentity(newIdentity);
+    String generatedId = newIdentity.getId();
+    assertNotNull(generatedId);
+    assertEquals("organization", newIdentity.getProviderId());
+    assertEquals(false, newIdentity.isDeleted());
+    assertEquals("remoteid", newIdentity.getRemoteId());
+
+    //
+    Identity got = storage._findIdentity("organization", "remoteid");
+    assertNotNull(got.getId());
+    assertEquals("organization", got.getProviderId());
+    assertEquals(false, got.isDeleted());
+    assertEquals("remoteid", got.getRemoteId());
+
+    //
+    tearDownIdentityList.add(newIdentity.getId());
+  }
+
+  public void testProfile() throws Exception {
+    Identity newIdentity = new Identity("organization", "remoteid");
+
+    //
+    storage._createIdentity(newIdentity);
+    String generatedId = newIdentity.getId();
+    assertNotNull(generatedId);
+    assertEquals("organization", newIdentity.getProviderId());
+    assertEquals(false, newIdentity.isDeleted());
+    assertEquals("remoteid", newIdentity.getRemoteId());
+    assertNotNull(newIdentity.getProfile());
+    assertNull(newIdentity.getProfile().getId());
+
+    //
+    storage._createProfile(newIdentity.getProfile());
+    assertNotNull(newIdentity.getProfile().getId());
+
+    //
+    Profile profile = newIdentity.getProfile();
+    profile.setProperty(Profile.USERNAME, "user");
+    profile.setProperty(Profile.FIRST_NAME, "first");
+    profile.setProperty(Profile.LAST_NAME, "last");
+    profile.setProperty(Profile.AVATAR_URL, "avatarurl");
+    storage._saveProfile(profile);
+
+    //
+    Profile toLoadProfile = new Profile(newIdentity);
+    assertNull(toLoadProfile.getProperty(Profile.USERNAME));
+    assertNull(toLoadProfile.getProperty(Profile.FIRST_NAME));
+    assertNull(toLoadProfile.getProperty(Profile.LAST_NAME));
+    assertNull(toLoadProfile.getProperty(Profile.AVATAR_URL));
+    storage._loadProfile(toLoadProfile);
+    assertNotNull(toLoadProfile.getId());
+    assertNotNull(toLoadProfile.getProperty(Profile.USERNAME));
+    assertNotNull(toLoadProfile.getProperty(Profile.FIRST_NAME));
+    assertNotNull(toLoadProfile.getProperty(Profile.LAST_NAME));
+    assertNotNull(toLoadProfile.getProperty(Profile.AVATAR_URL));
+
+    tearDownIdentityList.add(newIdentity.getId());
+  }
+
+  public void testMoveIdentity() throws Exception {
+    Identity newIdentity = new Identity("organization", "checkMove");
+
+    //
+    storage._createIdentity(newIdentity);
+    String generatedId = newIdentity.getId();
+    assertNotNull(generatedId);
+    assertEquals("organization", newIdentity.getProviderId());
+    assertEquals(false, newIdentity.isDeleted());
+    assertEquals("checkMove", newIdentity.getRemoteId());
+
+    //
+    newIdentity.setProviderId("newProviderId");
+    newIdentity.setRemoteId("newRemoteId");
+
+    //
+    assertEquals("newProviderId", newIdentity.getProviderId());
+    assertEquals("newRemoteId", newIdentity.getRemoteId());
+
+    //
+    storage._saveIdentity(newIdentity);
+    Identity got = storage._findIdentity(newIdentity.getProviderId(), newIdentity.getRemoteId());
+    assertEquals(generatedId, got.getId());
+    assertEquals("newProviderId", got.getProviderId());
+    assertEquals(false, got.isDeleted());
+    assertEquals("newRemoteId", got.getRemoteId());
+
+    tearDownIdentityList.add(newIdentity.getId());
+  }
+
+  public void testGetType() throws Exception {
+    assertEquals("String", storage.getType("soc:identitydefinition", "soc:providerId"));
+    assertNull(storage.getType("soc:profiledefinition", "doesn't exists"));
+    assertNull(storage.getType("doesn't exists", "doesn't exists"));
+    assertNull(storage.getType("soc:profiledefinition", null));
+    assertNull(storage.getType(null, null));
+  }
+
+  public void testUpdateProfileProperties() throws Exception {
+   Identity newIdentity = new Identity("organization", "checksaveprofile");
+
+    //
+   storage._createIdentity(newIdentity);
+   String generatedId = newIdentity.getId();
+   assertNotNull(generatedId);
+   assertEquals("organization", newIdentity.getProviderId());
+   assertEquals(false, newIdentity.isDeleted());
+   assertEquals("checksaveprofile", newIdentity.getRemoteId());
+   assertNotNull(newIdentity.getProfile());
+   assertNull(newIdentity.getProfile().getId());
+
+   //
+   storage._createProfile(newIdentity.getProfile());
+   assertNotNull(newIdentity.getProfile().getId());
+
+   //
+   Profile profile = newIdentity.getProfile();
+   profile.setProperty(Profile.USERNAME, "user");
+   profile.setProperty(Profile.FIRST_NAME, "first");
+   profile.setProperty(Profile.LAST_NAME, "last");
+   profile.setProperty(Profile.AVATAR_URL, "avatarurl");
+   storage._saveProfile(profile);
+
+   //
+   Profile toLoadProfile = new Profile(newIdentity);
+   assertNull(toLoadProfile.getProperty(Profile.USERNAME));
+   assertNull(toLoadProfile.getProperty(Profile.FIRST_NAME));
+   assertNull(toLoadProfile.getProperty(Profile.LAST_NAME));
+   assertNull(toLoadProfile.getProperty(Profile.AVATAR_URL));
+
+   //
+   storage._loadProfile(toLoadProfile);
+   assertNotNull(toLoadProfile.getId());
+   assertNotNull(toLoadProfile.getProperty(Profile.USERNAME));
+   assertNotNull(toLoadProfile.getProperty(Profile.FIRST_NAME));
+   assertNotNull(toLoadProfile.getProperty(Profile.LAST_NAME));
+   assertNotNull(toLoadProfile.getProperty(Profile.AVATAR_URL));
+
+   //
+   Profile updaterProfile = new Profile(newIdentity);
+   updaterProfile.setId(toLoadProfile.getId());
+   updaterProfile.setProperty(Profile.USERNAME, "updated user");
+   updaterProfile.setProperty(Profile.LAST_NAME, "updated last");
+   updaterProfile.setProperty(Profile.FULL_NAME, "new full");
+   assertNull(toLoadProfile.getProperty(Profile.FULL_NAME));
+   storage.addOrModifyProfileProperties(updaterProfile);
+
+   //
+   Profile toLoadAfterUpdateProfile = new Profile(newIdentity);
+   storage.loadProfile(toLoadAfterUpdateProfile);
+   assertEquals("updated user", toLoadAfterUpdateProfile.getProperty(Profile.USERNAME));
+   assertEquals("updated last", toLoadAfterUpdateProfile.getProperty(Profile.LAST_NAME));
+   assertEquals("avatarurl", toLoadAfterUpdateProfile.getProperty(Profile.AVATAR_URL));
+   assertEquals("first", toLoadAfterUpdateProfile.getProperty(Profile.FIRST_NAME));
+   assertEquals("new full", toLoadAfterUpdateProfile.getProperty(Profile.FULL_NAME));
+
+   tearDownIdentityList.add(newIdentity.getId());
+  }
+
+  public void testFindIdentityByFirstCharCount() throws Exception {
+
+    addIdentity("o", "a1", "male", "");
+    addIdentity("o", "a2", "male", "");
+    addIdentity("o", "a3", "male", "");
+    addIdentity("o", "a4", "male", "");
+    addIdentity("o", "b1", "male", "");
+    addIdentity("o", "b2", "male", "");
+    addIdentity("o", "b3", "male", "");
+    addIdentity("o", "z", "male", "");
+
+    ProfileFilter filterA = createFilter('a', "", "", "");
+    ProfileFilter filterB = createFilter('b', "", "", "");
+    ProfileFilter filterC = createFilter('c', "", "", "");
+    ProfileFilter filterZ = createFilter('z', "", "", "");
+
+    assertEquals(4, storage.getIdentitiesByFirstCharacterOfNameCount("o", filterA));
+    assertEquals(3, storage.getIdentitiesByFirstCharacterOfNameCount("o", filterB));
+    assertEquals(0, storage.getIdentitiesByFirstCharacterOfNameCount("o", filterC));
+    assertEquals(1, storage.getIdentitiesByFirstCharacterOfNameCount("o", filterZ));
+  }
+
+  public void testFindIdentityByFirstChar() throws Exception {
+
+    addIdentity("o", "a1", "", "");
+    addIdentity("o", "a2", "", "");
+    addIdentity("o", "a3", "", "");
+    addIdentity("o", "a4", "", "");
+    addIdentity("o", "b1", "", "");
+    addIdentity("o", "b2", "", "");
+    addIdentity("o", "b3", "", "");
+    addIdentity("o", "z", "", "");
+
+    ProfileFilter filterA = createFilter('a', "", "", "");
+    ProfileFilter filterB = createFilter('b', "", "", "");
+    ProfileFilter filterC = createFilter('c', "", "", "");
+    ProfileFilter filterZ = createFilter('z', "", "", "");
+
+    assertEquals(4, storage.getIdentitiesByFirstCharacterOfName("o", filterA, 0, -1, false).size());
+    assertEquals(4, storage.getIdentitiesByFirstCharacterOfName("o", filterA, 0, 4, false).size());
+    assertEquals(4, storage.getIdentitiesByFirstCharacterOfName("o", filterA, 0, 4, false).size());
+    assertEquals(3, storage.getIdentitiesByFirstCharacterOfName("o", filterA, 0, 3, false).size());
+    assertEquals(4, storage.getIdentitiesByFirstCharacterOfName("o", filterA, 0, 10, false).size());
+    assertEquals(3, storage.getIdentitiesByFirstCharacterOfName("o", filterB, 0, 10, false).size());
+    assertEquals(0, storage.getIdentitiesByFirstCharacterOfName("o", filterC, 0, 10, false).size());
+    assertEquals(1, storage.getIdentitiesByFirstCharacterOfName("o", filterZ, 0, 10, false).size());
+  }
+
+  public void testFindIdentityWithFilterCount() throws Exception {
+
+    addIdentity("o", "toto", "male", "cadre");
+    addIdentity("o", "totota", "female", "dev");
+    addIdentity("o", "tata", "male", "cadre");
+
+    ProfileFilter t = createFilter('\u0000', "t", "", "");
+    ProfileFilter to = createFilter('\u0000', "to", "", "");
+    ProfileFilter toto = createFilter('\u0000', "toto", "", "");
+    ProfileFilter totota = createFilter('\u0000', "totota", "", "");
+    ProfileFilter unknown = createFilter('\u0000', "unknown", "", "");
+
+    ProfileFilter male = createFilter('\u0000', "", "male", "");
+    ProfileFilter female = createFilter('\u0000', "", "female", "");
+
+    ProfileFilter cadre = createFilter('\u0000', "", "", "cadre");
+    ProfileFilter dev = createFilter('\u0000', "", "", "dev");
+
+    ProfileFilter tmale = createFilter('\u0000', "t", "male", "");
+    ProfileFilter tmaledev = createFilter('\u0000', "t", "male", "dev");
+    ProfileFilter tmalecadre = createFilter('\u0000', "t", "male", "cadre");
+
+
+    assertEquals(3, storage.getIdentitiesByProfileFilterCount("o", t));
+    assertEquals(2, storage.getIdentitiesByProfileFilterCount("o", to));
+    assertEquals(2, storage.getIdentitiesByProfileFilterCount("o", toto));
+    assertEquals(1, storage.getIdentitiesByProfileFilterCount("o", totota));
+    assertEquals(0, storage.getIdentitiesByProfileFilterCount("o", unknown));
+    assertEquals(2, storage.getIdentitiesByProfileFilterCount("o", male));
+    assertEquals(1, storage.getIdentitiesByProfileFilterCount("o", female));
+    assertEquals(2, storage.getIdentitiesByProfileFilterCount("o", cadre));
+    assertEquals(1, storage.getIdentitiesByProfileFilterCount("o", dev));
+    assertEquals(2, storage.getIdentitiesByProfileFilterCount("o", tmale));
+    assertEquals(0, storage.getIdentitiesByProfileFilterCount("o", tmaledev));
+    assertEquals(2, storage.getIdentitiesByProfileFilterCount("o", tmalecadre));
+  }
+
+  public void testFindIdentityWithFilter() throws Exception {
+
+    addIdentity("o", "toto", "male", "cadre");
+    addIdentity("o", "totota", "female", "dev");
+    addIdentity("o", "tata", "male", "cadre");
+
+    ProfileFilter t = createFilter('\u0000', "t", "", "");
+    ProfileFilter to = createFilter('\u0000', "to", "", "");
+    ProfileFilter toto = createFilter('\u0000', "toto", "", "");
+    ProfileFilter totota = createFilter('\u0000', "totota", "", "");
+    ProfileFilter unknown = createFilter('\u0000', "unknown", "", "");
+
+    ProfileFilter male = createFilter('\u0000', "", "male", "");
+    ProfileFilter female = createFilter('\u0000', "", "female", "");
+
+    ProfileFilter cadre = createFilter('\u0000', "", "", "cadre");
+    ProfileFilter dev = createFilter('\u0000', "", "", "dev");
+
+    ProfileFilter tmale = createFilter('\u0000', "t", "male", "");
+    ProfileFilter tmaledev = createFilter('\u0000', "t", "male", "dev");
+    ProfileFilter tmalecadre = createFilter('\u0000', "t", "male", "cadre");
+
+
+    assertEquals(3, storage.getIdentitiesByProfileFilter("o", t, 0, 10, false).size());
+    assertEquals(3, storage.getIdentitiesByProfileFilter("o", t, 0, 3, false).size());
+    assertEquals(1, storage.getIdentitiesByProfileFilter("o", t, 0, 1, false).size());
+    assertEquals(3, storage.getIdentitiesByProfileFilter("o", t, 0, 0, false).size());
+    assertEquals(3, storage.getIdentitiesByProfileFilter("o", t, 0, -1, false).size());
+    assertEquals(2, storage.getIdentitiesByProfileFilter("o", to, 0, 10, false).size());
+    assertEquals(2, storage.getIdentitiesByProfileFilter("o", toto, 0, 10, false).size());
+    assertEquals(1, storage.getIdentitiesByProfileFilter("o", totota, 0, 10, false).size());
+    assertEquals(0, storage.getIdentitiesByProfileFilter("o", unknown, 0, 10, false).size());
+    assertEquals(2, storage.getIdentitiesByProfileFilter("o", male, 0, 10, false).size());
+    assertEquals(1, storage.getIdentitiesByProfileFilter("o", female, 0, 10, false).size());
+    assertEquals(2, storage.getIdentitiesByProfileFilter("o", cadre, 0, 10, false).size());
+    assertEquals(1, storage.getIdentitiesByProfileFilter("o", dev, 0, 10, false).size());
+    assertEquals(2, storage.getIdentitiesByProfileFilter("o", tmale, 0, 10, false).size());
+    assertEquals(0, storage.getIdentitiesByProfileFilter("o", tmaledev, 0, 10, false).size());
+    assertEquals(2, storage.getIdentitiesByProfileFilter("o", tmalecadre, 0, 10, false).size());
+  }
+
+  public void testAvatar() throws Exception {
+    Identity newIdentity = new Identity("organization", "remoteid");
+
+    //
+    storage._createIdentity(newIdentity);
+    String generatedId = newIdentity.getId();
+    assertNotNull(generatedId);
+    assertEquals("organization", newIdentity.getProviderId());
+    assertEquals(false, newIdentity.isDeleted());
+    assertEquals("remoteid", newIdentity.getRemoteId());
+    assertNotNull(newIdentity.getProfile());
+    assertNull(newIdentity.getProfile().getId());
+
+    //
+    storage._createProfile(newIdentity.getProfile());
+    assertNotNull(newIdentity.getProfile().getId());
+
+    //
+    Profile profile = newIdentity.getProfile();
+    AvatarAttachment avatar = new AvatarAttachment();
+    avatar.setMimeType("plain/text");
+    avatar.setInputStream(new ByteArrayInputStream("Attachment content".getBytes()));
+    profile.setProperty(Profile.AVATAR, avatar);
+
+    //
+    storage._saveProfile(profile);
+
+    //
+    Profile loadedProfile = new Profile(newIdentity);
+    storage._loadProfile(loadedProfile);
+    assertEquals(
+        "/rest/jcr/repository/social/production/soc:providers/soc:organization/soc:remoteid/soc:profile/soc:avatar",
+        loadedProfile.getAvatarUrl()
+    );
+
+    
+  }
+
+  private void addIdentity(String provider, String name, String gender, String position) throws Exception {
+    Identity newIdentity = new Identity(provider, name);
+    storage._createIdentity(newIdentity);
+    Profile p = new Profile(newIdentity);
+    p.setProperty(Profile.FIRST_NAME, name);
+    p.setProperty(Profile.FULL_NAME, name);
+    p.setProperty(Profile.GENDER, gender);
+    p.setProperty(Profile.POSITION, position);
+    newIdentity.setProfile(p);
+    storage._createProfile(p);
+    tearDownIdentityList.add(newIdentity.getId());
+  }
+
+  private ProfileFilter createFilter(char c, String name, String gender, String position) throws Exception {
+    ProfileFilter filter = new ProfileFilter();
+    filter.setFirstCharacterOfName(c);
+    filter.setName(name);
+    filter.setGender(gender);
+    filter.setPosition(position);
+    return filter;
+  }
+
+  // TODO : test request excludes
+  // TODO : test multi values
+
+}

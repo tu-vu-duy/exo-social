@@ -449,6 +449,11 @@
         </value-param>
         <values-param>
           <name>entities</name>
+          <value>org.exoplatform.social.core.chromattic.entity.ProviderRootEntity</value>
+          <value>org.exoplatform.social.core.chromattic.entity.ProviderEntity</value>
+
+          <value>org.exoplatform.social.core.chromattic.entity.IdentityEntity</value>
+          <value>org.exoplatform.social.core.chromattic.entity.ProfileEntity</value>
         </values-param>
         <properties-param>
           <name>options</name>

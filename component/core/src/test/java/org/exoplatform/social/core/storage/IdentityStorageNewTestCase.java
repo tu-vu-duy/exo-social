@@ -30,7 +30,9 @@ import org.exoplatform.social.core.test.AbstractCoreTest;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
@@ -651,7 +653,114 @@ public class IdentityStorageNewTestCase extends AbstractCoreTest {
     return filter;
   }
 
+  public void testProfileContact() throws Exception {
+    Identity newIdentity = new Identity("organization", "withcontact");
+
+    //
+    storage._createIdentity(newIdentity);
+    String generatedId = newIdentity.getId();
+    assertNotNull(generatedId);
+    assertEquals("organization", newIdentity.getProviderId());
+    assertEquals(false, newIdentity.isDeleted());
+    assertEquals("withcontact", newIdentity.getRemoteId());
+    assertNotNull(newIdentity.getProfile());
+    assertNull(newIdentity.getProfile().getId());
+
+    //
+    storage._createProfile(newIdentity.getProfile());
+    assertNotNull(newIdentity.getProfile().getId());
+
+    //
+    Profile profile = newIdentity.getProfile();
+    profile.setProperty(Profile.USERNAME, "user");
+    profile.setProperty(Profile.FIRST_NAME, "first");
+    profile.setProperty(Profile.LAST_NAME, "last");
+    profile.setProperty(Profile.AVATAR_URL, "avatarurl");
+
+    // urls
+    List<Map<String, String>> urls = new ArrayList<Map<String, String>>();
+    Map<String, String> url1 = new HashMap<String, String>();
+    url1.put("key", "http://www.toto.com");
+    url1.put("value", "http://www.toto.com");
+    Map<String, String> url2 = new HashMap<String, String>();
+    url2.put("key", "http://www.tata.com");
+    url2.put("value", "http://www.tata.com");
+    urls.add(url1);
+    urls.add(url2);
+    profile.setProperty(Profile.CONTACT_URLS, urls);
+
+    // ims
+    List<Map<String, String>> ims = new ArrayList<Map<String, String>>();
+    Map<String, String> im1 = new HashMap<String, String>();
+    im1.put("key", "GTalk");
+    im1.put("value", "nickname1");
+    Map<String, String> im2 = new HashMap<String, String>();
+    im2.put("key", "GTalk");
+    im2.put("value", "nickname2");
+    Map<String, String> im3 = new HashMap<String, String>();
+    im3.put("key", "MSN");
+    im3.put("value", "nickname3");
+    ims.add(im1);
+    ims.add(im2);
+    ims.add(im3);
+    profile.setProperty(Profile.CONTACT_IMS, ims);
+
+    // phones
+    List<Map<String, String>> phones = new ArrayList<Map<String, String>>();
+    Map<String, String> phone1 = new HashMap<String, String>();
+    phone1.put("key", "Work");
+    phone1.put("value", "1234567890");
+    Map<String, String> phone2 = new HashMap<String, String>();
+    phone2.put("key", "Work");
+    phone2.put("value", "2345678901");
+    Map<String, String> phone3 = new HashMap<String, String>();
+    phone3.put("key", "Home");
+    phone3.put("value", "3456789012");
+    Map<String, String> phone4 = new HashMap<String, String>();
+    phone4.put("key", "Other");
+    phone4.put("value", "4567890123");
+    phones.add(phone1);
+    phones.add(phone2);
+    phones.add(phone3);
+    phones.add(phone4);
+    profile.setProperty(Profile.CONTACT_PHONES, phones);
+
+    storage._saveProfile(profile);
+
+    //
+    Profile toLoadProfile = new Profile(newIdentity);
+    assertNull(toLoadProfile.getProperty(Profile.USERNAME));
+    assertNull(toLoadProfile.getProperty(Profile.FIRST_NAME));
+    assertNull(toLoadProfile.getProperty(Profile.LAST_NAME));
+    assertNull(toLoadProfile.getProperty(Profile.AVATAR_URL));
+    storage._loadProfile(toLoadProfile);
+    assertNotNull(toLoadProfile.getId());
+    assertNotNull(toLoadProfile.getProperty(Profile.USERNAME));
+    assertNotNull(toLoadProfile.getProperty(Profile.FIRST_NAME));
+    assertNotNull(toLoadProfile.getProperty(Profile.LAST_NAME));
+    assertNotNull(toLoadProfile.getProperty(Profile.AVATAR_URL));
+
+    List<Map<String, String>> loadedIms = (List<Map<String, String>>) toLoadProfile.getProperty(Profile.CONTACT_IMS);
+    List<Map<String, String>> loadedUrls = (List<Map<String, String>>) toLoadProfile.getProperty(Profile.CONTACT_URLS);
+    List<Map<String, String>> loadedPhones = (List<Map<String, String>>) toLoadProfile.getProperty(Profile.CONTACT_PHONES);
+
+    assertEquals(3, loadedIms.size());
+    assertEquals(2, loadedUrls.size());
+    assertEquals(4, loadedPhones.size());
+
+    //
+    profile.setProperty(Profile.CONTACT_PHONES, new ArrayList<Map<String, String>>());
+    storage._saveProfile(profile);
+
+    Profile toLoadProfile2 = new Profile(newIdentity);
+    storage._loadProfile(toLoadProfile2);
+    List<Map<String, String>> loadedPhones2 = (List<Map<String, String>>) toLoadProfile2.getProperty(Profile.CONTACT_PHONES);
+    assertNull(loadedPhones2);
+
+    tearDownIdentityList.add(newIdentity.getId());
+  }
+
   // TODO : test request excludes
-  // TODO : test multi values
+  // TODO : test profile xp
 
 }

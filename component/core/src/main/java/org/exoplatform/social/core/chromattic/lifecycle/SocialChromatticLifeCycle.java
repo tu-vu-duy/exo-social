@@ -30,11 +30,11 @@ import org.exoplatform.container.xml.InitParams;
  */
 public class SocialChromatticLifeCycle extends ChromatticLifeCycle {
 
-  private static ThreadLocal<ChromatticSession> session = new ThreadLocal<ChromatticSession>();
+  private static ChromatticSession session;
 
   public static ChromatticSession getSession() {
 
-    return session.get();
+    return session;
     
   }
 
@@ -47,7 +47,7 @@ public class SocialChromatticLifeCycle extends ChromatticLifeCycle {
   @Override
   protected void onOpenSession(final SessionContext context) {
 
-    session.set(context.getSession());
+    session = context.getSession();
     super.onOpenSession(context);
 
   }
@@ -56,7 +56,7 @@ public class SocialChromatticLifeCycle extends ChromatticLifeCycle {
   protected void onCloseSession(final SessionContext context) {
 
     super.onCloseSession(context);
-    session.remove();
+    session = null;
 
   }
 }

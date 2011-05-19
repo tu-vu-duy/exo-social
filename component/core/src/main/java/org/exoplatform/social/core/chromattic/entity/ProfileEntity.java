@@ -47,21 +47,24 @@ public abstract class ProfileEntity {
   public abstract IdentityEntity getIdentity();
   public abstract void setIdentity(IdentityEntity identity);
 
+  //@Properties
+  //public abstract Map<String, Object> getProperties();
+
   @Properties
-  public abstract Map<String, Object> getProperties();
-  public static final PropertyLiteralExpression firstName = new PropertyLiteralExpression(String.class, "firstName");
-  public static final PropertyLiteralExpression fullName = new PropertyLiteralExpression(String.class, "fullName");
-  public static final PropertyLiteralExpression position = new PropertyLiteralExpression(String.class, "position");
-  public static final PropertyLiteralExpression gender = new PropertyLiteralExpression(String.class, "gender");
+  public abstract Map<String, List<String>> getProperties();
+  public static final PropertyLiteralExpression firstName = new PropertyLiteralExpression(String.class, "void-firstName");
+  public static final PropertyLiteralExpression fullName = new PropertyLiteralExpression(String.class, "void-fullName");
+  public static final PropertyLiteralExpression position = new PropertyLiteralExpression(String.class, "void-position");
+  public static final PropertyLiteralExpression gender = new PropertyLiteralExpression(String.class, "void-gender");
 
   @Create
   public abstract NTFile createAvatar();
 
-  public Object getProperty(String key) {
+  public List<String> getProperty(String key) {
     return getProperties().get(key);
   }
 
-  public void setProperty(String key, Object value) {
+  public void setProperty(String key, List<String> value) {
     getProperties().put(key, value);
   }
 }

@@ -48,6 +48,10 @@ public abstract class AbstractStorage {
   protected static final String NODETYPE_PROVIDERS = "soc:providers";
 
   //
+  protected static final String SENDER = "sender";
+  protected static final String RECEIVER = "receiver";
+
+  //
   protected static final String ASTERISK_STR = "*";
   protected static final String PERCENT_STR = "%";
   protected static final char   ASTERISK_CHAR = '*';
@@ -117,6 +121,10 @@ public abstract class AbstractStorage {
     }
 
     return got;
+  }
+
+  protected void _removeById(final Class<?> clazz, final String nodeId) {
+    getSession().remove(getSession().findById(clazz, nodeId));
   }
 
   protected boolean isJcrProperty(String name) {

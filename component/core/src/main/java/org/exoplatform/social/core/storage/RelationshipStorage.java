@@ -1,576 +1,541 @@
 /*
- * Copyright (C) 2003-2007 eXo Platform SAS.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; either version 3
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, see<http://www.gnu.org/licenses/>.
- */
+* Copyright (C) 2003-2009 eXo Platform SAS.
+*
+* This is free software; you can redistribute it and/or modify it
+* under the terms of the GNU Lesser General Public License as
+* published by the Free Software Foundation; either version 2.1 of
+* the License, or (at your option) any later version.
+*
+* This software is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+* Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public
+* License along with this software; if not, write to the Free
+* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+* 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+*/
+
 package org.exoplatform.social.core.storage;
+
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
+import org.exoplatform.social.core.chromattic.entity.IdentityEntity;
+import org.exoplatform.social.core.chromattic.entity.ProfileEntity;
+import org.exoplatform.social.core.chromattic.entity.RelationshipEntity;
+import org.exoplatform.social.core.chromattic.entity.RelationshipListEntity;
+import org.exoplatform.social.core.identity.model.Identity;
+import org.exoplatform.social.core.identity.model.Profile;
+import org.exoplatform.social.core.relationship.model.Relationship;
+import org.exoplatform.social.core.storage.exception.NodeNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.jcr.ItemNotFoundException;
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-
-import org.exoplatform.container.PortalContainer;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
-import org.exoplatform.social.common.jcr.JCRSessionManager;
-import org.exoplatform.social.common.jcr.NodeProperties;
-import org.exoplatform.social.common.jcr.NodeTypes;
-import org.exoplatform.social.common.jcr.QueryBuilder;
-import org.exoplatform.social.common.jcr.SocialDataLocation;
-import org.exoplatform.social.common.jcr.Util;
-import org.exoplatform.social.core.identity.model.Identity;
-import org.exoplatform.social.core.manager.IdentityManager;
-import org.exoplatform.social.core.relationship.model.Relationship;
-import org.exoplatform.social.core.storage.RelationshipStorageException.Type;
+import java.util.Map;
 
 /**
- * Class RelationshipStorage is a class that persist or get Relationship object
- * directly from JCR
- * 
- * @modifier tuan_nguyenxuan
+ * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
+ * @version $Revision$
  */
-public class RelationshipStorage {
-  private static final Log   LOG = ExoLogger.getLogger(RelationshipStorage.class);
+public class RelationshipStorage extends AbstractStorage {
 
-  /** The identity manager. */
-  private IdentityManager    identityManager;
+  /** Logger */
+  private static final Log LOG = ExoLogger.getLogger(RelationshipStorage.class);
 
-  /** The data location. */
-  private SocialDataLocation dataLocation;
+  private void _putRelationshipToList(List<Relationship> relationships, RelationshipListEntity list) {
+    if (list != null) {
+      for (Map.Entry<String, RelationshipEntity> entry : list.getRelationships().entrySet()) {
+        Relationship relationship = new Relationship(entry.getValue().getId());
 
-  /** The session manager. */
-  private JCRSessionManager  sessionManager;
+        RelationshipEntity relationshipEntity = entry.getValue();
+        IdentityEntity senderEntity = relationshipEntity.getFrom();
+        IdentityEntity receiverEntity = relationshipEntity.getTo();
 
-  /** The relationship service home. */
-  private Node               relationshipServiceHome;
-
-  /**
-   * Instantiates a new RelationshipStorage.
-   * 
-   * @param dataLocation the data location
-   */
-  public RelationshipStorage(final SocialDataLocation dataLocation) {
-    this.dataLocation = dataLocation;
-    this.sessionManager = dataLocation.getSessionManager();
-  }
-
-  /**
-   * Saves relationship.
-   * 
-   * @param relationship the relationship
-   * @throws RelationshipStorageException
-   */
-  public Relationship saveRelationship(final Relationship relationship) throws RelationshipStorageException {
-    if (relationship == null) {
-      throw new RelationshipStorageException(Type.ILLEGAL_ARGUMENTS, new String[] { Relationship.class.getSimpleName() });
-    }
-    final Session session = sessionManager.getOrOpenSession();
-    Node relationshipNode = null;
-
-    try {
-      final Node relationshipHomeNode = getRelationshipServiceHome(session);
-
-      if (relationship.getId() == null) {
-        relationshipNode = relationshipHomeNode.addNode(NodeTypes.EXO_RELATIONSHIP, NodeTypes.EXO_RELATIONSHIP);
-        relationshipNode.addMixin(NodeTypes.MIX_REFERENCEABLE);
-      } else {
-        relationshipNode = session.getNodeByUUID(relationship.getId());
-      }
-      relationshipNode.setProperty(NodeProperties.RELATIONSHIP_SENDER, session.getNodeByUUID(relationship.getSender().getId()));
-      relationshipNode.setProperty(NodeProperties.RELATIONSHIP_RECEIVER, 
-                                   session.getNodeByUUID(relationship.getReceiver().getId()));
-      relationshipNode.setProperty(NodeProperties.RELATIONSHIP_STATUS, relationship.getStatus().toString());
-      relationshipNode.setProperty(NodeProperties.RELATIONSHIP_IS_SYMETRIC, relationship.isSymetric());
-
-      if (relationship.getId() == null) {
-        relationshipHomeNode.save();
-        relationship.setId(relationshipNode.getUUID());
-        LOG.debug("relationship " + relationship + " stored");
-      } else {
-        relationshipNode.save();
-        LOG.debug("relationship " + relationship + " updated");
-      }
-    } catch (Exception e) {
-      throw new RelationshipStorageException(Type.FAILED_TO_SAVE_RELATIONSHIP, e);
-    } finally {
-      sessionManager.closeSession();
-    }
-    return relationship;
-  }
-
-  /**
-   * Removes the relationship.
-   * 
-   * @param relationship the relationship
-   * @throws RelationshipStorageException
-   */
-  public void removeRelationship(Relationship relationship) throws RelationshipStorageException {
-    Session session = sessionManager.openSession();
-    try {
-      Node relationshipNode = session.getNodeByUUID(relationship.getId());
-      relationshipNode.remove();
-      session.save();
-    } catch (ItemNotFoundException e) {
-      throw new RelationshipStorageException(Type.FAILED_TO_DELETE_RELATIONSHIP_ITEM_NOT_FOUND, e);
-    } catch (RepositoryException e) {
-      throw new RelationshipStorageException(Type.FAILED_TO_DELETE_RELATIONSHIP, e);
-    } finally {
-      sessionManager.closeSession();
-    }
-  }
-
-  /**
-   * Gets the relationship.
-   * 
-   * @param uuid the uuid
-   * @return the relationship
-   * @throws RelationshipStorageException
-   */
-  public Relationship getRelationship(String uuid) throws RelationshipStorageException {
-    final Session session = sessionManager.getOrOpenSession();
-    Relationship relationship = null;
-    try {
-      Node relationshipNode = session.getNodeByUUID(uuid);
-      relationship = loadRelationship(relationshipNode);
-    } catch (Exception e) {
-      throw new RelationshipStorageException(Type.FAILED_TO_GET_RELATIONSHIP, e);
-    } finally {
-      sessionManager.closeSession();
-    }
-
-    return relationship;
-  }
-
-  /**
-   * Loads relationship from JCR
-   * 
-   * @param relationshipNode
-   * @return relationship
-   * @throws RepositoryException
-   * @throws RelationshipStorageException 
-   */
-  private Relationship loadRelationship(final Node relationshipNode) throws RepositoryException, RelationshipStorageException {
-    final Relationship relationship = new Relationship(relationshipNode.getUUID());
-
-    Node idNode = relationshipNode.getProperty(NodeProperties.RELATIONSHIP_SENDER).getNode();
-    relationship.setSender(getIdentityManager().getIdentity(idNode.getUUID()));
-
-    idNode = relationshipNode.getProperty(NodeProperties.RELATIONSHIP_RECEIVER).getNode();
-    relationship.setReceiver(getIdentityManager().getIdentity(idNode.getUUID()));
-
-    relationship.setStatus(Relationship.Type.valueOf(relationshipNode.getProperty(NodeProperties.RELATIONSHIP_STATUS)
-                                                                     .getString()));
-    relationship.setSymetric(relationshipNode.getProperty(NodeProperties.RELATIONSHIP_IS_SYMETRIC).getBoolean());
-
-    return relationship;
-  }
-
-  /**
-   * Gets the relationship of 2 identities.
-   * 
-   * @param identity the identity1
-   * @param identity the identity2
-   * @return the relationship
-   * @throws RelationshipStorageException
-   */
-  public Relationship getRelationship(final Identity identity1, final Identity identity2) throws RelationshipStorageException {
-    if (identity1 == null || identity1.getId() == null || identity2 == null || identity2.getId() == null) {
-      throw new RelationshipStorageException(Type.ILLEGAL_ARGUMENTS, new String[] {identity1.toString(), identity2.toString() });
-    }
-    return getRelationship(identity1.getId(), identity2.getId());
-  }
-
-  /**
-   * Gets the relationship of 2 identities.
-   * 
-   * @param string the identityId1
-   * @param string the identityId2
-   * @return the relationship of 2 identities
-   * @throws RelationshipStorageException
-   */
-  public Relationship getRelationship(final String identityId1, final String identityId2) throws RelationshipStorageException {
-    if (identityId1 == null || "".equals(identityId1) || identityId2 == null || "".equals(identityId2)) {
-      throw new RelationshipStorageException(Type.ILLEGAL_ARGUMENTS, identityId1, identityId2);
-    }
-    final Session session = sessionManager.getOrOpenSession();
-    List<Node> nodes = null;
-    try {
-      final QueryBuilder query = selectRelationship(session);
-      query.and()
-             .group()
-               .group()
-                 .equal(NodeProperties.RELATIONSHIP_SENDER, identityId1)
-                 .and().equal(NodeProperties.RELATIONSHIP_RECEIVER, identityId2)
-               .endGroup()
-               .or()
-               .group()
-                 .equal(NodeProperties.RELATIONSHIP_SENDER, identityId2)
-                 .and().equal(NodeProperties.RELATIONSHIP_RECEIVER, identityId1)
-               .endGroup()
-             .endGroup();
-
-      nodes = query.exec();
-      if (nodes == null || nodes.size() < 1) {
-        return null;
-      } else if (nodes.size() > 1) {
-        throw new RelationshipStorageException(Type.MORE_THAN_ONE_RELATIONSHIP, identityId1, identityId2);
-      } else {
-        return loadRelationship(nodes.get(0));
-      }
-    } catch (RepositoryException e) {
-      throw new RelationshipStorageException(Type.FAILED_TO_GET_RELATIONSHIP_OF_THEM, null, e, identityId1, identityId2);
-    } finally {
-      sessionManager.closeSession();
-    }
-  }
-
-  /**
-   * Gets count of connection with the identity.
-   * 
-   * @param identity
-   * @return
-   * @throws RelationshipStorageException
-   * @since 1.2.0-GA
-   */
-  public int getConnectionsCount(Identity identity) throws RelationshipStorageException {
-    Session session = sessionManager.getOrOpenSession();
-    String identityId = identity.getId();
-
-    try {
-      QueryBuilder query = selectRelationship(session);
-      return (int)query
-             .and()
-             .group()
-               .equal(NodeProperties.RELATIONSHIP_SENDER, identityId)
-               .or().equal(NodeProperties.RELATIONSHIP_RECEIVER, identityId)
-             .endGroup()
-             .and().equal(NodeProperties.RELATIONSHIP_STATUS, Relationship.Type.CONFIRMED.toString())
-             .count();
-      
-    } catch (RepositoryException e) {
-      throw new RelationshipStorageException(Type.FAILED_TO_GET_RELATIONSHIP, null, e, identityId,
-                                             Relationship.Type.CONFIRMED.toString());
-    } finally {
-      sessionManager.closeSession();
-    }
-  }
-
-  /**
-   * Gets connections with the identity.
-   * 
-   * @param identity
-   * @param offset
-   * @param limit
-   * @return number of connections belong to limitation of offset and limit.
-   * @throws RelationshipStorageException
-   * @since 1.2.0-GA
-   */
-  public List<Identity> getConnections(Identity identity, int offset, int limit) throws RelationshipStorageException {
-    Session session = sessionManager.getOrOpenSession();
-    List<Identity> connections = new ArrayList<Identity>();
-    String identityId = identity.getId();
-    List<Node> nodes = null;
-    try {
-      QueryBuilder query = new QueryBuilder(session);
-      query.select(NodeTypes.EXO_RELATIONSHIP, offset, limit)
-           .like(NodeProperties.JCR_PATH, "/" + dataLocation.getSocialRelationshipHome() + "/%")
-           .and()
-           .group()
-             .equal(NodeProperties.RELATIONSHIP_SENDER, identityId)
-             .or().equal(NodeProperties.RELATIONSHIP_RECEIVER, identityId)
-           .endGroup()
-           .and().equal(NodeProperties.RELATIONSHIP_STATUS, Relationship.Type.CONFIRMED.toString());
-      
-      nodes = query.exec();
-      for (Node node : nodes) {
-        Relationship relationship = loadRelationship(node);
-        connections.add(relationship.getPartner(identity));
-      }
-    } catch (RepositoryException e) {
-      throw new RelationshipStorageException(Type.FAILED_TO_GET_RELATIONSHIP, null, e, identityId,
-                                             Relationship.Type.CONFIRMED.toString());
-    } finally {
-      sessionManager.closeSession();
-    }
-    return connections;
-  }
-  
-  /**
-   * Gets the list of relationship by identity id matching with checking
-   * identity ids
-   * 
-   * @param identity the identity
-   * @param relationshipType
-   * @param list identity the checking identities
-   * @return the relationship
-   * @throws RelationshipStorageException
-   */
-  public List<Relationship> getRelationships(final Identity identity, final Relationship.Type type,
-                                             final List<Identity> listCheckIdentity) throws RelationshipStorageException {
-    if (identity == null || identity.getId() == null) {
-      throw new RelationshipStorageException(Type.ILLEGAL_ARGUMENTS);
-    }
-    if (listCheckIdentity == null) {
-      return getRelationships(identity.getId(), type, null);
-    }
-    List<String> identityIds = new ArrayList<String>();
-    for (Identity checkingIdentity : listCheckIdentity) {
-      identityIds.add(checkingIdentity.getId());
-    }
-    return getRelationships(identity.getId(), type, identityIds);
-  }
-
-  /**
-   * Gets the list of relationship by identity id matching with checking
-   * identity ids
-   * 
-   * @param identityId the identity id
-   * @param relationshipType
-   * @param list identityId the checking identity ids
-   * @return the relationship
-   * @throws RelationshipStorageException
-   */
-  public List<Relationship> getRelationships(final String identityId, final Relationship.Type type,
-                                             final List<String> listCheckIdentityId) throws RelationshipStorageException {
-    final Session session = sessionManager.getOrOpenSession();
-    final List<Relationship> results = new ArrayList<Relationship>();
-
-    List<Node> nodes = null;
-    try {
-      final QueryBuilder query = selectRelationship(session);
-      query.and()
-             .group()
-               .equal(NodeProperties.RELATIONSHIP_SENDER, identityId)
-               .or().equal(NodeProperties.RELATIONSHIP_RECEIVER, identityId)
-             .endGroup();
-
-      if (type != null) {
-        query.and().equal(NodeProperties.RELATIONSHIP_STATUS, type.toString());
-      }
-
-      if (listCheckIdentityId != null && listCheckIdentityId.size() > 0) {
-        query.and().group();
-        String firstCheckIdentityId = listCheckIdentityId.get(0);
-        query.equal(NodeProperties.RELATIONSHIP_SENDER, firstCheckIdentityId)
-             .or().equal(NodeProperties.RELATIONSHIP_RECEIVER, firstCheckIdentityId);
-        listCheckIdentityId.remove(0);
-        for (String checkIdentityId : listCheckIdentityId) {
-          query.or().equal(NodeProperties.RELATIONSHIP_SENDER, checkIdentityId)
-               .or().equal(NodeProperties.RELATIONSHIP_RECEIVER, checkIdentityId);
+        Identity sender = new Identity(senderEntity.getId());
+        sender.setRemoteId(senderEntity.getRemoteId());
+        sender.setProviderId(senderEntity.getProviderId());
+        ProfileEntity senderProfileEntity = senderEntity.getProfile();
+        if (senderProfileEntity != null) {
+          Profile senderProfile = new Profile(sender);
+          senderProfile.setProperty(Profile.FIRST_NAME, senderProfileEntity.getProperty(Profile.FIRST_NAME));
+          senderProfile.setProperty(Profile.LAST_NAME, senderProfileEntity.getProperty(Profile.LAST_NAME));
+          senderProfile.setProperty(Profile.URL, senderProfileEntity.getProperty(Profile.URL));
+          senderProfile.setProperty(Profile.POSITION, senderProfileEntity.getProperty(Profile.POSITION));
+          senderProfile.setId(senderProfileEntity.getId());
+          sender.setProfile(senderProfile);
         }
-        query.endGroup();
-      }
 
-      nodes = query.exec();
-      for (final Node node : nodes) {
-        final Relationship relationship = loadRelationship(node);
-        results.add(relationship);
+        Identity receiver = new Identity(receiverEntity.getId());
+        receiver.setRemoteId(receiverEntity.getRemoteId());
+        receiver.setProviderId(receiverEntity.getProviderId());
+        ProfileEntity receiverProfileEntity = receiverEntity.getProfile();
+        if (receiverProfileEntity != null) {
+          Profile receiverProfile = new Profile(receiver);
+          receiverProfile.setProperty(Profile.FIRST_NAME, receiverProfileEntity.getProperty(Profile.FIRST_NAME));
+          receiverProfile.setProperty(Profile.LAST_NAME, receiverProfileEntity.getProperty(Profile.LAST_NAME));
+          receiverProfile.setProperty(Profile.URL, receiverProfileEntity.getProperty(Profile.URL));
+          receiverProfile.setProperty(Profile.POSITION, receiverProfileEntity.getProperty(Profile.POSITION));
+          receiverProfile.setId(receiverProfileEntity.getId());
+          receiver.setProfile(receiverProfile);
+        }
+
+        if (relationshipEntity.isSender()) {
+          relationship.setSender(sender);
+          relationship.setReceiver(receiver);
+        }
+        else {
+          relationship.setSender(receiver);
+          relationship.setReceiver(sender);
+        }
+
+        if (SENDER.equals(entry.getValue().getParent().getName()) ||
+            RECEIVER.equals(entry.getValue().getParent().getName())) {
+          relationship.setStatus(Relationship.Type.PENDING);
+        }
+        else {
+          relationship.setStatus(Relationship.Type.CONFIRMED);
+        }
+
+        // TODO : IGNORED
+
+        relationships.add(relationship);
       }
-    } catch (RepositoryException e) {
-      throw new RelationshipStorageException(Type.FAILED_TO_GET_RELATIONSHIP, null, e, identityId, type.toString());
-    } finally {
-      sessionManager.closeSession();
     }
-    return results;
   }
 
   /**
-   * Gets the list of relationship by identity id matching with checking
-   * identity ids
-   * 
-   * @param identity the identity
-   * @param relationshipType
-   * @param list identity the checking identities
-   * @return the relationship
-   * @throws RelationshipStorageException
+   * Private.
    */
+
+  RelationshipEntity _createRelationship(final Relationship relationship) throws NodeNotFoundException {
+    String identityId1 = relationship.getSender().getId();
+    String identityId2 = relationship.getReceiver().getId();
+
+    IdentityEntity identity1 = _findById(IdentityEntity.class, identityId1);
+    IdentityEntity identity2 = _findById(IdentityEntity.class, identityId2);
+
+    RelationshipEntity createdRelationship = identity1.createRelationship();
+    RelationshipEntity symmetricalRelationship = identity1.createRelationship();
+
+    switch (relationship.getStatus()) {
+
+      case PENDING:
+        identity1.getSender().getRelationships().put(identity2.getRemoteId(), createdRelationship);
+        identity2.getReceiver().getRelationships().put(identity1.getRemoteId(), symmetricalRelationship);
+        break;
+
+      case CONFIRMED:
+        identity1.getRelationship().getRelationships().put(identity2.getRemoteId(), createdRelationship);
+        identity2.getRelationship().getRelationships().put(identity1.getRemoteId(), symmetricalRelationship);
+        break;
+
+      // TODO : IGNORED
+
+    }
+
+    createdRelationship.setFrom(identity1);
+    createdRelationship.setTo(identity2);
+    createdRelationship.setReciprocal(symmetricalRelationship);
+    createdRelationship.setStatus(relationship.getStatus().toString());
+    
+    symmetricalRelationship.setFrom(identity2);
+    symmetricalRelationship.setTo(identity1);
+    symmetricalRelationship.setReciprocal(createdRelationship);
+    symmetricalRelationship.setStatus(relationship.getStatus().toString());
+
+    relationship.setId(createdRelationship.getId());
+
+    getSession().save();
+
+    //
+    LOG.debug(String.format(
+        "Relationship from %s:%s to %s:%s created (%s)",
+        createdRelationship.getFrom().getProviderId(),
+        createdRelationship.getFrom().getRemoteId(),
+        createdRelationship.getTo().getProviderId(),
+        createdRelationship.getTo().getRemoteId(),
+        createdRelationship.getPath()
+    ));
+
+    //
+    LOG.debug(String.format(
+        "Symmetrical relationship from %s:%s to %s:%s created (%s)",
+        symmetricalRelationship.getFrom().getProviderId(),
+        symmetricalRelationship.getFrom().getRemoteId(),
+        symmetricalRelationship.getTo().getProviderId(),
+        symmetricalRelationship.getTo().getRemoteId(),
+        symmetricalRelationship.getPath()
+    ));
+
+    return createdRelationship;
+  }
+
+  RelationshipEntity _saveRelationship(final Relationship relationship) throws NodeNotFoundException {
+
+    RelationshipEntity savedRelationship = _findById(RelationshipEntity.class, relationship.getId());
+    RelationshipEntity symmetricalRelationship = savedRelationship.getReciprocal();
+
+    savedRelationship.setStatus(relationship.getStatus().toString());
+    symmetricalRelationship.setStatus(relationship.getStatus().toString());
+
+    switch (relationship.getStatus()) {
+      case PENDING:
+
+        // Move to sender / receiver
+        savedRelationship.getParent().getParent().getSender().getRelationships().put(savedRelationship.getName(), savedRelationship);
+        symmetricalRelationship.getParent().getParent().getReceiver().getRelationships().put(symmetricalRelationship.getName(), symmetricalRelationship);
+        break;
+      case CONFIRMED:
+
+        // Move to relationship
+        savedRelationship.getParent().getParent().getRelationship().getRelationships().put(savedRelationship.getName(), savedRelationship);
+        symmetricalRelationship.getParent().getParent().getRelationship().getRelationships().put(symmetricalRelationship.getName(), symmetricalRelationship);
+        break;
+      
+      // TODO : IGNORED
+    }
+
+    getSession().save();
+
+    //
+    LOG.debug(String.format(
+        "Relationship from %s:%s to %s:%s saved (%s)",
+        savedRelationship.getFrom().getProviderId(),
+        savedRelationship.getFrom().getRemoteId(),
+        savedRelationship.getTo().getProviderId(),
+        savedRelationship.getTo().getRemoteId(),
+        savedRelationship.getPath()
+    ));
+
+    //
+    LOG.debug(String.format(
+        "Symmetrical relationship from %s:%s to %s:%s saved (%s)",
+        symmetricalRelationship.getFrom().getProviderId(),
+        symmetricalRelationship.getFrom().getRemoteId(),
+        symmetricalRelationship.getTo().getProviderId(),
+        symmetricalRelationship.getTo().getRemoteId(),
+        symmetricalRelationship.getPath()
+    ));
+
+    return savedRelationship;
+  }
+
+  List<Relationship> _getSenderRelationships(final Identity sender, final Relationship.Type type,
+                                                   final List<Identity> listCheckIdentity) throws NodeNotFoundException {
+
+    List<Relationship> relationships = new ArrayList<Relationship>();
+
+    //
+    IdentityEntity senderEntity = _findById(IdentityEntity.class, sender.getId());
+
+    if (type == null) {
+      _putRelationshipToList(relationships, senderEntity.getRelationship());
+      _putRelationshipToList(relationships, senderEntity.getSender());
+    }
+    else {
+      switch (type) {
+
+        case CONFIRMED:
+          _putRelationshipToList(relationships, senderEntity.getRelationship());
+          break;
+
+        case PENDING:
+          _putRelationshipToList(relationships, senderEntity.getSender());
+          break;
+
+        // TODO : IGNORED
+
+      }
+    }
+
+    return relationships;
+  }
+
+  List<Relationship> _getReceiverRelationships(final Identity receiver, final Relationship.Type type,
+                                                   final List<Identity> listCheckIdentity) throws NodeNotFoundException {
+
+    List<Relationship> relationships = new ArrayList<Relationship>();
+
+    //
+    IdentityEntity receiverEntity = _findById(IdentityEntity.class, receiver.getId());
+
+    if (type == null) {
+      _putRelationshipToList(relationships, receiverEntity.getRelationship());
+      _putRelationshipToList(relationships, receiverEntity.getReceiver());
+    }
+    else {
+      switch (type) {
+
+        case CONFIRMED:
+          _putRelationshipToList(relationships, receiverEntity.getRelationship());
+          break;
+
+        case PENDING:
+          _putRelationshipToList(relationships, receiverEntity.getReceiver());
+          break;
+
+        // TODO : IGNORED
+
+      }
+    }
+
+    return relationships;
+  }
+
+  Relationship _getRelationship(String uuid) throws NodeNotFoundException {
+
+    RelationshipEntity relationshipEntity = _findById(RelationshipEntity.class, uuid);
+
+    IdentityEntity receiverEntity = relationshipEntity.getTo();
+    IdentityEntity senderEntity = relationshipEntity.getFrom();
+
+    Identity receiver = new Identity(receiverEntity.getId());
+    Identity sender = new Identity(senderEntity.getId());
+
+    Relationship relationship = new Relationship(uuid);
+    if (relationshipEntity.isSender()) {
+      relationship.setSender(sender);
+      relationship.setReceiver(receiver);
+    }
+    else {
+      relationship.setSender(receiver);
+      relationship.setReceiver(sender);
+    }
+
+    if (SENDER.equals(relationshipEntity.getParent().getName()) ||
+        RECEIVER.equals(relationshipEntity.getParent().getName())) {
+      relationship.setStatus(Relationship.Type.PENDING);
+    }
+    else {
+      relationship.setStatus(Relationship.Type.CONFIRMED);
+    }
+
+    // TODO : IGNORED
+
+    return relationship;
+  }
+
+  public Relationship _getRelationship(final Identity identity1, final Identity identity2) throws RelationshipStorageException, NodeNotFoundException {
+
+    IdentityEntity identityEntity1 = _findById(IdentityEntity.class, identity1.getId());
+    IdentityEntity identityEntity2 = _findById(IdentityEntity.class, identity2.getId());
+
+    RelationshipEntity got = identityEntity1.getRelationship().getRelationships().get(identity2.getRemoteId());
+
+    if (got == null) {
+      got = identityEntity1.getSender().getRelationships().get(identity2.getRemoteId());
+    }
+    if (got == null) {
+      got = identityEntity2.getSender().getRelationships().get(identity1.getRemoteId());
+    }
+
+    if (got == null) {
+      throw new NodeNotFoundException();
+    }
+
+    Relationship relationship = new Relationship(got.getId());
+
+    //
+    IdentityEntity senderEntity = got.getFrom();
+    IdentityEntity receiverEntity = got.getTo();
+
+    Identity sender = new Identity(senderEntity.getId());
+    sender.setRemoteId(senderEntity.getRemoteId());
+    sender.setProviderId(senderEntity.getProviderId());
+
+    Identity receiver = new Identity(receiverEntity.getId());
+    receiver.setRemoteId(receiverEntity.getRemoteId());
+    receiver.setProviderId(receiverEntity.getProviderId());
+
+    relationship.setSender(sender);
+    relationship.setReceiver(receiver);
+
+    relationship.setStatus(Relationship.Type.valueOf(got.getStatus()));
+    return relationship;
+  }
+
+  /**
+   * Public.
+   */
+
+  public Relationship saveRelationship(final Relationship relationship) throws RelationshipStorageException {
+    try {
+      if (relationship.getId() == null) {
+        _createRelationship(relationship);
+      }
+      else {
+        _saveRelationship(relationship);
+      }
+    }
+    catch (NodeNotFoundException e) {
+      throw new RelationshipStorageException(RelationshipStorageException.Type.ILLEGAL_ARGUMENTS, new String[] { Relationship.class.getSimpleName() });
+    }
+
+    return relationship;
+  }
+
+  public void removeRelationship(Relationship relationship) throws RelationshipStorageException {
+
+    try {
+      RelationshipEntity toDeleteRelationship = _findById(RelationshipEntity.class, relationship.getId());
+      RelationshipEntity symmetricalRelationship = toDeleteRelationship.getReciprocal();
+
+      IdentityEntity from = toDeleteRelationship.getFrom();
+      IdentityEntity to = toDeleteRelationship.getFrom();
+
+      _removeById(RelationshipEntity.class, symmetricalRelationship.getId());
+      _removeById(RelationshipEntity.class, relationship.getId());
+      
+      getSession().save();
+
+      //
+      LOG.debug(String.format(
+          "Symmetrical relationship from %s:%s to %s:%s removed",
+          to.getProviderId(),
+          to.getRemoteId(),
+          from.getProviderId(),
+          from.getRemoteId()
+      ));
+
+      //
+      LOG.debug(String.format(
+          "Relationship from %s:%s to %s:%s removed",
+          from.getProviderId(),
+          from.getRemoteId(),
+          to.getProviderId(),
+          to.getRemoteId()
+      ));
+    }
+    catch (NodeNotFoundException e) {
+      throw new RelationshipStorageException(RelationshipStorageException.Type.FAILED_TO_GET_RELATIONSHIP);
+    }
+  }
+
+  public Relationship getRelationship(String uuid) throws RelationshipStorageException {
+
+    try {
+      return _getRelationship(uuid);
+    }
+    catch (NodeNotFoundException e) {
+      return null;
+    }
+  }
+
   public List<Relationship> getSenderRelationships(final Identity sender, final Relationship.Type type,
                                                    final List<Identity> listCheckIdentity) throws RelationshipStorageException {
-    if (sender == null || sender.getId() == null) {
-      throw new RelationshipStorageException(Type.ILLEGAL_ARGUMENTS);
-    }
-    if (listCheckIdentity == null) {
-      return getSenderRelationships(sender.getId(), type, null);
-    }
-    List<String> identityIds = new ArrayList<String>();
-    for (Identity checkingIdentity : listCheckIdentity) {
-      identityIds.add(checkingIdentity.getId());
-    }
-    return getSenderRelationships(sender.getId(), type, identityIds);
-  }
 
-  /**
-   * Gets the list of relationship by identity id matching with checking
-   * identity ids
-   * 
-   * @param identityId the identity id
-   * @param relationshipType
-   * @param list identityId the checking identity ids
-   * @return the relationship
-   * @throws RelationshipStorageException
-   */
-  public List<Relationship> getSenderRelationships(final String senderId, final Relationship.Type type,
-                                                   final List<String> listCheckIdentityId) throws RelationshipStorageException {
-    final Session session = sessionManager.getOrOpenSession();
-    final List<Relationship> results = new ArrayList<Relationship>();
+    // TODO : check listCheckIdentityId later
 
-    List<Node> nodes = null;
     try {
-      final QueryBuilder query = selectRelationship(session);
-      query.and().equal(NodeProperties.RELATIONSHIP_SENDER, senderId);
-
-      if (type != null) {
-        query.and().equal(NodeProperties.RELATIONSHIP_STATUS, type.toString());
-      }
-
-      if (listCheckIdentityId != null && listCheckIdentityId.size() > 0) {
-        query.and().group();
-        String firstCheckIdentityId = listCheckIdentityId.get(0);
-        query.equal(NodeProperties.RELATIONSHIP_RECEIVER, firstCheckIdentityId);
-        listCheckIdentityId.remove(0);
-        for (String checkIdentityId : listCheckIdentityId) {
-          query.or().equal(NodeProperties.RELATIONSHIP_RECEIVER, checkIdentityId);
-        }
-        query.endGroup();
-      }
-
-      nodes = query.exec();
-      for (final Node node : nodes) {
-        final Relationship relationship = loadRelationship(node);
-        results.add(relationship);
-      }
-    } catch (RepositoryException e) {
-      throw new RelationshipStorageException(Type.FAILED_TO_GET_RELATIONSHIP, null, e, senderId, type.toString());
-    } finally {
-      sessionManager.closeSession();
+      return _getSenderRelationships(sender, type, listCheckIdentity);
     }
-    return results;
+    catch (NodeNotFoundException e) {
+      throw new RelationshipStorageException(
+          RelationshipStorageException.Type.FAILED_TO_GET_RELATIONSHIP, null, e, sender.getId(), type.toString());
+    }
   }
 
-  /**
-   * Gets the list of relationship by identity id matching with checking
-   * identity ids
-   * 
-   * @param identityId the identity id
-   * @param relationshipType
-   * @param list identityId the checking identity ids
-   * @return the relationship
-   * @throws RelationshipStorageException
-   */
   public List<Relationship> getReceiverRelationships(final Identity receiver, final Relationship.Type type,
-                                                     final List<Identity> listCheckIdentity) throws RelationshipStorageException {
-    List<String> identityIds = new ArrayList<String>();
-    for (Identity checkingIdentity : listCheckIdentity) {
-      identityIds.add(checkingIdentity.getId());
-    }
-    return getReceiverRelationships(receiver.getId(), type, identityIds);
-  }
+                                                   final List<Identity> listCheckIdentity) throws RelationshipStorageException {
 
-  /**
-   * Gets the list of relationship by identity id matching with checking
-   * identity ids
-   * 
-   * @param identityId the identity id
-   * @param relationshipType
-   * @param list identityId the checking identity ids
-   * @return the relationship
-   * @throws RelationshipStorageException
-   */
-  public List<Relationship> getReceiverRelationships(final String receiverId, final Relationship.Type type,
-                                                     final List<String> listCheckIdentityId) throws RelationshipStorageException {
-    final Session session = sessionManager.getOrOpenSession();
-    final List<Relationship> results = new ArrayList<Relationship>();
+    // TODO : check listCheckIdentityId later
 
-    List<Node> nodes = null;
     try {
-      final QueryBuilder query = selectRelationship(session);
-      query.and().equal(NodeProperties.RELATIONSHIP_RECEIVER, receiverId);
+      return _getReceiverRelationships(receiver, type, listCheckIdentity);
+    }
+    catch (NodeNotFoundException e) {
+      throw new RelationshipStorageException(
+          RelationshipStorageException.Type.FAILED_TO_GET_RELATIONSHIP, null, e, receiver.getId(), type.toString());
+    }
+  }
 
-      if (type != null) {
-        query.and().equal(NodeProperties.RELATIONSHIP_STATUS, type.toString());
+  public Relationship getRelationship(final Identity identity1, final Identity identity2) throws RelationshipStorageException {
+    try {
+      return _getRelationship(identity1, identity2);
+    }
+    catch (NodeNotFoundException e) {
+      return null;
+    }
+  }
+
+  public List<Relationship> getRelationships(final Identity identity, final Relationship.Type type,
+                                             final List<Identity> listCheckIdentity) throws RelationshipStorageException {
+    try {
+      List<Relationship> relationships = new ArrayList<Relationship>();
+
+      //
+      IdentityEntity receiverEntity = _findById(IdentityEntity.class, identity.getId());
+
+      if (type == null) {
+        _putRelationshipToList(relationships, receiverEntity.getRelationship());
+        _putRelationshipToList(relationships, receiverEntity.getReceiver());
+        _putRelationshipToList(relationships, receiverEntity.getSender());
       }
+      else {
+        switch (type) {
 
-      if (listCheckIdentityId != null && listCheckIdentityId.size() > 0) {
-        query.and().group();
-        String firstCheckIdentityId = listCheckIdentityId.get(0);
-        query.equal(NodeProperties.RELATIONSHIP_SENDER, firstCheckIdentityId);
-        listCheckIdentityId.remove(0);
-        for (String checkIdentityId : listCheckIdentityId) {
-          query.or().equal(NodeProperties.RELATIONSHIP_SENDER, checkIdentityId);
+          case CONFIRMED:
+            _putRelationshipToList(relationships, receiverEntity.getRelationship());
+            break;
+
+          case PENDING:
+            _putRelationshipToList(relationships, receiverEntity.getReceiver());
+            _putRelationshipToList(relationships, receiverEntity.getSender());
+            break;
+
+          // TODO : IGNORED
+
         }
-        query.endGroup();
       }
-
-      nodes = query.exec();
-      for (final Node node : nodes) {
-        final Relationship relationship = loadRelationship(node);
-        results.add(relationship);
-      }
-    } catch (RepositoryException e) {
-      throw new RelationshipStorageException(Type.FAILED_TO_GET_RELATIONSHIP, null, e, receiverId, type.toString());
-    } finally {
-      sessionManager.closeSession();
+      
+      return relationships;
     }
-    return results;
+    catch (NodeNotFoundException e) {
+      return new ArrayList<Relationship>();
+    }
   }
 
-  /**
-   * Gets QueryBuilder for select relationship
-   * 
-   * @param session
-   * @return QueryBuilder
-   */
-  private QueryBuilder selectRelationship(final Session session) {
-    final QueryBuilder query = new QueryBuilder(session);
-    query.select(NodeTypes.EXO_RELATIONSHIP)
-          .like(NodeProperties.JCR_PATH, "/" + dataLocation.getSocialRelationshipHome() + "/%");
-    return query;
-  }
+  public List<Identity> getConnections(Identity identity, int offset, int limit) throws RelationshipStorageException {
 
-  /**
-   * Gets the relationship service home.
-   * 
-   * @param session the session
-   * @return the relationship service home
-   * @throws Exception the exception
-   */
-  private Node getRelationshipServiceHome(final Session session) {
-    if (relationshipServiceHome == null) {
-      try {
-        String path = dataLocation.getSocialRelationshipHome();
-        Util.createNodes(session.getRootNode(), path);
-        relationshipServiceHome = session.getRootNode().getNode(path);
-      } catch (RepositoryException re) {
-        LOG.warn(re.getMessage(), re);
+    //
+    List<Identity> identities = new ArrayList<Identity>();
+    int i = 0;
+
+    try {
+      IdentityEntity identityEntity = _findById(IdentityEntity.class, identity.getId());
+
+      for (RelationshipEntity relationshipEntity : identityEntity.getRelationship().getRelationships().values()) {
+
+        IdentityEntity targetIdentity = relationshipEntity.getTo();
+        Identity gotIdentity = new Identity(targetIdentity.getId());
+        gotIdentity.setRemoteId(targetIdentity.getRemoteId());
+        gotIdentity.setProviderId(targetIdentity.getProviderId());
+        identities.add(gotIdentity);
+        
+        if (limit > 0 && ++i >= limit) {
+          break;
+        }
       }
+      
+      return identities;
     }
-    return relationshipServiceHome;
+    catch (NodeNotFoundException e) {
+      throw new RelationshipStorageException(RelationshipStorageException.Type.ILLEGAL_ARGUMENTS);
+    }
   }
 
-  /**
-   * Gets identityManager
-   * 
-   * @return identityManager
-   */
-  private IdentityManager getIdentityManager() {
-    if (identityManager == null) {
-      identityManager = (IdentityManager) PortalContainer.getInstance().getComponentInstanceOfType(IdentityManager.class);
+  public int getConnectionsCount(Identity identity) throws RelationshipStorageException {
+
+    try {
+
+      // TODO : user property
+
+      IdentityEntity identityEntity = _findById(IdentityEntity.class, identity.getId());
+      return identityEntity.getRelationship().getRelationships().size();
     }
-    return identityManager;
+    catch (NodeNotFoundException e) {
+      throw new RelationshipStorageException(RelationshipStorageException.Type.ILLEGAL_ARGUMENTS);
+    }
   }
 }

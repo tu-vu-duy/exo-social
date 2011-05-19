@@ -43,6 +43,21 @@
           <requiredPrimaryType>soc:profiledefinition</requiredPrimaryType>
         </requiredPrimaryTypes>
       </childNodeDefinition>
+      <childNodeDefinition name="soc:relationship" defaultPrimaryType="soc:relationship" autoCreated="true" mandatory="true" onParentVersion="COPY" protected="false" sameNameSiblings="false">
+        <requiredPrimaryTypes>
+          <requiredPrimaryType>soc:relationship</requiredPrimaryType>
+        </requiredPrimaryTypes>
+      </childNodeDefinition>
+      <childNodeDefinition name="soc:receiver" defaultPrimaryType="soc:relationship" autoCreated="true" mandatory="true" onParentVersion="COPY" protected="false" sameNameSiblings="false">
+        <requiredPrimaryTypes>
+          <requiredPrimaryType>soc:relationship</requiredPrimaryType>
+        </requiredPrimaryTypes>
+      </childNodeDefinition>
+      <childNodeDefinition name="soc:sender" defaultPrimaryType="soc:relationship" autoCreated="true" mandatory="true" onParentVersion="COPY" protected="false" sameNameSiblings="false">
+        <requiredPrimaryTypes>
+          <requiredPrimaryType>soc:relationship</requiredPrimaryType>
+        </requiredPrimaryTypes>
+      </childNodeDefinition>
     </childNodeDefinitions>
   </nodeType>
   <!-- Node type generated for the class org.exoplatform.social.core.chromattic.entity.ProviderEntity -->
@@ -71,6 +86,43 @@
       <childNodeDefinition name="*" defaultPrimaryType="soc:providerdefinition" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" sameNameSiblings="false">
         <requiredPrimaryTypes>
           <requiredPrimaryType>soc:providerdefinition</requiredPrimaryType>
+        </requiredPrimaryTypes>
+      </childNodeDefinition>
+    </childNodeDefinitions>
+  </nodeType>
+  <!-- Node type generated for the class org.exoplatform.social.core.chromattic.entity.RelationshipEntity -->
+  <nodeType name="soc:relationshipdefinition" isMixin="false" hasOrderableChildNodes="false">
+    <supertypes>
+      <supertype>nt:base</supertype>
+      <supertype>mix:referenceable</supertype>
+    </supertypes>
+    <propertyDefinitions>
+      <propertyDefinition name="soc:to" requiredType="Reference" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
+        <valueConstraints/>
+      </propertyDefinition>
+      <propertyDefinition name="soc:status" requiredType="String" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
+        <valueConstraints/>
+      </propertyDefinition>
+      <propertyDefinition name="soc:reciprocal" requiredType="Reference" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
+        <valueConstraints/>
+      </propertyDefinition>
+      <propertyDefinition name="soc:from" requiredType="Reference" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
+        <valueConstraints/>
+      </propertyDefinition>
+    </propertyDefinitions>
+    <childNodeDefinitions/>
+  </nodeType>
+  <!-- Node type generated for the class org.exoplatform.social.core.chromattic.entity.RelationshipListEntity -->
+  <nodeType name="soc:relationship" isMixin="false" hasOrderableChildNodes="false">
+    <supertypes>
+      <supertype>nt:base</supertype>
+      <supertype>mix:referenceable</supertype>
+    </supertypes>
+    <propertyDefinitions/>
+    <childNodeDefinitions>
+      <childNodeDefinition name="*" defaultPrimaryType="soc:relationshipdefinition" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" sameNameSiblings="false">
+        <requiredPrimaryTypes>
+          <requiredPrimaryType>soc:relationshipdefinition</requiredPrimaryType>
         </requiredPrimaryTypes>
       </childNodeDefinition>
     </childNodeDefinitions>

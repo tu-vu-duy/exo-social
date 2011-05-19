@@ -19,12 +19,13 @@
 
 package org.exoplatform.social.core.chromattic.entity;
 
-import org.chromattic.api.annotations.Create;
+import org.chromattic.api.RelationshipType;
 import org.chromattic.api.annotations.Id;
+import org.chromattic.api.annotations.ManyToOne;
 import org.chromattic.api.annotations.MappedBy;
 import org.chromattic.api.annotations.Name;
-import org.chromattic.api.annotations.OneToOne;
 import org.chromattic.api.annotations.Owner;
+import org.chromattic.api.annotations.Path;
 import org.chromattic.api.annotations.PrimaryType;
 import org.chromattic.api.annotations.Property;
 
@@ -32,55 +33,48 @@ import org.chromattic.api.annotations.Property;
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-@PrimaryType(name = "soc:identitydefinition")
-public abstract class IdentityEntity {
+@PrimaryType(name = "soc:relationshipdefinition")
+public abstract class RelationshipEntity {
 
   @Id
   public abstract String getId();
 
   @Name
   public abstract String getName();
-  public abstract String setName(String name);
 
-  @Property(name = "soc:providerId")
-  public abstract String getProviderId();
-  public abstract void setProviderId(String providerId);
+  @Path
+  public abstract String getPath();
+  
+  @Property(name = "soc:status")
+  public abstract String getStatus();
+  public abstract void setStatus(String status);
 
-  @Property(name = "soc:remoteId")
-  public abstract String getRemoteId();
-  public abstract void setRemoteId(String remoteId);
-
-  @Property(name = "soc:isDeleted")
-  public abstract Boolean isDeleted();
-  public abstract void setDeleted(Boolean deleted);
-
-
-  @MappedBy("soc:profile")
-  @OneToOne
+  @MappedBy("soc:from")
+  @ManyToOne(type = RelationshipType.REFERENCE)
   @Owner
-  public abstract ProfileEntity getProfile();
-  public abstract void setProfile(ProfileEntity profile);
+  public abstract IdentityEntity getFrom();
+  public abstract void setFrom(IdentityEntity fromEntity);
 
-  @MappedBy("soc:sender")
-  @OneToOne
+  @MappedBy("soc:to")
+  @ManyToOne(type = RelationshipType.REFERENCE)
   @Owner
-  public abstract RelationshipListEntity getSender();
-  public abstract void setSender(RelationshipListEntity sender);
+  public abstract IdentityEntity getTo();
+  public abstract void setTo(IdentityEntity toEntity);
 
-  @MappedBy("soc:receiver")
-  @OneToOne
+  @MappedBy("soc:reciprocal")
+  @ManyToOne(type = RelationshipType.REFERENCE)
   @Owner
-  public abstract RelationshipListEntity getReceiver();
-  public abstract void setReceiver(RelationshipListEntity receiver);
+  public abstract RelationshipEntity getReciprocal();
+  public abstract void setReciprocal(RelationshipEntity reciprocal);
 
-  @MappedBy("soc:relationship")
-  @OneToOne
-  @Owner
-  public abstract RelationshipListEntity getRelationship();
+  @ManyToOne
+  public abstract RelationshipListEntity getParent();
 
-  @Create
-  public abstract ProfileEntity createProfile();
-
-  @Create
-  public abstract RelationshipEntity createRelationship();
+  public boolean isReceiver() {
+    return "receiver".equals(getParent().getName());
+  }
+  
+  public boolean isSender() {
+    return "sender".equals(getParent().getName());
+  }
 }

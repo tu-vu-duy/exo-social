@@ -322,6 +322,24 @@ public class IdentityStorage extends AbstractStorage {
           clearPropertyForPrefix(profileEntity, PropNs.URL.prefix);
           putParam(profileEntity, value, PropNs.URL.toString().toLowerCase());
         }
+        else if (Profile.EXPERIENCES.equals(key)) {
+          // TODO : update instead of remove/add
+          for (ProfileXpEntity xpEntity : profileEntity.getXps().values()) {
+            _removeById(ProfileXpEntity.class, xpEntity.getId());
+          }
+
+          // create
+          for (Map<String, String> currentXp : (List<Map<String, String>>) value) {
+            ProfileXpEntity xpEntity = profileEntity.createXp();
+            profileEntity.getXps().put(String.valueOf(System.currentTimeMillis()), xpEntity);
+            xpEntity.setSkills(currentXp.get(Profile.EXPERIENCES_SKILLS));
+            xpEntity.setPosition(currentXp.get(Profile.EXPERIENCES_POSITION));
+            xpEntity.setStartDate(currentXp.get(Profile.EXPERIENCES_START_DATE));
+            xpEntity.setEndDate(currentXp.get(Profile.EXPERIENCES_END_DATE));
+            xpEntity.setCompany(currentXp.get(Profile.EXPERIENCES_COMPANY));
+            xpEntity.setDescription(currentXp.get(Profile.EXPERIENCES_DESCRIPTION));
+          }
+        }
         else if (Profile.AVATAR.equals(key)) {
           AvatarAttachment attachement = (AvatarAttachment) value;
           NTFile avatar = profileEntity.getAvatar();
@@ -767,6 +785,7 @@ public class IdentityStorage extends AbstractStorage {
       }
     }
 
+    //
     if (phones.size() > 0) {
       profile.setProperty(Profile.CONTACT_PHONES, phones);
     }
@@ -777,10 +796,26 @@ public class IdentityStorage extends AbstractStorage {
       profile.setProperty(Profile.CONTACT_URLS, urls);
     }
 
+    //
     NTFile avatar = profileEntity.getAvatar();
-
     if (avatar != null) {
       profile.setProperty(Profile.AVATAR_URL, "/rest/jcr/repository/social" + getSession().getPath(avatar));
     }
+
+    //
+    List<Map<String, Object>> xpData = new ArrayList<Map<String, Object>>();
+    for (ProfileXpEntity xpEntity : profileEntity.getXps().values()){
+      Map<String, Object> xpMap = new HashMap<String, Object>();
+      xpMap.put(Profile.EXPERIENCES_SKILLS, xpEntity.getSkills());
+      xpMap.put(Profile.EXPERIENCES_POSITION, xpEntity.getPosition());
+      xpMap.put(Profile.EXPERIENCES_START_DATE, xpEntity.getStartDate());
+      xpMap.put(Profile.EXPERIENCES_END_DATE, xpEntity.getEndDate());
+      xpMap.put(Profile.EXPERIENCES_COMPANY, xpEntity.getCompany());
+      xpMap.put(Profile.EXPERIENCES_DESCRIPTION, xpEntity.getDescription());
+      xpMap.put(Profile.EXPERIENCES_IS_CURRENT, xpEntity.isCurrent());
+      xpData.add(xpMap);
+    }
+
+    profile.setProperty(Profile.EXPERIENCES, xpData);
   }
 }

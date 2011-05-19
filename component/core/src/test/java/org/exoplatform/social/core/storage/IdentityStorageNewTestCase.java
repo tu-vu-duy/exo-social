@@ -760,6 +760,86 @@ public class IdentityStorageNewTestCase extends AbstractCoreTest {
     tearDownIdentityList.add(newIdentity.getId());
   }
 
+  public void testProfileXp() throws Exception {
+    Identity newIdentity = new Identity("organization", "withxp");
+
+    //
+    storage._createIdentity(newIdentity);
+    String generatedId = newIdentity.getId();
+    assertNotNull(generatedId);
+    assertEquals("organization", newIdentity.getProviderId());
+    assertEquals(false, newIdentity.isDeleted());
+    assertEquals("withxp", newIdentity.getRemoteId());
+    assertNotNull(newIdentity.getProfile());
+    assertNull(newIdentity.getProfile().getId());
+
+    //
+    storage._createProfile(newIdentity.getProfile());
+    assertNotNull(newIdentity.getProfile().getId());
+
+    //
+    Profile profile = newIdentity.getProfile();
+    profile.setProperty(Profile.USERNAME, "user");
+    profile.setProperty(Profile.FIRST_NAME, "first");
+    profile.setProperty(Profile.LAST_NAME, "last");
+    profile.setProperty(Profile.AVATAR_URL, "avatarurl");
+
+    // xps
+    List<Map<String, Object>> xps = new ArrayList<Map<String, Object>>();
+    Map<String, Object> xp1 = new HashMap<String, Object>();
+    xp1.put(Profile.EXPERIENCES_SKILLS, "skills 1");
+    xp1.put(Profile.EXPERIENCES_POSITION, "position 1");
+    xp1.put(Profile.EXPERIENCES_COMPANY, "company 1");
+    xp1.put(Profile.EXPERIENCES_DESCRIPTION, "description 1");
+    xp1.put(Profile.EXPERIENCES_START_DATE, "01/01/2010");
+    xp1.put(Profile.EXPERIENCES_END_DATE, null);
+    xp1.put(Profile.EXPERIENCES_IS_CURRENT, Boolean.TRUE);
+    Map<String, Object> xp2 = new HashMap<String, Object>();
+    xp2.put(Profile.EXPERIENCES_SKILLS, "skills 2");
+    xp2.put(Profile.EXPERIENCES_POSITION, "position 2");
+    xp2.put(Profile.EXPERIENCES_COMPANY, "company 2");
+    xp2.put(Profile.EXPERIENCES_DESCRIPTION, "description 2");
+    xp2.put(Profile.EXPERIENCES_START_DATE, "01/01/2002");
+    xp2.put(Profile.EXPERIENCES_END_DATE, "01/01/2003");
+    xp2.put(Profile.EXPERIENCES_IS_CURRENT, Boolean.FALSE);
+    Map<String, Object> xp3 = new HashMap<String, Object>();
+    xp3.put(Profile.EXPERIENCES_SKILLS, "skills 3");
+    xp3.put(Profile.EXPERIENCES_POSITION, "position3");
+    xp3.put(Profile.EXPERIENCES_COMPANY, "company 3");
+    xp3.put(Profile.EXPERIENCES_DESCRIPTION, "description 3");
+    xp3.put(Profile.EXPERIENCES_START_DATE, "01/01/2002");
+    xp3.put(Profile.EXPERIENCES_END_DATE, "01/01/2003");
+    xp3.put(Profile.EXPERIENCES_IS_CURRENT, Boolean.FALSE);
+    xps.add(xp1);
+    xps.add(xp2);
+    xps.add(xp3);
+    profile.setProperty(Profile.EXPERIENCES, xps);
+
+    //
+    storage._saveProfile(profile);
+
+    //
+    Profile toLoadProfile = new Profile(newIdentity);
+    storage._loadProfile(toLoadProfile);
+    List<Map<String, String>> loadedXp = (List<Map<String, String>>) toLoadProfile.getProperty(Profile.EXPERIENCES);
+
+    assertEquals(3, loadedXp.size());
+
+    // remove one
+    xps.remove(xp2);
+    profile.setProperty(Profile.EXPERIENCES, xps);
+    storage._saveProfile(profile);
+
+    // reload
+    Profile toLoadProfile2 = new Profile(newIdentity);
+    storage._loadProfile(toLoadProfile2);
+    List<Map<String, String>> loadedXp2 = (List<Map<String, String>>) toLoadProfile2.getProperty(Profile.EXPERIENCES);
+
+    assertEquals(2, loadedXp2.size());
+
+    tearDownIdentityList.add(newIdentity.getId());
+  }
+
   // TODO : test request excludes
   // TODO : test profile xp
 

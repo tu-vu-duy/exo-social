@@ -20,9 +20,11 @@
 package org.exoplatform.social.core.chromattic.entity;
 
 import org.chromattic.api.annotations.*;
+import org.chromattic.ext.format.BaseEncodingObjectFormatter;
 import org.chromattic.ext.ntdef.NTFile;
 import org.exoplatform.social.core.storage.query.PropertyLiteralExpression;
 
+import java.awt.color.ProfileDataException;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +33,8 @@ import java.util.Map;
  * @version $Revision$
  */
 @PrimaryType(name = "soc:profiledefinition")
+@FormattedBy(BaseEncodingObjectFormatter.class)
+@NamingPrefix("soc")
 public abstract class ProfileEntity {
 
   @Id
@@ -47,8 +51,9 @@ public abstract class ProfileEntity {
   public abstract IdentityEntity getIdentity();
   public abstract void setIdentity(IdentityEntity identity);
 
-  //@Properties
-  //public abstract Map<String, Object> getProperties();
+  @OneToMany
+  @Owner
+  public abstract Map<String, ProfileXpEntity> getXps();
 
   @Properties
   public abstract Map<String, List<String>> getProperties();
@@ -59,6 +64,9 @@ public abstract class ProfileEntity {
 
   @Create
   public abstract NTFile createAvatar();
+
+  @Create
+  public abstract ProfileXpEntity createXp();
 
   public List<String> getProperty(String key) {
     return getProperties().get(key);

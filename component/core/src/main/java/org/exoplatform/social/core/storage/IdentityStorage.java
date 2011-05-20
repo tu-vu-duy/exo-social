@@ -57,7 +57,7 @@ public class IdentityStorage extends AbstractStorage {
 
   private static final String VOID = "void.";
 
-  private enum PropNs {
+  static enum PropNs {
 
     VOID("void"),
     IM("im"),
@@ -356,6 +356,9 @@ public class IdentityStorage extends AbstractStorage {
         }
       }
     }
+    
+    // TODO : find better
+    profileEntity.setParentId(profile.getIdentity().getId());
 
     getSession().save();
 
@@ -732,16 +735,9 @@ public class IdentityStorage extends AbstractStorage {
 
   private void applyExcludes(final WhereExpression whereExpression, final List<Identity> excludedIdentityList) {
 
-    // TODO : apply excludes
-
     if (excludedIdentityList != null & excludedIdentityList.size() > 0) {
       for (Identity identity : excludedIdentityList) {
-        /*queryBuilder.and().not().equal(
-            NodeProperties.JCR_PATH,
-            SLASH_STR + "soc:profile" + SLASH_STR +
-            "soc:" + identity.getProviderId() + SLASH_STR + "soc:" + identity.getRemoteId() +
-            SLASH_STR + "soc:profile"
-        );*/
+        whereExpression.and().not().equals(ProfileEntity.parentId, identity.getId());
       }
     }
   }

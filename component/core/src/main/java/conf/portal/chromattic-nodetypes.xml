@@ -8,6 +8,9 @@
       <supertype>mix:referenceable</supertype>
     </supertypes>
     <propertyDefinitions>
+      <propertyDefinition name="soc:parentId" requiredType="String" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
+        <valueConstraints/>
+      </propertyDefinition>
       <propertyDefinition name="*" requiredType="undefined" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="true">
         <valueConstraints/>
       </propertyDefinition>

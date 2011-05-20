@@ -470,7 +470,7 @@ public class IdentityStorageNewTestCase extends AbstractCoreTest {
   public void testFindIdentityByFirstCharCount() throws Exception {
 
     addIdentity("o", "a1", "male", "");
-    addIdentity("o", "a2", "male", "");
+    Identity a2 = addIdentity("o", "a2", "male", "");
     addIdentity("o", "a3", "male", "");
     addIdentity("o", "a4", "male", "");
     addIdentity("o", "b1", "male", "");
@@ -478,15 +478,17 @@ public class IdentityStorageNewTestCase extends AbstractCoreTest {
     addIdentity("o", "b3", "male", "");
     addIdentity("o", "z", "male", "");
 
-    ProfileFilter filterA = createFilter('a', "", "", "");
-    ProfileFilter filterB = createFilter('b', "", "", "");
-    ProfileFilter filterC = createFilter('c', "", "", "");
-    ProfileFilter filterZ = createFilter('z', "", "", "");
+    ProfileFilter filterA = createFilter('a', "", "", "", null);
+    ProfileFilter filterB = createFilter('b', "", "", "", null);
+    ProfileFilter filterC = createFilter('c', "", "", "", null);
+    ProfileFilter filterZ = createFilter('z', "", "", "", null);
+    ProfileFilter filterA2 = createFilter('a', "", "", "", a2);
 
     assertEquals(4, storage.getIdentitiesByFirstCharacterOfNameCount("o", filterA));
     assertEquals(3, storage.getIdentitiesByFirstCharacterOfNameCount("o", filterB));
     assertEquals(0, storage.getIdentitiesByFirstCharacterOfNameCount("o", filterC));
     assertEquals(1, storage.getIdentitiesByFirstCharacterOfNameCount("o", filterZ));
+    assertEquals(3, storage.getIdentitiesByFirstCharacterOfNameCount("o", filterA2));
   }
 
   public void testFindIdentityByFirstChar() throws Exception {
@@ -496,14 +498,15 @@ public class IdentityStorageNewTestCase extends AbstractCoreTest {
     addIdentity("o", "a3", "", "");
     addIdentity("o", "a4", "", "");
     addIdentity("o", "b1", "", "");
-    addIdentity("o", "b2", "", "");
+    Identity b2 = addIdentity("o", "b2", "", "");
     addIdentity("o", "b3", "", "");
     addIdentity("o", "z", "", "");
 
-    ProfileFilter filterA = createFilter('a', "", "", "");
-    ProfileFilter filterB = createFilter('b', "", "", "");
-    ProfileFilter filterC = createFilter('c', "", "", "");
-    ProfileFilter filterZ = createFilter('z', "", "", "");
+    ProfileFilter filterA = createFilter('a', "", "", "", null);
+    ProfileFilter filterB = createFilter('b', "", "", "", null);
+    ProfileFilter filterC = createFilter('c', "", "", "", null);
+    ProfileFilter filterZ = createFilter('z', "", "", "", null);
+    ProfileFilter filterB2 = createFilter('b', "", "", "", b2);
 
     assertEquals(4, storage.getIdentitiesByFirstCharacterOfName("o", filterA, 0, -1, false).size());
     assertEquals(4, storage.getIdentitiesByFirstCharacterOfName("o", filterA, 0, 4, false).size());
@@ -513,29 +516,32 @@ public class IdentityStorageNewTestCase extends AbstractCoreTest {
     assertEquals(3, storage.getIdentitiesByFirstCharacterOfName("o", filterB, 0, 10, false).size());
     assertEquals(0, storage.getIdentitiesByFirstCharacterOfName("o", filterC, 0, 10, false).size());
     assertEquals(1, storage.getIdentitiesByFirstCharacterOfName("o", filterZ, 0, 10, false).size());
+    assertEquals(2, storage.getIdentitiesByFirstCharacterOfName("o", filterB2, 0, 10, false).size());
   }
 
   public void testFindIdentityWithFilterCount() throws Exception {
 
     addIdentity("o", "toto", "male", "cadre");
-    addIdentity("o", "totota", "female", "dev");
+    Identity itotota = addIdentity("o", "totota", "female", "dev");
     addIdentity("o", "tata", "male", "cadre");
 
-    ProfileFilter t = createFilter('\u0000', "t", "", "");
-    ProfileFilter to = createFilter('\u0000', "to", "", "");
-    ProfileFilter toto = createFilter('\u0000', "toto", "", "");
-    ProfileFilter totota = createFilter('\u0000', "totota", "", "");
-    ProfileFilter unknown = createFilter('\u0000', "unknown", "", "");
+    ProfileFilter t = createFilter('\u0000', "t", "", "", null);
+    ProfileFilter to = createFilter('\u0000', "to", "", "", null);
+    ProfileFilter toto = createFilter('\u0000', "toto", "", "", null);
+    ProfileFilter totota = createFilter('\u0000', "totota", "", "", null);
+    ProfileFilter unknown = createFilter('\u0000', "unknown", "", "", null);
 
-    ProfileFilter male = createFilter('\u0000', "", "male", "");
-    ProfileFilter female = createFilter('\u0000', "", "female", "");
+    ProfileFilter male = createFilter('\u0000', "", "male", "", null);
+    ProfileFilter female = createFilter('\u0000', "", "female", "", null);
 
-    ProfileFilter cadre = createFilter('\u0000', "", "", "cadre");
-    ProfileFilter dev = createFilter('\u0000', "", "", "dev");
+    ProfileFilter cadre = createFilter('\u0000', "", "", "cadre", null);
+    ProfileFilter dev = createFilter('\u0000', "", "", "dev", null);
 
-    ProfileFilter tmale = createFilter('\u0000', "t", "male", "");
-    ProfileFilter tmaledev = createFilter('\u0000', "t", "male", "dev");
-    ProfileFilter tmalecadre = createFilter('\u0000', "t", "male", "cadre");
+    ProfileFilter tmale = createFilter('\u0000', "t", "male", "", null);
+    ProfileFilter tmaledev = createFilter('\u0000', "t", "male", "dev", null);
+    ProfileFilter tmalecadre = createFilter('\u0000', "t", "male", "cadre", null);
+
+    ProfileFilter t2 = createFilter('\u0000', "t", "", "", itotota);
 
 
     assertEquals(3, storage.getIdentitiesByProfileFilterCount("o", t));
@@ -550,29 +556,33 @@ public class IdentityStorageNewTestCase extends AbstractCoreTest {
     assertEquals(2, storage.getIdentitiesByProfileFilterCount("o", tmale));
     assertEquals(0, storage.getIdentitiesByProfileFilterCount("o", tmaledev));
     assertEquals(2, storage.getIdentitiesByProfileFilterCount("o", tmalecadre));
+
+    assertEquals(2, storage.getIdentitiesByProfileFilterCount("o", t2));
   }
 
   public void testFindIdentityWithFilter() throws Exception {
 
     addIdentity("o", "toto", "male", "cadre");
-    addIdentity("o", "totota", "female", "dev");
+    Identity itotota = addIdentity("o", "totota", "female", "dev");
     addIdentity("o", "tata", "male", "cadre");
 
-    ProfileFilter t = createFilter('\u0000', "t", "", "");
-    ProfileFilter to = createFilter('\u0000', "to", "", "");
-    ProfileFilter toto = createFilter('\u0000', "toto", "", "");
-    ProfileFilter totota = createFilter('\u0000', "totota", "", "");
-    ProfileFilter unknown = createFilter('\u0000', "unknown", "", "");
+    ProfileFilter t = createFilter('\u0000', "t", "", "", null);
+    ProfileFilter to = createFilter('\u0000', "to", "", "", null);
+    ProfileFilter toto = createFilter('\u0000', "toto", "", "", null);
+    ProfileFilter totota = createFilter('\u0000', "totota", "", "", null);
+    ProfileFilter unknown = createFilter('\u0000', "unknown", "", "", null);
 
-    ProfileFilter male = createFilter('\u0000', "", "male", "");
-    ProfileFilter female = createFilter('\u0000', "", "female", "");
+    ProfileFilter male = createFilter('\u0000', "", "male", "", null);
+    ProfileFilter female = createFilter('\u0000', "", "female", "", null);
 
-    ProfileFilter cadre = createFilter('\u0000', "", "", "cadre");
-    ProfileFilter dev = createFilter('\u0000', "", "", "dev");
+    ProfileFilter cadre = createFilter('\u0000', "", "", "cadre", null);
+    ProfileFilter dev = createFilter('\u0000', "", "", "dev", null);
 
-    ProfileFilter tmale = createFilter('\u0000', "t", "male", "");
-    ProfileFilter tmaledev = createFilter('\u0000', "t", "male", "dev");
-    ProfileFilter tmalecadre = createFilter('\u0000', "t", "male", "cadre");
+    ProfileFilter tmale = createFilter('\u0000', "t", "male", "", null);
+    ProfileFilter tmaledev = createFilter('\u0000', "t", "male", "dev", null);
+    ProfileFilter tmalecadre = createFilter('\u0000', "t", "male", "cadre", null);
+
+    ProfileFilter t2 = createFilter('\u0000', "t", "", "", itotota);
 
 
     assertEquals(3, storage.getIdentitiesByProfileFilter("o", t, 0, 10, false).size());
@@ -591,6 +601,8 @@ public class IdentityStorageNewTestCase extends AbstractCoreTest {
     assertEquals(2, storage.getIdentitiesByProfileFilter("o", tmale, 0, 10, false).size());
     assertEquals(0, storage.getIdentitiesByProfileFilter("o", tmaledev, 0, 10, false).size());
     assertEquals(2, storage.getIdentitiesByProfileFilter("o", tmalecadre, 0, 10, false).size());
+
+    assertEquals(2, storage.getIdentitiesByProfileFilter("o", t2, 0, 10, false).size());
   }
 
   public void testAvatar() throws Exception {
@@ -631,7 +643,7 @@ public class IdentityStorageNewTestCase extends AbstractCoreTest {
     
   }
 
-  private void addIdentity(String provider, String name, String gender, String position) throws Exception {
+  private Identity addIdentity(String provider, String name, String gender, String position) throws Exception {
     Identity newIdentity = new Identity(provider, name);
     storage._createIdentity(newIdentity);
     Profile p = new Profile(newIdentity);
@@ -642,14 +654,23 @@ public class IdentityStorageNewTestCase extends AbstractCoreTest {
     newIdentity.setProfile(p);
     storage._createProfile(p);
     tearDownIdentityList.add(newIdentity.getId());
+
+    return newIdentity;
   }
 
-  private ProfileFilter createFilter(char c, String name, String gender, String position) throws Exception {
+  private ProfileFilter createFilter(char c, String name, String gender, String position, Identity exclude) throws Exception {
     ProfileFilter filter = new ProfileFilter();
     filter.setFirstCharacterOfName(c);
     filter.setName(name);
     filter.setGender(gender);
     filter.setPosition(position);
+
+    if (exclude != null) {
+      List<Identity> excludeList = new ArrayList<Identity>();
+      excludeList.add(exclude);
+      filter.setExcludedIdentityList(excludeList);
+    }
+
     return filter;
   }
 
@@ -839,8 +860,5 @@ public class IdentityStorageNewTestCase extends AbstractCoreTest {
 
     tearDownIdentityList.add(newIdentity.getId());
   }
-
-  // TODO : test request excludes
-  // TODO : test profile xp
 
 }

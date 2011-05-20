@@ -51,6 +51,12 @@ public abstract class ProfileEntity {
   public abstract IdentityEntity getIdentity();
   public abstract void setIdentity(IdentityEntity identity);
 
+  // TODO : find better
+  @Property(name = "soc:parentId")
+  public abstract String getParentId();
+  public abstract void setParentId(String parentid);
+  public static final PropertyLiteralExpression parentId = new PropertyLiteralExpression(String.class, "soc:parentId");
+
   @OneToMany
   @Owner
   public abstract Map<String, ProfileXpEntity> getXps();
@@ -74,5 +80,10 @@ public abstract class ProfileEntity {
 
   public void setProperty(String key, List<String> value) {
     getProperties().put(key, value);
+  }
+
+  public String getPropertyFirst(String key) {
+    List<String> value = getProperties().get(key);
+    return (value.size() > 0 ? value.get(0) : null);
   }
 }

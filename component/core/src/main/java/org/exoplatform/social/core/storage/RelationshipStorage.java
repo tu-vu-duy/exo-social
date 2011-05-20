@@ -58,10 +58,10 @@ public class RelationshipStorage extends AbstractStorage {
         ProfileEntity senderProfileEntity = senderEntity.getProfile();
         if (senderProfileEntity != null) {
           Profile senderProfile = new Profile(sender);
-          senderProfile.setProperty(Profile.FIRST_NAME, senderProfileEntity.getProperty(Profile.FIRST_NAME));
-          senderProfile.setProperty(Profile.LAST_NAME, senderProfileEntity.getProperty(Profile.LAST_NAME));
-          senderProfile.setProperty(Profile.URL, senderProfileEntity.getProperty(Profile.URL));
-          senderProfile.setProperty(Profile.POSITION, senderProfileEntity.getProperty(Profile.POSITION));
+          senderProfile.setProperty(Profile.FIRST_NAME, senderProfileEntity.getPropertyFirst(IdentityStorage.PropNs.VOID.nameOf(Profile.FIRST_NAME)));
+          senderProfile.setProperty(Profile.LAST_NAME, senderProfileEntity.getPropertyFirst(IdentityStorage.PropNs.VOID.nameOf(Profile.LAST_NAME)));
+          senderProfile.setProperty(Profile.URL, senderProfileEntity.getPropertyFirst(IdentityStorage.PropNs.VOID.nameOf(Profile.URL)));
+          senderProfile.setProperty(Profile.POSITION, senderProfileEntity.getPropertyFirst(IdentityStorage.PropNs.VOID.nameOf(Profile.POSITION)));
           senderProfile.setId(senderProfileEntity.getId());
           sender.setProfile(senderProfile);
         }
@@ -72,10 +72,10 @@ public class RelationshipStorage extends AbstractStorage {
         ProfileEntity receiverProfileEntity = receiverEntity.getProfile();
         if (receiverProfileEntity != null) {
           Profile receiverProfile = new Profile(receiver);
-          receiverProfile.setProperty(Profile.FIRST_NAME, receiverProfileEntity.getProperty(Profile.FIRST_NAME));
-          receiverProfile.setProperty(Profile.LAST_NAME, receiverProfileEntity.getProperty(Profile.LAST_NAME));
-          receiverProfile.setProperty(Profile.URL, receiverProfileEntity.getProperty(Profile.URL));
-          receiverProfile.setProperty(Profile.POSITION, receiverProfileEntity.getProperty(Profile.POSITION));
+          receiverProfile.setProperty(Profile.FIRST_NAME, receiverProfileEntity.getPropertyFirst(IdentityStorage.PropNs.VOID.nameOf(Profile.FIRST_NAME)));
+          receiverProfile.setProperty(Profile.LAST_NAME, receiverProfileEntity.getPropertyFirst(IdentityStorage.PropNs.VOID.nameOf(Profile.LAST_NAME)));
+          receiverProfile.setProperty(Profile.URL, receiverProfileEntity.getPropertyFirst(IdentityStorage.PropNs.VOID.nameOf(Profile.URL)));
+          receiverProfile.setProperty(Profile.POSITION, receiverProfileEntity.getPropertyFirst(IdentityStorage.PropNs.VOID.nameOf(Profile.POSITION)));
           receiverProfile.setId(receiverProfileEntity.getId());
           receiver.setProfile(receiverProfile);
         }

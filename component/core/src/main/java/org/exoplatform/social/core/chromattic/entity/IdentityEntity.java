@@ -61,6 +61,12 @@ public abstract class IdentityEntity {
   public abstract ProfileEntity getProfile();
   public abstract void setProfile(ProfileEntity profile);
 
+  @MappedBy("soc:activities")
+  @OneToOne
+  @Owner
+  public abstract ActivityListEntity getActivityList();
+  public abstract void setActivityList(ActivityListEntity activityListEntity);
+
   @MappedBy("soc:sender")
   @OneToOne
   @Owner

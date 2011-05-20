@@ -29,6 +29,9 @@ import org.exoplatform.social.core.chromattic.lifecycle.SocialChromatticLifeCycl
 import org.exoplatform.social.core.storage.exception.NodeNotFoundException;
 import org.exoplatform.social.core.storage.query.WhereExpression;
 
+import java.text.DateFormatSymbols;
+import java.util.Locale;
+
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
@@ -40,6 +43,9 @@ public abstract class AbstractStorage {
   protected final ChromatticLifeCycle lifeCycle;
   protected final Chromattic chromattic;
   protected final WhereExpression whereExpression;
+
+  //
+  protected String[] MONTH_NAME = new DateFormatSymbols(Locale.ENGLISH).getMonths();
 
   //
   protected static final String NS_JCR = "jcr:";

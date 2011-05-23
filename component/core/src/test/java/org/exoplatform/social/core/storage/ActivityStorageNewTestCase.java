@@ -280,5 +280,27 @@ public class ActivityStorageNewTestCase extends AbstractCoreTest {
 
   }
 
+  public void testTimeStamp() throws Exception {
+    ExoSocialActivity activity = new ExoSocialActivityImpl();
+    activity.setTitle("activity title");
+    activityStorage.saveActivity(rootIdentity, activity);
+
+    ExoSocialActivity comment = new ExoSocialActivityImpl();
+    comment.setUserId(rootIdentity.getId());
+    comment.setTitle("comment title");
+
+    activityStorage.saveComment(activity, comment);
+
+    List<ExoSocialActivity> activities = activityStorage.getActivities(rootIdentity);
+
+    assertEquals(1, activities.size());
+    assertFalse(activities.get(0).getPostedTime() == 0);
+    assertEquals(2, activities.get(0).getReplyToId().split(",").length);
+
+    ExoSocialActivity gotComment = activityStorage.getActivity(activities.get(0).getReplyToId().split(",")[1]);
+    assertFalse(gotComment.getPostedTime() == 0);
+
+  }
+
   // TODO : test many days
 }

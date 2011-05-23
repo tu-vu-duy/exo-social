@@ -248,14 +248,16 @@ public class ActivityStorage extends AbstractStorage {
     try {
 
       //
+      long currentMillis = System.currentTimeMillis();
       ActivityEntity activityEntity = _findById(ActivityEntity.class, activity.getId());
-      ActivityEntity commentEntity = activityEntity.createComment(String.valueOf(System.currentTimeMillis()));
+      ActivityEntity commentEntity = activityEntity.createComment(String.valueOf(currentMillis));
 
       //
       activityEntity.getComments().add(commentEntity);
       commentEntity.setTitle(comment.getTitle());
       commentEntity.setIdentity(_findById(IdentityEntity.class, comment.getUserId()));
       commentEntity.setComment(Boolean.TRUE);
+      commentEntity.setPostedTime(currentMillis);
       comment.setId(commentEntity.getId());
 
     }

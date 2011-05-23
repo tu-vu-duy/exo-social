@@ -246,7 +246,7 @@
       </propertyDefinition>
     </propertyDefinitions>
     <childNodeDefinitions>
-      <childNodeDefinition name="*" defaultPrimaryType="soc:activityday" autoCreated="true" mandatory="true" onParentVersion="COPY" protected="false" sameNameSiblings="false">
+      <childNodeDefinition name="*" defaultPrimaryType="soc:activityday" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" sameNameSiblings="false">
         <requiredPrimaryTypes>
           <requiredPrimaryType>soc:activityday</requiredPrimaryType>
         </requiredPrimaryTypes>
@@ -268,7 +268,7 @@
       </propertyDefinition>
     </propertyDefinitions>
     <childNodeDefinitions>
-      <childNodeDefinition name="*" defaultPrimaryType="soc:activitymonth" autoCreated="true" mandatory="true" onParentVersion="COPY" protected="false" sameNameSiblings="false">
+      <childNodeDefinition name="*" defaultPrimaryType="soc:activitymonth" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" sameNameSiblings="false">
         <requiredPrimaryTypes>
           <requiredPrimaryType>soc:activitymonth</requiredPrimaryType>
         </requiredPrimaryTypes>
@@ -290,7 +290,7 @@
       </propertyDefinition>
     </propertyDefinitions>
     <childNodeDefinitions>
-      <childNodeDefinition name="*" defaultPrimaryType="soc:activityyear" autoCreated="true" mandatory="true" onParentVersion="COPY" protected="false" sameNameSiblings="false">
+      <childNodeDefinition name="*" defaultPrimaryType="soc:activityyear" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" sameNameSiblings="false">
         <requiredPrimaryTypes>
           <requiredPrimaryType>soc:activityyear</requiredPrimaryType>
         </requiredPrimaryTypes>

@@ -458,6 +458,18 @@
 
           <value>org.exoplatform.social.core.chromattic.entity.RelationshipEntity</value>
           <value>org.exoplatform.social.core.chromattic.entity.RelationshipListEntity</value>
+
+          <value>org.exoplatform.social.core.chromattic.entity.ActivityEntity</value>
+          <value>org.exoplatform.social.core.chromattic.entity.ActivityListEntity</value>
+          <value>org.exoplatform.social.core.chromattic.entity.ActivityDayEntity</value>
+          <value>org.exoplatform.social.core.chromattic.entity.ActivityMonthEntity</value>
+          <value>org.exoplatform.social.core.chromattic.entity.ActivityYearEntity</value>
+          <value>org.exoplatform.social.core.chromattic.entity.ActivityParameters</value>
+
+          <value>org.exoplatform.social.core.chromattic.entity.SpaceRootEntity</value>
+          <value>org.exoplatform.social.core.chromattic.entity.SpaceEntity</value>
+          <value>org.exoplatform.social.core.chromattic.entity.SpaceListEntity</value>
+          <value>org.exoplatform.social.core.chromattic.entity.SpaceRef</value>
         </values-param>
         <properties-param>
           <name>options</name>

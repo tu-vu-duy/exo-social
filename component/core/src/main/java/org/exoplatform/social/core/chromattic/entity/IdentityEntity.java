@@ -84,6 +84,30 @@ public abstract class IdentityEntity {
   @Owner
   public abstract RelationshipListEntity getRelationship();
 
+  @OneToOne
+  @Owner
+  @MappedBy("soc:spacemember")
+  public abstract SpaceListEntity getSpaces();
+  public abstract void setSpaces(SpaceListEntity spaces);
+
+  @OneToOne
+  @Owner
+  @MappedBy("soc:spacependingmember")
+  public abstract SpaceListEntity getPendingSpaces();
+  public abstract void setPendingSpaces(SpaceListEntity spaces);
+
+  @OneToOne
+  @Owner
+  @MappedBy("soc:spaceinvitedmember")
+  public abstract SpaceListEntity getInvitedSpaces();
+  public abstract void setInvitedSpaces(SpaceListEntity spaces);
+
+  @OneToOne
+  @Owner
+  @MappedBy("soc:spacemanagermember")
+  public abstract SpaceListEntity getManagerSpaces();
+  public abstract void setManagerSpaces(SpaceListEntity spaces);
+
   @Create
   public abstract ProfileEntity createProfile();
 

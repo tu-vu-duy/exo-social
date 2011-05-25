@@ -25,6 +25,7 @@ import org.exoplatform.commons.chromattic.ChromatticLifeCycle;
 import org.exoplatform.commons.chromattic.ChromatticManager;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.social.core.chromattic.entity.ProviderRootEntity;
+import org.exoplatform.social.core.chromattic.entity.SpaceRootEntity;
 import org.exoplatform.social.core.chromattic.lifecycle.SocialChromatticLifeCycle;
 import org.exoplatform.social.core.storage.exception.NodeNotFoundException;
 import org.exoplatform.social.core.storage.query.WhereExpression;
@@ -52,6 +53,7 @@ public abstract class AbstractStorage {
 
   //
   protected static final String NODETYPE_PROVIDERS = "soc:providers";
+  protected static final String NODETYPE_SPACES = "soc:spaces";
 
   //
   protected static final String SENDER = "sender";
@@ -94,7 +96,9 @@ public abstract class AbstractStorage {
     return getRoot(NODETYPE_PROVIDERS, ProviderRootEntity.class);
   }
 
-
+  protected SpaceRootEntity getSpaceRoot() {
+    return getRoot(NODETYPE_SPACES, SpaceRootEntity.class);
+  }
 
   protected <T> T _findById(final Class<T> clazz, final String nodeId) throws NodeNotFoundException {
 

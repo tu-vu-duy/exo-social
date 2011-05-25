@@ -350,9 +350,14 @@ public class IdentityStorage extends AbstractStorage {
           avatar.setContentResource(new Resource(attachement.getMimeType(), null, attachement.getImageBytes()));
         }
         else {
-          List<String> lvalue = new ArrayList();
-          lvalue.add((String) value);
-          profileEntity.setProperty(PropNs.VOID.nameOf(key), lvalue);
+          if (value != null) {
+            List<String> lvalue = new ArrayList();
+            lvalue.add((String) value);
+            profileEntity.setProperty(PropNs.VOID.nameOf(key), lvalue);
+          }
+          else {
+            profileEntity.setProperty(PropNs.VOID.nameOf(key), null);
+          }
         }
       }
     }

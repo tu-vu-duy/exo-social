@@ -66,6 +66,10 @@ public abstract class ActivityEntity {
   public abstract String getTitle();
   public abstract void setTitle(String title);
 
+  @Property(name = "soc:body")
+  public abstract String getBody();
+  public abstract void setBody(String body);
+
   @Property(name = "soc:likes")
   public abstract String[] getLikes();
   public abstract void setLikes(String[] title);

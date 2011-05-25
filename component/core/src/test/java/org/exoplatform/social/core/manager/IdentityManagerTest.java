@@ -45,7 +45,7 @@ public class IdentityManagerTest extends AbstractCoreTest {
   private List<Identity>  tearDownIdentityList;
 
   private ActivityManager activityManager;
-  private List<ExoSocialActivity> tearDownActivityList;
+
   public void setUp() throws Exception {
     super.setUp();
     identityManager = (IdentityManager) getContainer().getComponentInstanceOfType(IdentityManager.class);
@@ -53,16 +53,11 @@ public class IdentityManagerTest extends AbstractCoreTest {
     activityManager = (ActivityManager) getContainer().getComponentInstanceOfType(ActivityManager.class);
     assertNotNull(activityManager);
     tearDownIdentityList = new ArrayList<Identity>();
-    tearDownActivityList = new ArrayList<ExoSocialActivity>();
   }
 
   public void tearDown() throws Exception {
     for (Identity identity : tearDownIdentityList) {
       identityManager.deleteIdentity(identity);
-    }
-    
-    for (ExoSocialActivity activity : tearDownActivityList) {
-      activityManager.deleteActivity(activity.getId());
     }
     super.tearDown();
   }
@@ -476,11 +471,10 @@ public class IdentityManagerTest extends AbstractCoreTest {
     
     Identity identityUpdated = identityManager.getOrCreateIdentity(rootIdentity.getProviderId(), rootIdentity.getRemoteId(), false);
     assertEquals("CEO", identityUpdated.getProfile().getProperty(Profile.POSITION));
-    
+
     Thread.sleep(3000);
     List<ExoSocialActivity> rootActivityList = activityManager.getActivities(rootIdentity);
 
-    tearDownActivityList.addAll(rootActivityList);
     tearDownIdentityList.add(rootIdentity);
   }
   
@@ -717,7 +711,6 @@ public class IdentityManagerTest extends AbstractCoreTest {
       Thread.sleep(3000);
       List<ExoSocialActivity> johnActivityList = activityManager.getActivities(gotJohnIdentity, 0, 10);
       assertEquals("johnActivityList.size() must be 1", 1, johnActivityList.size());
-      tearDownActivityList.addAll(johnActivityList);
     } catch (InterruptedException e) {
       LOG.error(e.getMessage(), e);
     }

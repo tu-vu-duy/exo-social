@@ -75,6 +75,7 @@ public class ActivityStorage extends AbstractStorage {
   private void _fillActivityEntityFromActivity(ExoSocialActivity activity, ActivityEntity activityEntity) {
 
     activityEntity.setTitle(activity.getTitle());
+    activityEntity.setBody(activity.getBody());
     activityEntity.setLikes(activity.getLikeIdentityIds());
 
     //
@@ -93,6 +94,7 @@ public class ActivityStorage extends AbstractStorage {
     //
     activity.setId(activityEntity.getId());
     activity.setTitle(activityEntity.getTitle());
+    activity.setBody(activityEntity.getBody());
     activity.setUserId(activityEntity.getIdentity().getId());
     activity.setPostedTime(activityEntity.getPostedTime());
 
@@ -255,10 +257,14 @@ public class ActivityStorage extends AbstractStorage {
       //
       activityEntity.getComments().add(commentEntity);
       commentEntity.setTitle(comment.getTitle());
+      commentEntity.setBody(comment.getBody());
       commentEntity.setIdentity(_findById(IdentityEntity.class, comment.getUserId()));
       commentEntity.setComment(Boolean.TRUE);
       commentEntity.setPostedTime(currentMillis);
       comment.setId(commentEntity.getId());
+
+      //
+      activity.setReplyToId(activity.getReplyToId() + "," + commentEntity.getId());
 
     }
     catch (NodeNotFoundException e) {

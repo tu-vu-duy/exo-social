@@ -85,10 +85,6 @@ public class WhereExpression {
     return builder.toString();
   }
 
-  public void clear() {
-    builder.setLength(0);
-  }
-
   public <T> CallExpression callFunction(QueryFunction function, PropertyLiteralExpression<T> property) {
     return new CallExpression(function, property);
   }

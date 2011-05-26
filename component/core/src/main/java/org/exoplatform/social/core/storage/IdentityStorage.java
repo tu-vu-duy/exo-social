@@ -379,17 +379,7 @@ public class IdentityStorage extends AbstractStorage {
 
   Identity _findIdentity(final String providerId, final String remoteId) throws NodeNotFoundException {
 
-    ProviderEntity providerEntity = getProviderRoot().getProviders().get(providerId);
-
-    if (providerEntity == null) {
-      throw new NodeNotFoundException("The node " + providerId + "/" + remoteId + " doesn't be found");
-    }
-
-    IdentityEntity identityEntity = providerEntity.getIdentities().get(remoteId);
-
-    if (identityEntity == null) {
-      throw new NodeNotFoundException("The node " + providerId + "/" + remoteId + " doesn't be found");
-    }
+    IdentityEntity identityEntity = _findIdentityEntity(providerId, remoteId);
 
     Identity identity = new Identity(providerId, remoteId);
     identity.setDeleted(identityEntity.isDeleted());
@@ -412,6 +402,23 @@ public class IdentityStorage extends AbstractStorage {
     return identity;
   }
 
+  IdentityEntity _findIdentityEntity(final String providerId, final String remoteId) throws NodeNotFoundException {
+
+    ProviderEntity providerEntity = getProviderRoot().getProviders().get(providerId);
+
+    if (providerEntity == null) {
+      throw new NodeNotFoundException("The node " + providerId + "/" + remoteId + " doesn't be found");
+    }
+
+    IdentityEntity identityEntity = providerEntity.getIdentities().get(remoteId);
+
+    if (identityEntity == null) {
+      throw new NodeNotFoundException("The node " + providerId + "/" + remoteId + " doesn't be found");
+    }
+
+    return identityEntity;
+
+  }
   /**
    * Public.
    */
@@ -543,7 +550,7 @@ public class IdentityStorage extends AbstractStorage {
     List<Identity> listIdentity = new ArrayList<Identity>();
 
     QueryBuilder<ProfileEntity> builder = getSession().createQueryBuilder(ProfileEntity.class);
-    whereExpression.clear();
+    WhereExpression whereExpression = new WhereExpression();
 
     whereExpression
         .like(JCRProperties.path, getProviderRoot().getProviders().get(providerId).getPath() + SLASH_STR + PERCENT_STR);
@@ -575,7 +582,7 @@ public class IdentityStorage extends AbstractStorage {
     List<Identity> excludedIdentityList = profileFilter.getExcludedIdentityList();
 
     QueryBuilder<ProfileEntity> builder = getSession().createQueryBuilder(ProfileEntity.class);
-    whereExpression.clear();
+    WhereExpression whereExpression = new WhereExpression();
 
     whereExpression
         .like(JCRProperties.path, getProviderRoot().getProviders().get(providerId).getPath() + SLASH_STR + PERCENT_STR);
@@ -594,7 +601,7 @@ public class IdentityStorage extends AbstractStorage {
     List<Identity> excludedIdentityList = profileFilter.getExcludedIdentityList();
 
     QueryBuilder<ProfileEntity> builder = getSession().createQueryBuilder(ProfileEntity.class);
-    whereExpression.clear();
+    WhereExpression whereExpression = new WhereExpression();
 
     whereExpression
         .like(JCRProperties.path, getProviderRoot().getProviders().get(providerId).getPath() + SLASH_STR + PERCENT_STR);
@@ -620,7 +627,7 @@ public class IdentityStorage extends AbstractStorage {
 
     //
     QueryBuilder<ProfileEntity> builder = getSession().createQueryBuilder(ProfileEntity.class);
-    whereExpression.clear();
+    WhereExpression whereExpression = new WhereExpression();
 
     whereExpression
         .like(JCRProperties.path, getProviderRoot().getProviders().get(providerId).getPath() + SLASH_STR + PERCENT_STR);

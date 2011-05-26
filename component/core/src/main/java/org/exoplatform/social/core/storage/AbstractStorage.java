@@ -43,7 +43,6 @@ public abstract class AbstractStorage {
   protected final ChromatticManager manager;
   protected final ChromatticLifeCycle lifeCycle;
   protected final Chromattic chromattic;
-  protected final WhereExpression whereExpression;
 
   //
   protected String[] MONTH_NAME = new DateFormatSymbols(Locale.ENGLISH).getMonths();
@@ -73,7 +72,6 @@ public abstract class AbstractStorage {
     this.manager = (ChromatticManager) container.getComponentInstanceOfType(ChromatticManager.class);
     this.lifeCycle = manager.getLifeCycle("soc");
     this.chromattic = lifeCycle.getChromattic();
-    this.whereExpression = new WhereExpression();
 
   }
 

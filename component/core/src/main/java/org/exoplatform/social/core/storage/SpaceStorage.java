@@ -23,10 +23,8 @@ package org.exoplatform.social.core.storage;
 import org.chromattic.api.query.Query;
 import org.chromattic.api.query.QueryBuilder;
 import org.chromattic.api.query.QueryResult;
-import org.exoplatform.social.core.chromattic.entity.IdentityEntity;
-import org.exoplatform.social.core.chromattic.entity.SpaceEntity;
-import org.exoplatform.social.core.chromattic.entity.SpaceRef;
-import org.exoplatform.social.core.chromattic.entity.SpaceRootEntity;
+import org.exoplatform.social.core.chromattic.entity.*;
+import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
 import org.exoplatform.social.core.space.SpaceFilter;
 import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.storage.exception.NodeNotFoundException;
@@ -34,7 +32,6 @@ import org.exoplatform.social.core.storage.query.QueryFunction;
 import org.exoplatform.social.core.storage.query.WhereExpression;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -44,7 +41,13 @@ import java.util.List;
  */
 public class SpaceStorage extends AbstractStorage {
 
-  /*
+   private final IdentityStorage identityStorage;
+
+   public SpaceStorage(IdentityStorage identityStorage) {
+     this.identityStorage = identityStorage;
+   }
+
+   /*
     Private
    */
   private void _fillSpaceFormEntity (SpaceEntity entity, Space space) {
@@ -60,24 +63,10 @@ public class SpaceStorage extends AbstractStorage {
     space.setPriority(entity.getPriority());
     space.setGroupId(entity.getGroupId());
     space.setUrl(entity.getURL());
-
-    List<String> memberIds = entity.getMembersId();
-    List<String> managerIds = entity.getManagerMembersId();
-    List<String> pendingIds = entity.getPendingMembersId();
-    List<String> invitedIds = entity.getInvitedMembersId();
-
-    if (memberIds != null) {
-      space.setMembers(memberIds.toArray(new String[]{}));
-    }
-    if (managerIds != null) {
-      space.setManagers(managerIds.toArray(new String[]{}));
-    }
-    if (pendingIds != null) {
-      space.setPendingUsers(pendingIds.toArray(new String[]{}));
-    }
-    if (invitedIds != null) {
-      space.setInvitedUsers(invitedIds.toArray(new String[]{}));
-    }
+    space.setMembers(entity.getMembersId());
+    space.setManagers(entity.getManagerMembersId());
+    space.setPendingUsers(entity.getPendingMembersId());
+    space.setInvitedUsers(entity.getInvitedMembersId());
 
   }
 
@@ -93,151 +82,71 @@ public class SpaceStorage extends AbstractStorage {
     entity.setPriority(space.getPriority());
     entity.setGroupId(space.getGroupId());
     entity.setURL(space.getUrl());
+    entity.setMembersId(space.getMembers());
+    entity.setManagerMembersId(space.getManagers());
+    entity.setPendingMembersId(space.getPendingUsers());
+    entity.setInvitedMembersId(space.getInvitedUsers());
 
   }
 
+  private enum RefType {
+    MEMBER() {
+      @Override
+      public SpaceListEntity refsOf(IdentityEntity identityEntity) {
+        return identityEntity.getSpaces();
+      }},
+    MANAGER() {
+      @Override
+      public SpaceListEntity refsOf(IdentityEntity identityEntity) {
+        return identityEntity.getManagerSpaces();
+      }},
+    PENDING() {
+      @Override
+      public SpaceListEntity refsOf(IdentityEntity identityEntity) {
+        return identityEntity.getPendingSpaces();
+      }},
+    INVITED() {
+      @Override
+      public SpaceListEntity refsOf(IdentityEntity identityEntity) {
+        return identityEntity.getInvitedSpaces();
+      }};
+
+    public abstract SpaceListEntity refsOf(IdentityEntity identityEntity);
+  }
+
   private void _createRefs(SpaceEntity spaceEntity, Space space) throws NodeNotFoundException {
-    
-    //
-    String[] membersIds = space.getMembers();
-    String[] managerIds = space.getManagers();
-    String[] pendingIds = space.getPendingUsers();
-    String[] invitedIds = space.getInvitedUsers();
 
-    List<String> membersIdsToDelete = spaceEntity.getMembersId();
-    if (membersIdsToDelete != null) {
-      membersIdsToDelete.removeAll(Arrays.asList(membersIds));
-      for (String id : membersIdsToDelete) {
-        IdentityEntity identityEntity = _findById(IdentityEntity.class, id);
-        SpaceRef ref = identityEntity.getSpaces().getRef(spaceEntity.getName());
-        identityEntity.getSpaces().getRefs().remove(ref);
-      }
-      spaceEntity.getMembersId().removeAll(membersIdsToDelete);
-    }
+    manageRefList(space.getMembers(), spaceEntity, RefType.MEMBER);
+    manageRefList(space.getManagers(), spaceEntity, RefType.MANAGER);
+    manageRefList(space.getInvitedUsers(), spaceEntity, RefType.INVITED);
+    manageRefList(space.getPendingUsers(), spaceEntity, RefType.PENDING);
 
-    List<String> managerIdsToDelete = spaceEntity.getManagerMembersId();
-    if (managerIdsToDelete != null) {
-      managerIdsToDelete.removeAll(Arrays.asList(managerIds));
-      for (String id : managerIdsToDelete) {
-        IdentityEntity identityEntity = _findById(IdentityEntity.class, id);
-        SpaceRef ref = identityEntity.getManagerSpaces().getRef(spaceEntity.getName());
-        identityEntity.getManagerSpaces().getRefs().remove(ref);
-      }
-      spaceEntity.getMembersId().removeAll(managerIdsToDelete);
-    }
+  }
 
-    List<String> pendingIdsToDelete = spaceEntity.getPendingMembersId();
-    if (pendingIdsToDelete != null) {
-      pendingIdsToDelete.removeAll(Arrays.asList(pendingIds));
-      for (String id : pendingIdsToDelete) {
-        IdentityEntity identityEntity = _findById(IdentityEntity.class, id);
-        SpaceRef ref = identityEntity.getPendingSpaces().getRef(spaceEntity.getName());
-        identityEntity.getPendingSpaces().getRefs().remove(ref);
-      }
-      spaceEntity.getMembersId().removeAll(pendingIdsToDelete);
-    }
+  private void manageRefList(String[] referencedUser, SpaceEntity spaceEntity, RefType type) {
 
-    List<String> invitedIdsToDelete = spaceEntity.getInvitedMembersId();
-    if (invitedIdsToDelete != null) {
-      invitedIdsToDelete.removeAll(Arrays.asList(invitedIds));
-      for (String id : invitedIdsToDelete) {
-        IdentityEntity identityEntity = _findById(IdentityEntity.class, id);
-        SpaceRef ref = identityEntity.getInvitedSpaces().getRef(spaceEntity.getName());
-        _removeById(SpaceRef.class, ref.getId());
-      }
-      spaceEntity.getMembersId().removeAll(invitedIdsToDelete);
-    }
-
-    if (membersIds != null && membersIds.length > 0) {
-      for (String memberId : membersIds) {
-
-        // Spaces references
-        IdentityEntity identityEntity = _findById(IdentityEntity.class, memberId);
-        String name = spaceEntity.getName();
-
-        // Move ref if pending or invited
-        SpaceRef gotRef = identityEntity.getInvitedSpaces().getRefs().get(name);
-        if (gotRef == null) {
-          gotRef = identityEntity.getPendingSpaces().getRefs().get(name);
+    if (referencedUser != null) {
+      for (String userName : referencedUser) {
+        try {
+          IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userName);
+          SpaceListEntity listRef = type.refsOf(identityEntity);
+          SpaceRef ref = listRef.getRef(spaceEntity.getName());
+          ref.setSpaceRef(spaceEntity);
         }
-        if (gotRef == null) {
-          SpaceRef spaceRef = identityEntity.getSpaces().getRefs().get(name);
+        catch (NodeNotFoundException e) {
+          // TODO : manage
         }
-
-        if (gotRef != null) {
-          // Move ref
-          identityEntity.getSpaces().getRefs().put(name, gotRef);
-        }
-        else {
-          // Create ref
-          SpaceRef spaceRef = identityEntity.getSpaces().getRef(spaceEntity.getName());
-          spaceRef.setSpaceRef(spaceEntity);
-        }
-
       }
-
-      spaceEntity.setMembersId(Arrays.asList(membersIds));
-
     }
-    else {
-      spaceEntity.setMembersId(null);
-    }
-
-    if (managerIds != null && managerIds.length > 0) {
-      for (String managerId : managerIds) {
-
-        // Spaces references
-        IdentityEntity identityEntity = _findById(IdentityEntity.class, managerId);
-        SpaceRef spaceRef = identityEntity.getManagerSpaces().getRef(spaceEntity.getName());
-        spaceRef.setSpaceRef(spaceEntity);
-
-      }
-
-      spaceEntity.setManagerMembersId(Arrays.asList(managerIds));
-
-    }
-    else {
-      spaceEntity.setManagerMembersId(null);
-    }
-
-    if (pendingIds != null && pendingIds.length > 0) {
-      for (String pendingId : pendingIds) {
-
-        // Spaces references
-        IdentityEntity identityEntity = _findById(IdentityEntity.class, pendingId);
-        SpaceRef spaceRef = identityEntity.getPendingSpaces().getRef(spaceEntity.getName());
-        spaceRef.setSpaceRef(spaceEntity);
-
-      }
-
-      spaceEntity.setPendingMembersId(Arrays.asList(pendingIds));
-
-    }
-    else {
-      spaceEntity.setPendingMembersId(null);
-    }
-
-    if (invitedIds != null && invitedIds.length > 0) {
-      for (String invitedId : invitedIds) {
-
-        // Spaces references
-        IdentityEntity identityEntity = _findById(IdentityEntity.class, invitedId);
-        SpaceRef spaceRef = identityEntity.getInvitedSpaces().getRef(spaceEntity.getName());
-        spaceRef.setSpaceRef(spaceEntity);
-
-      }
-
-      spaceEntity.setInvitedMembersId(Arrays.asList(invitedIds));
-      
-    }
-    else {
-      spaceEntity.setInvitedMembersId(null);
-    }
-
   }
 
   private boolean _validateFilter(SpaceFilter filter) {
 
+    if (filter == null) {
+      return false;
+    }
+
+    // TODO : do it better
     if (filter.getSpaceNameSearchCondition() != null &&
         filter.getSpaceNameSearchCondition().length() != 0) {
       if (isValidInput(filter.getSpaceNameSearchCondition())) {
@@ -252,6 +161,7 @@ public class SpaceStorage extends AbstractStorage {
   }
 
   public SpaceEntity _createSpace(Space space) throws SpaceStorageException {
+
     SpaceRootEntity spaceRootEntity = getSpaceRoot();
     SpaceEntity spaceEntity = spaceRootEntity.getSpace(space.getPrettyName());
     space.setId(spaceEntity.getId());
@@ -275,7 +185,7 @@ public class SpaceStorage extends AbstractStorage {
     // TODO : JCR query
 
     QueryBuilder<SpaceEntity> builder = getSession().createQueryBuilder(SpaceEntity.class);
-    whereExpression.clear();
+    WhereExpression whereExpression = new WhereExpression();
 
     _applyFilter(whereExpression, spaceFilter);
 
@@ -299,7 +209,7 @@ public class SpaceStorage extends AbstractStorage {
     // TODO : JCR query
 
     QueryBuilder<SpaceEntity> builder = getSession().createQueryBuilder(SpaceEntity.class);
-    whereExpression.clear();
+    WhereExpression whereExpression = new WhereExpression();
 
     if (spaceFilter != null) {
       _applyFilter(whereExpression, spaceFilter);
@@ -332,9 +242,9 @@ public class SpaceStorage extends AbstractStorage {
     // TODO : JCR query
 
     QueryBuilder<SpaceEntity> builder = getSession().createQueryBuilder(SpaceEntity.class);
-    whereExpression.clear();
+    WhereExpression whereExpression = new WhereExpression();
 
-    if (spaceFilter != null) {
+    if (_validateFilter(spaceFilter)) {
       _applyFilter(whereExpression, spaceFilter);
       whereExpression.and();
     }
@@ -356,9 +266,9 @@ public class SpaceStorage extends AbstractStorage {
     // TODO : JCR query
 
     QueryBuilder<SpaceEntity> builder = getSession().createQueryBuilder(SpaceEntity.class);
-    whereExpression.clear();
+    WhereExpression whereExpression = new WhereExpression();
 
-    if (spaceFilter != null) {
+    if (_validateFilter(spaceFilter)) {
       _applyFilter(whereExpression, spaceFilter);
       whereExpression.and();
     }
@@ -375,11 +285,11 @@ public class SpaceStorage extends AbstractStorage {
   private Query<SpaceEntity> _getInvitedSpacesFilterQuery(String userId, SpaceFilter spaceFilter) {
 
     // TODO : JCR query
-
+    
     QueryBuilder<SpaceEntity> builder = getSession().createQueryBuilder(SpaceEntity.class);
-    whereExpression.clear();
+    WhereExpression whereExpression = new WhereExpression();
 
-    if (spaceFilter != null) {
+    if (_validateFilter(spaceFilter)) {
       _applyFilter(whereExpression, spaceFilter);
       whereExpression.and();
     }
@@ -398,9 +308,9 @@ public class SpaceStorage extends AbstractStorage {
     // TODO : JCR query
 
     QueryBuilder<SpaceEntity> builder = getSession().createQueryBuilder(SpaceEntity.class);
-    whereExpression.clear();
+    WhereExpression whereExpression = new WhereExpression();
 
-    if (spaceFilter != null) {
+    if (_validateFilter(spaceFilter)) {
       _applyFilter(whereExpression, spaceFilter);
       whereExpression.and();
     }
@@ -484,7 +394,7 @@ public class SpaceStorage extends AbstractStorage {
     Space space = null;
 
     QueryBuilder<SpaceEntity> builder = getSession().createQueryBuilder(SpaceEntity.class);
-    whereExpression.clear();
+    WhereExpression whereExpression = new WhereExpression();
 
     whereExpression.equals(SpaceEntity.displayName, spaceDisplayName);
 
@@ -541,12 +451,15 @@ public class SpaceStorage extends AbstractStorage {
 
   public List<Space> getMemberSpaces(String userId, long offset, long limit) throws SpaceStorageException {
 
+    // TODO : manage offset
+
     List<Space> spaces = new ArrayList<Space>();
 
     try {
 
       int i = 0;
-      Collection<SpaceRef> spaceEntities = _findById(IdentityEntity.class, userId).getSpaces().getRefs().values();
+      IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
+      Collection<SpaceRef> spaceEntities = identityEntity.getSpaces().getRefs().values();
 
       if (spaceEntities != null) {
         for (SpaceRef spaceRef : spaceEntities) {
@@ -573,7 +486,7 @@ public class SpaceStorage extends AbstractStorage {
 
     try {
 
-      IdentityEntity identityEntity = _findById(IdentityEntity.class, userId);
+      IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
 
       List<Space> spaces = new ArrayList<Space>();
       for (SpaceRef space : identityEntity.getSpaces().getRefs().values()) {
@@ -596,7 +509,12 @@ public class SpaceStorage extends AbstractStorage {
   }
 
   public int getMemberSpacesCount(String userId) throws SpaceStorageException {
-    return 0;
+    try {
+       return identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId).getSpaces().getRefs().size();
+    }
+    catch (NodeNotFoundException e){
+       return 0;
+    }
   }
 
   public List<Space> getMemberSpacesByFilter(String userId, SpaceFilter spaceFilter, long offset, long limit) {
@@ -628,7 +546,9 @@ public class SpaceStorage extends AbstractStorage {
     try {
 
       int i = 0;
-      Collection<SpaceRef> spaceEntities = _findById(IdentityEntity.class, userId).getPendingSpaces().getRefs().values();
+
+      IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
+      Collection<SpaceRef> spaceEntities = identityEntity.getPendingSpaces().getRefs().values();
 
       if (spaceEntities != null) {
         for (SpaceRef spaceRef : spaceEntities) {
@@ -656,7 +576,10 @@ public class SpaceStorage extends AbstractStorage {
     List<Space> spaces = new ArrayList<Space>();
 
     try {
-      for (SpaceRef ref : _findById(IdentityEntity.class, userId).getPendingSpaces().getRefs().values()) {
+      IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
+      Collection<SpaceRef> spaceEntities = identityEntity.getPendingSpaces().getRefs().values();
+
+      for (SpaceRef ref : spaceEntities) {
 
         Space space = new Space();
         _fillEntityFormSpace(space, ref.getSpaceRef());
@@ -676,7 +599,9 @@ public class SpaceStorage extends AbstractStorage {
 
   public int getPendingSpacesCount(String userId) throws SpaceStorageException {
     try {
-      return _findById(IdentityEntity.class, userId).getPendingSpaces().getRefs().size();
+      IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
+      Collection<SpaceRef> spaceEntities = identityEntity.getPendingSpaces().getRefs().values();
+      return spaceEntities.size();
     }
     catch (NodeNotFoundException e) {
       return 0;
@@ -709,7 +634,10 @@ public class SpaceStorage extends AbstractStorage {
     List<Space> spaces = new ArrayList<Space>();
 
     try {
-      for (SpaceRef ref : _findById(IdentityEntity.class, userId).getInvitedSpaces().getRefs().values()) {
+      IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
+      Collection<SpaceRef> spaceEntities = identityEntity.getInvitedSpaces().getRefs().values();
+
+      for (SpaceRef ref : spaceEntities) {
 
         Space space = new Space();
         _fillEntityFormSpace(space, ref.getSpaceRef());
@@ -729,7 +657,8 @@ public class SpaceStorage extends AbstractStorage {
     try {
 
       int i = 0;
-      Collection<SpaceRef> spaceEntities = _findById(IdentityEntity.class, userId).getInvitedSpaces().getRefs().values();
+      IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
+      Collection<SpaceRef> spaceEntities = identityEntity.getInvitedSpaces().getRefs().values();
 
       if (spaceEntities != null) {
         for (SpaceRef spaceRef : spaceEntities) {
@@ -755,7 +684,9 @@ public class SpaceStorage extends AbstractStorage {
   public int getInvitedSpacesCount(String userId) throws SpaceStorageException {
 
     try {
-      return _findById(IdentityEntity.class, userId).getInvitedSpaces().getRefs().size();
+      IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
+      Collection<SpaceRef> spaceEntities = identityEntity.getInvitedSpaces().getRefs().values();
+      return spaceEntities.size();
     }
     catch (NodeNotFoundException e) {
       return 0;
@@ -764,7 +695,13 @@ public class SpaceStorage extends AbstractStorage {
   }
 
   public int getInvitedSpacesByFilterCount(String userId, SpaceFilter spaceFilter) {
-    return _getInvitedSpacesFilterQuery(userId, spaceFilter).objects().size();
+
+    if (_validateFilter(spaceFilter)) {
+      return _getInvitedSpacesFilterQuery(userId, spaceFilter).objects().size();
+    }
+    else {
+      return 0;
+    }
   }
 
   public List<Space> getInvitedSpacesByFilter(String userId, SpaceFilter spaceFilter, long offset, long limit) {
@@ -791,7 +728,7 @@ public class SpaceStorage extends AbstractStorage {
   public List<Space> getPublicSpacesByFilter(String userId, SpaceFilter spaceFilter, long offset, long limit) {
 
     try {
-      _findById(IdentityEntity.class, userId);
+      identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
     }
     catch (NodeNotFoundException e) {
       userId = null;
@@ -817,7 +754,12 @@ public class SpaceStorage extends AbstractStorage {
   }
 
   public int getPublicSpacesByFilterCount(String userId, SpaceFilter spaceFilter) {
-    return _getPublicSpacesQuery(userId, spaceFilter).objects().size();
+    if (_validateFilter(spaceFilter)) {
+      return _getPublicSpacesQuery(userId, spaceFilter).objects().size();
+    }
+    else {
+      return 0;
+    }
   }
 
   public List<Space> getPublicSpaces(String userId) throws SpaceStorageException {
@@ -904,13 +846,6 @@ public class SpaceStorage extends AbstractStorage {
 
   public List<Space> getAccessibleSpacesByFilter(String userId, SpaceFilter spaceFilter, long offset, long limit) {
 
-    try {
-      _findById(IdentityEntity.class, userId);
-    }
-    catch (NodeNotFoundException e) {
-      return new ArrayList<Space>();
-    }
-
     List<Space> spaces = new ArrayList<Space>();
 
     //
@@ -932,7 +867,8 @@ public class SpaceStorage extends AbstractStorage {
 
   public int getEditableSpacesCount(String userId) throws SpaceStorageException {
     try {
-      return _findById(IdentityEntity.class, userId).getManagerSpaces().getRefs().size();
+      IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
+      return identityEntity.getManagerSpaces().getRefs().size();
     }
     catch (NodeNotFoundException e) {
       return 0;
@@ -944,13 +880,6 @@ public class SpaceStorage extends AbstractStorage {
   }
 
   public List<Space> getEditableSpacesByFilter(String userId, SpaceFilter spaceFilter, long offset, long limit) {
-
-    try {
-      _findById(IdentityEntity.class, userId);
-    }
-    catch (NodeNotFoundException e) {
-      userId = null;
-    }
 
     List<Space> spaces = new ArrayList<Space>();
 
@@ -969,12 +898,14 @@ public class SpaceStorage extends AbstractStorage {
 
   public List<Space> getEditableSpaces(String userId, long offset, long limit) throws SpaceStorageException {
 
+    // TODO : manage offset
     List<Space> spaces = new ArrayList<Space>();
 
     try {
 
       int i = 0;
-      Collection<SpaceRef> spaceEntities = _findById(IdentityEntity.class, userId).getManagerSpaces().getRefs().values();
+      IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
+      Collection<SpaceRef> spaceEntities = identityEntity.getManagerSpaces().getRefs().values();
 
       if (spaceEntities != null) {
         for (SpaceRef spaceRef : spaceEntities) {
@@ -1003,7 +934,8 @@ public class SpaceStorage extends AbstractStorage {
 
     try {
 
-      Collection<SpaceRef> spaceEntities = _findById(IdentityEntity.class, userId).getManagerSpaces().getRefs().values();
+      IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
+      Collection<SpaceRef> spaceEntities = identityEntity.getManagerSpaces().getRefs().values();
 
       if (spaceEntities != null) {
         for (SpaceRef spaceRef : spaceEntities) {
@@ -1148,7 +1080,7 @@ public class SpaceStorage extends AbstractStorage {
     // TODO : JCR query
 
     QueryBuilder<SpaceEntity> builder = getSession().createQueryBuilder(SpaceEntity.class);
-    whereExpression.clear();
+    WhereExpression whereExpression = new WhereExpression();
 
     builder.where(whereExpression.equals(SpaceEntity.groupId, groupId).toString());
 

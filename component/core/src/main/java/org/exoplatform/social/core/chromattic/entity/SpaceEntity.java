@@ -86,64 +86,64 @@ public abstract class SpaceEntity {
   public abstract void setURL(String url);
 
   @Property(name = "soc:membersId")
-  public abstract List<String> getMembersId();
-  public abstract void setMembersId(List<String> membersId);
+  public abstract String[] getMembersId();
+  public abstract void setMembersId(String[] membersId);
   public static final PropertyLiteralExpression membersId = new PropertyLiteralExpression(String.class, "soc:membersId");
 
   @Property(name = "soc:pendingMembersId")
-  public abstract List<String> getPendingMembersId();
-  public abstract void setPendingMembersId(List<String> pendingMembersId);
+  public abstract String[] getPendingMembersId();
+  public abstract void setPendingMembersId(String[] pendingMembersId);
   public static final PropertyLiteralExpression pendingMembersId = new PropertyLiteralExpression(String.class, "soc:pendingMembersId");
 
   @Property(name = "soc:invitedMembersId")
-  public abstract List<String> getInvitedMembersId();
-  public abstract void setInvitedMembersId(List<String> invitedMembersId);
+  public abstract String[] getInvitedMembersId();
+  public abstract void setInvitedMembersId(String[] invitedMembersId);
   public static final PropertyLiteralExpression invitedMembersId = new PropertyLiteralExpression(String.class, "soc:invitedMembersId");
 
   @Property(name = "soc:managerMembersId")
-  public abstract List<String> getManagerMembersId();
-  public abstract void setManagerMembersId(List<String> managerMembersId);
+  public abstract String[] getManagerMembersId();
+  public abstract void setManagerMembersId(String[] managerMembersId);
   public static final PropertyLiteralExpression managerMembersId = new PropertyLiteralExpression(String.class, "soc:managerMembersId");
 
-  public List<String> safeGetMembersId() {
+  public String[] safeGetMembersId() {
 
-    List<String> ids = getMembersId();
+    String[] ids = getMembersId();
 
     if (ids == null) {
-      return new ArrayList<String>();
+      return new String[]{};
     }
 
     return ids;
   }
 
-  public List<String> safeGetManagerMembersId() {
+  public String[] safeGetManagerMembersId() {
 
-    List<String> ids = getManagerMembersId();
+    String[] ids = getManagerMembersId();
 
     if (ids == null) {
-      return new ArrayList<String>();
+      return new String[]{};
     }
 
     return ids;
   }
 
-  public List<String> safeGetPendingMembersId() {
+  public String[] safeGetPendingMembersId() {
 
-    List<String> ids = getPendingMembersId();
+    String[] ids = getPendingMembersId();
 
     if (ids == null) {
-      return new ArrayList<String>();
+      return new String[]{};
     }
 
     return ids;
   }
 
-  public List<String> safeGetInvitedMembersId() {
+  public String[] safeGetInvitedMembersId() {
 
-    List<String> ids = getInvitedMembersId();
+    String[] ids = getInvitedMembersId();
 
     if (ids == null) {
-      return new ArrayList<String>();
+      return new String[]{};
     }
 
     return ids;

@@ -40,6 +40,7 @@ import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.service.LinkProvider;
 import org.exoplatform.social.core.storage.exception.NodeNotFoundException;
 import org.exoplatform.social.core.storage.query.Order;
+import org.exoplatform.social.core.storage.query.WhereExpression;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -378,7 +379,7 @@ public class ActivityStorage extends AbstractStorage {
     }
 
     QueryBuilder<ActivityEntity> builder = getSession().createQueryBuilder(ActivityEntity.class);
-    whereExpression.clear();
+    WhereExpression whereExpression = new WhereExpression();
 
     boolean first = true;
 

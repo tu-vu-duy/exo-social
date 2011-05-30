@@ -31,9 +31,7 @@ import org.exoplatform.social.core.storage.exception.NodeNotFoundException;
 import org.exoplatform.social.core.storage.query.QueryFunction;
 import org.exoplatform.social.core.storage.query.WhereExpression;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
@@ -89,7 +87,7 @@ public class SpaceStorage extends AbstractStorage {
 
   }
 
-  private enum RefType {
+   private enum RefType {
     MEMBER() {
       @Override
       public SpaceListEntity refsOf(IdentityEntity identityEntity) {
@@ -114,24 +112,79 @@ public class SpaceStorage extends AbstractStorage {
     public abstract SpaceListEntity refsOf(IdentityEntity identityEntity);
   }
 
+  private class UpdateContext {
+    private String[] added;
+    private String[] removed;
+
+    private UpdateContext(String[] added, String[] removed) {
+      this.added = added;
+      this.removed = removed;
+    }
+
+    public String[] getAdded() {
+      return added;
+    }
+
+    public String[] getRemoved() {
+      return removed;
+    }
+  }
+
+  private String[] _sub(String[] l1, String[] l2) {
+
+    if (l1 == null) {
+      return new String[]{};
+    }
+
+    if (l2 == null) {
+      return l1;
+    }
+
+    List<String> l = new ArrayList(Arrays.asList(l1));
+    l.removeAll(Arrays.asList(l2));
+    return l.toArray(new String[]{});
+  }
+
   private void _createRefs(SpaceEntity spaceEntity, Space space) throws NodeNotFoundException {
 
-    manageRefList(space.getMembers(), spaceEntity, RefType.MEMBER);
-    manageRefList(space.getManagers(), spaceEntity, RefType.MANAGER);
-    manageRefList(space.getInvitedUsers(), spaceEntity, RefType.INVITED);
-    manageRefList(space.getPendingUsers(), spaceEntity, RefType.PENDING);
+    String[] removedMembers = _sub(spaceEntity.getMembersId(), space.getMembers());
+    String[] removedManagers = _sub(spaceEntity.getManagerMembersId(), space.getManagers());
+    String[] removedInvited = _sub(spaceEntity.getInvitedMembersId(), space.getInvitedUsers());
+    String[] removedPending = _sub(spaceEntity.getPendingMembersId(), space.getPendingUsers());
+
+    String[] addedMembers = _sub(space.getMembers(), spaceEntity.getMembersId());
+    String[] addedManagers = _sub(space.getManagers(), spaceEntity.getManagerMembersId());
+    String[] addedInvited = _sub(space.getInvitedUsers(), spaceEntity.getInvitedMembersId());
+    String[] addedPending = _sub(space.getPendingUsers(), spaceEntity.getPendingMembersId());
+
+    _manageRefList(new UpdateContext(addedMembers, removedMembers), spaceEntity, RefType.MEMBER);
+    _manageRefList(new UpdateContext(addedManagers, removedManagers), spaceEntity, RefType.MANAGER);
+    _manageRefList(new UpdateContext(addedInvited, removedInvited), spaceEntity, RefType.INVITED);
+    _manageRefList(new UpdateContext(addedPending, removedPending), spaceEntity, RefType.PENDING);
 
   }
 
-  private void manageRefList(String[] referencedUser, SpaceEntity spaceEntity, RefType type) {
+  private void _manageRefList(UpdateContext context, SpaceEntity spaceEntity, RefType type) {
 
-    if (referencedUser != null) {
-      for (String userName : referencedUser) {
+    if (context.getAdded() != null) {
+      for (String userName : context.getAdded()) {
         try {
           IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userName);
           SpaceListEntity listRef = type.refsOf(identityEntity);
           SpaceRef ref = listRef.getRef(spaceEntity.getName());
           ref.setSpaceRef(spaceEntity);
+        }
+        catch (NodeNotFoundException e) {
+          // TODO : manage
+        }
+      }
+
+      for (String userName : context.getRemoved()) {
+        try {
+          IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userName);
+          SpaceListEntity listRef = type.refsOf(identityEntity);
+          SpaceRef ref = listRef.getRef(spaceEntity.getName());
+          getSession().remove(ref);
         }
         catch (NodeNotFoundException e) {
           // TODO : manage
@@ -422,8 +475,8 @@ public class SpaceStorage extends AbstractStorage {
       }
 
       //
-      _fillEntityFormSpace(space, entity);
       _createRefs(entity, space);
+      _fillEntityFormSpace(space, entity);
 
       //
       getSession().save();

@@ -16,6 +16,9 @@
  */
 package org.exoplatform.social.common.lifecycle;
 
+import org.exoplatform.commons.chromattic.*;
+import org.exoplatform.container.PortalContainer;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -68,14 +71,34 @@ public abstract class AbstractLifeCycle<T extends LifeCycleListener<E>, E extend
       ecs = new ExecutorCompletionService<E>(executor);
     }
 
-    for (final T listener : listeners) {
-      ecs.submit(new Callable<E>() {
-        public E call() throws Exception {
-          dispatchEvent(listener, event);
-          return event;
-        }
-      });
-    }
+    //
+    PortalContainer container = PortalContainer.getInstance();
+    final ChromatticManager manager = (ChromatticManager) container.getComponentInstanceOfType(ChromatticManager.class);
+    ChromatticLifeCycle lifeCycle = manager.getLifeCycle("soc");
+    SessionContext ctx = lifeCycle.getContext();
+    ctx.addSynchronizationListener(new SynchronizationListener()
+    {
+       public void beforeSynchronization()
+       {
+       }
+       public void afterSynchronization(SynchronizationStatus status)
+       {
+          if (status == SynchronizationStatus.SAVED)
+          {
+             manager.beginRequest();
+             for (final T listener : listeners) {
+                 ecs.submit(new Callable<E>() {
+                    public E call() throws Exception {
+                       dispatchEvent(listener, event);
+                       return event;
+                    }
+                 });
+              }
+             manager.endRequest(true);
+          }
+       }
+    });
+
   }
 
   protected abstract void dispatchEvent(final T listener, final E event);

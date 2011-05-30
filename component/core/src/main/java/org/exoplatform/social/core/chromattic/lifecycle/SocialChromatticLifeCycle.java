@@ -19,9 +19,10 @@
 
 package org.exoplatform.social.core.chromattic.lifecycle;
 
+import org.chromattic.api.Chromattic;
 import org.chromattic.api.ChromatticSession;
-import org.exoplatform.commons.chromattic.ChromatticLifeCycle;
-import org.exoplatform.commons.chromattic.SessionContext;
+import org.exoplatform.commons.chromattic.*;
+import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.xml.InitParams;
 
 /**
@@ -30,12 +31,15 @@ import org.exoplatform.container.xml.InitParams;
  */
 public class SocialChromatticLifeCycle extends ChromatticLifeCycle {
 
-  private static ChromatticSession session;
+  private static final ThreadLocal<ChromatticSession> session = new ThreadLocal<ChromatticSession>();
 
-  public static ChromatticSession getSession() {
-
-    return session;
-    
+  public ChromatticSession getSession() {
+    if (session.get() != null) {
+      return session.get();
+    }
+    else {
+      return getChromattic().openSession();
+    }
   }
 
   public SocialChromatticLifeCycle(final InitParams params) {
@@ -46,17 +50,17 @@ public class SocialChromatticLifeCycle extends ChromatticLifeCycle {
 
   @Override
   protected void onOpenSession(final SessionContext context) {
-
-    session = context.getSession();
+    session.set(context.getSession());
     super.onOpenSession(context);
 
   }
 
   @Override
   protected void onCloseSession(final SessionContext context) {
-
+     
     super.onCloseSession(context);
-    session = null;
+    session.get().close();
+    session.remove();
 
   }
 }

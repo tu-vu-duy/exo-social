@@ -39,10 +39,10 @@ import java.util.Locale;
  */
 public abstract class AbstractStorage {
 
+  //
   protected final PortalContainer container;
   protected final ChromatticManager manager;
-  protected final ChromatticLifeCycle lifeCycle;
-  protected final Chromattic chromattic;
+  protected final SocialChromatticLifeCycle lifeCycle;
 
   //
   protected String[] MONTH_NAME = new DateFormatSymbols(Locale.ENGLISH).getMonths();
@@ -70,16 +70,12 @@ public abstract class AbstractStorage {
 
     this.container = PortalContainer.getInstance();
     this.manager = (ChromatticManager) container.getComponentInstanceOfType(ChromatticManager.class);
-    this.lifeCycle = manager.getLifeCycle("soc");
-    this.chromattic = lifeCycle.getChromattic();
+    this.lifeCycle = (SocialChromatticLifeCycle) manager.getLifeCycle("soc");
 
   }
 
   protected ChromatticSession getSession() {
-    if (SocialChromatticLifeCycle.getSession() != null) {
-      return SocialChromatticLifeCycle.getSession();
-    }
-    return chromattic.openSession();
+    return lifeCycle.getSession();
   }
 
   private <T> T getRoot(String nodetypeName, Class<T> t) {

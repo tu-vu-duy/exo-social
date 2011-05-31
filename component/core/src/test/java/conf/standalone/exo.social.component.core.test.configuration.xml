@@ -95,6 +95,21 @@
   </component>
 
   <component>
+    <key>org.exoplatform.social.common.lifecycle.LifeCycleCompletionService</key>
+    <type>org.exoplatform.social.common.lifecycle.LifeCycleCompletionService</type>
+    <init-params>
+      <value-param>
+        <name>thread-number</name>
+        <value>1</value>
+      </value-param>
+      <value-param>
+        <name>async-execution</name>
+        <value>true</value>
+      </value-param>
+    </init-params>
+  </component>
+
+  <component>
     <key>org.exoplatform.social.core.storage.ActivityStorage</key>
     <type>org.exoplatform.social.core.storage.ActivityStorage</type>
   </component>
@@ -438,7 +453,7 @@
     <component-plugin>
       <name>chromattic</name>
       <set-method>addLifeCycle</set-method>
-      <type>org.exoplatform.social.core.chromattic.lifecycle.SocialChromatticLifeCycle</type>
+      <type>org.exoplatform.social.common.lifecycle.SocialChromatticLifeCycle</type>
       <init-params>
         <value-param>
           <name>domain-name</name>

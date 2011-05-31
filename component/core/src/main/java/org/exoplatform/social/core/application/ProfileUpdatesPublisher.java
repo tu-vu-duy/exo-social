@@ -26,6 +26,7 @@ import org.exoplatform.social.core.manager.IdentityManager;
 import org.exoplatform.social.core.profile.ProfileLifeCycleEvent;
 import org.exoplatform.social.core.profile.ProfileListenerPlugin;
 
+import java.util.concurrent.Callable;
 
 /**
  * Publish updates onto the user's activity stream when his profile is updated.
@@ -40,7 +41,6 @@ public class ProfileUpdatesPublisher extends ProfileListenerPlugin {
 
   public ProfileUpdatesPublisher(InitParams params, ActivityManager activityManager, IdentityManager identityManager) {
     this.activityManager = activityManager;
-    this.identityManager = identityManager;
   }
 
   @Override

@@ -39,11 +39,26 @@ import java.util.concurrent.Executors;
  */
 public abstract class AbstractLifeCycle<T extends LifeCycleListener<E>, E extends LifeCycleEvent<?,?>> {
 
-  private Set<T>      listeners = new HashSet<T>();
+  protected Set<T>      listeners = new HashSet<T>();
 
-  protected ExecutorService                        executor  = Executors.newSingleThreadExecutor();
+  protected final PortalContainer container;
 
-  protected ExecutorCompletionService<E> ecs;
+  protected LifeCycleCompletionService completionService;
+
+  protected ChromatticManager manager;
+
+  protected ChromatticLifeCycle lifeCycle;
+
+  protected AbstractLifeCycle() {
+
+    this.container = PortalContainer.getInstance();
+    this.completionService = (LifeCycleCompletionService) container.getComponentInstanceOfType(LifeCycleCompletionService.class);
+    this.manager = (ChromatticManager) container.getComponentInstanceOfType(ChromatticManager.class);
+
+    if (manager != null) {
+      this.lifeCycle = manager.getLifeCycle("soc");
+    }
+  }
 
   /**
    * {@inheritDoc}
@@ -67,38 +82,50 @@ public abstract class AbstractLifeCycle<T extends LifeCycleListener<E>, E extend
    * @param event
    */
   protected void broadcast(final E event) {
-    if (ecs == null) {
-      ecs = new ExecutorCompletionService<E>(executor);
-    }
 
     //
-    PortalContainer container = PortalContainer.getInstance();
-    final ChromatticManager manager = (ChromatticManager) container.getComponentInstanceOfType(ChromatticManager.class);
-    ChromatticLifeCycle lifeCycle = manager.getLifeCycle("soc");
     SessionContext ctx = lifeCycle.getContext();
-    ctx.addSynchronizationListener(new SynchronizationListener()
-    {
-       public void beforeSynchronization()
-       {
-       }
-       public void afterSynchronization(SynchronizationStatus status)
-       {
-          if (status == SynchronizationStatus.SAVED)
-          {
-             manager.beginRequest();
-             for (final T listener : listeners) {
-                 ecs.submit(new Callable<E>() {
-                    public E call() throws Exception {
-                       dispatchEvent(listener, event);
-                       return event;
-                    }
-                 });
-              }
-             manager.endRequest(true);
-          }
-       }
-    });
+    ctx.addSynchronizationListener(new SynchronizationListener() {
 
+      public void beforeSynchronization() {}
+
+      public void afterSynchronization(SynchronizationStatus status) {
+        if (status == SynchronizationStatus.SAVED) {
+
+          addTasks(event);
+
+        }
+      }
+
+    });
+    
+  }
+
+  protected void addTasks(final E event) {
+    for (final T listener : listeners) {
+      completionService.addTask(new Callable<E>() {
+        public E call() throws Exception {
+          try {
+            begin();
+            dispatchEvent(listener, event);
+          }
+          finally {
+            end();
+          }
+
+          return event;
+        }
+      });
+    }
+  }
+
+  protected void begin() {
+    manager.beginRequest();
+    lifeCycle.getChromattic().openSession();
+  }
+
+  protected void end() {
+    manager.endRequest(true);
   }
 
   protected abstract void dispatchEvent(final T listener, final E event);

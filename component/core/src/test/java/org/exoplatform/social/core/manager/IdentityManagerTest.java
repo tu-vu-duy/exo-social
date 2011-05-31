@@ -22,8 +22,8 @@ import java.util.List;
 import org.exoplatform.commons.utils.ListAccess;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.exoplatform.social.common.lifecycle.LifeCycleCompletionService;
 import org.exoplatform.social.core.activity.model.ExoSocialActivity;
-import org.exoplatform.social.core.identity.model.GlobalId;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.model.Profile;
 import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
@@ -46,12 +46,19 @@ public class IdentityManagerTest extends AbstractCoreTest {
 
   private ActivityManager activityManager;
 
+  private LifeCycleCompletionService completionLifeCYcleService;
+
   public void setUp() throws Exception {
     super.setUp();
     identityManager = (IdentityManager) getContainer().getComponentInstanceOfType(IdentityManager.class);
     assertNotNull(identityManager);
+
     activityManager = (ActivityManager) getContainer().getComponentInstanceOfType(ActivityManager.class);
     assertNotNull(activityManager);
+
+    completionLifeCYcleService = (LifeCycleCompletionService) getContainer().getComponentInstanceOfType(LifeCycleCompletionService.class);
+    assertNotNull(completionLifeCYcleService);
+
     tearDownIdentityList = new ArrayList<Identity>();
   }
 
@@ -472,7 +479,10 @@ public class IdentityManagerTest extends AbstractCoreTest {
     Identity identityUpdated = identityManager.getOrCreateIdentity(rootIdentity.getProviderId(), rootIdentity.getRemoteId(), false);
     assertEquals("CEO", identityUpdated.getProfile().getProperty(Profile.POSITION));
 
-    Thread.sleep(3000);
+    end();
+    completionLifeCYcleService.waitCompletionFinished();
+    begin();
+    
     List<ExoSocialActivity> rootActivityList = activityManager.getActivities(rootIdentity);
 
     tearDownIdentityList.add(rootIdentity);
@@ -706,13 +716,12 @@ public class IdentityManagerTest extends AbstractCoreTest {
     // an activity for avatar created, clean it up here
 
     ActivityManager activityManager = (ActivityManager) getContainer().getComponentInstanceOfType(ActivityManager.class);
-    // Wait 3 secs to have activity stored
-    try {
-      Thread.sleep(3000);
-      List<ExoSocialActivity> johnActivityList = activityManager.getActivities(gotJohnIdentity, 0, 10);
-      assertEquals("johnActivityList.size() must be 1", 1, johnActivityList.size());
-    } catch (InterruptedException e) {
-      LOG.error(e.getMessage(), e);
-    }
+
+    end();
+    completionLifeCYcleService.waitCompletionFinished();
+    begin();
+    
+    List<ExoSocialActivity> johnActivityList = activityManager.getActivities(gotJohnIdentity, 0, 10);
+    assertEquals("johnActivityList.size() must be 1", 1, johnActivityList.size());
   }
 }

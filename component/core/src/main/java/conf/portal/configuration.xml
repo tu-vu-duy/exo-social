@@ -41,6 +41,7 @@
     <key>org.exoplatform.social.core.storage.SpaceStorage</key>
     <type>org.exoplatform.social.core.storage.SpaceStorage</type>
   </component>
+
   <!--
   <component>
     <key>org.exoplatform.social.core.service.LinkProvider</key>
@@ -354,7 +355,7 @@
     <component-plugin>
       <name>chromattic</name>
       <set-method>addLifeCycle</set-method>
-      <type>org.exoplatform.social.core.chromattic.lifecycle.SocialChromatticLifeCycle</type>
+      <type>org.exoplatform.social.common.lifecycle.SocialChromatticLifeCycle</type>
       <init-params>
         <value-param>
           <name>domain-name</name>
@@ -395,6 +396,21 @@
       </init-params>
     </component-plugin>
   </external-component-plugins>
+
+  <component>
+    <key>org.exoplatform.social.common.lifecycle.LifeCycleCompletionService</key>
+    <type>org.exoplatform.social.common.lifecycle.LifeCycleCompletionService</type>
+    <init-params>
+      <value-param>
+        <name>thread-number</name>
+        <value>10</value>
+      </value-param>
+      <value-param>
+        <name>async-execution</name>
+        <value>true</value>
+      </value-param>
+    </init-params>
+  </component>
 
   <external-component-plugins>
    <target-component>org.exoplatform.services.organization.OrganizationService</target-component>

@@ -1106,7 +1106,7 @@ public class SpaceStorage extends AbstractStorage {
 
     }
     catch (NodeNotFoundException e) {
-      throw new SpaceStorageException(SpaceStorageException.Type.FAILED_TO_GET_SPACE_BY_ID, e.getMessage(), e);
+      return null;
     }
 
   }

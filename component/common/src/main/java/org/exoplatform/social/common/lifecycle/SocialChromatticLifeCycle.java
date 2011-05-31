@@ -17,12 +17,10 @@
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
 
-package org.exoplatform.social.core.chromattic.lifecycle;
+package org.exoplatform.social.common.lifecycle;
 
-import org.chromattic.api.Chromattic;
 import org.chromattic.api.ChromatticSession;
 import org.exoplatform.commons.chromattic.*;
-import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.xml.InitParams;
 
 /**

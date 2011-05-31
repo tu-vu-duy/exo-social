@@ -19,16 +19,13 @@
 
 package org.exoplatform.social.core.storage;
 
-import org.chromattic.api.Chromattic;
 import org.chromattic.api.ChromatticSession;
-import org.exoplatform.commons.chromattic.ChromatticLifeCycle;
 import org.exoplatform.commons.chromattic.ChromatticManager;
 import org.exoplatform.container.PortalContainer;
+import org.exoplatform.social.common.lifecycle.SocialChromatticLifeCycle;
 import org.exoplatform.social.core.chromattic.entity.ProviderRootEntity;
 import org.exoplatform.social.core.chromattic.entity.SpaceRootEntity;
-import org.exoplatform.social.core.chromattic.lifecycle.SocialChromatticLifeCycle;
 import org.exoplatform.social.core.storage.exception.NodeNotFoundException;
-import org.exoplatform.social.core.storage.query.WhereExpression;
 
 import java.text.DateFormatSymbols;
 import java.util.Locale;

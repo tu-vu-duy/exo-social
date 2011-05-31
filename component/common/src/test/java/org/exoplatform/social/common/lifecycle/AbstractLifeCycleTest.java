@@ -20,16 +20,53 @@ package org.exoplatform.social.common.lifecycle;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.TimeUnit;
 
 import junit.framework.TestCase;
+import org.exoplatform.component.test.AbstractKernelTest;
+import org.exoplatform.component.test.ConfigurationUnit;
+import org.exoplatform.component.test.ConfiguredBy;
+import org.exoplatform.component.test.ContainerScope;
+import org.exoplatform.container.xml.InitParams;
+import org.exoplatform.container.xml.ValueParam;
 
-public class AbstractLifeCycleTest extends TestCase {
+import javax.faces.lifecycle.Lifecycle;
 
+public class AbstractLifeCycleTest extends AbstractKernelTest {
+
+  private LifeCycleCompletionService completionService;
+
+  @Override
+  public void setUp() throws Exception {
+
+    super.setUp();
+
+    InitParams params = new InitParams();
+
+    params.addParameter(createParam("thread-number", "10"));
+    params.addParameter(createParam("async-execution", "true"));
+
+    completionService = new LifeCycleCompletionService(params);
+
+  }
+
+  @Override
+  public void tearDown() throws Exception {
+    super.tearDown();
+  }
+
+  private ValueParam createParam(String key, String value) {
+
+    ValueParam valueParam = new ValueParam();
+
+    valueParam.setName(key);
+    valueParam.setValue(value);
+
+    return valueParam;
+  }
 
   public void testSimpleBroadcast() {
 
-    AwaitingLifeCycle lifecycle = new AwaitingLifeCycle();
+    AwaitingLifeCycle lifecycle = new AwaitingLifeCycle(completionService);
 
     MockListener capture = new MockListener();
     lifecycle.addListener(capture);
@@ -39,7 +76,7 @@ public class AbstractLifeCycleTest extends TestCase {
     lifecycle.event1(null, "foo");
     lifecycle.event1(null, "bar");
 
-    lifecycle.await(150);  // wait for the executor to finish
+    completionService.waitCompletionFinished();
 
     assertTrue(capture.hasEvent("bar"));
     assertTrue(capture.hasEvent("foo"));
@@ -51,7 +88,7 @@ public class AbstractLifeCycleTest extends TestCase {
 
   public void testBroadcastWithFailingListener() {
 
-    AwaitingLifeCycle lifecycle = new AwaitingLifeCycle();
+    AwaitingLifeCycle lifecycle = new AwaitingLifeCycle(completionService);
     MockListener capture = new MockListener();
     lifecycle.addListener(capture);
     MockFailingListener failing = new MockFailingListener();
@@ -62,7 +99,7 @@ public class AbstractLifeCycleTest extends TestCase {
     lifecycle.event1(null, "foo");
     lifecycle.event1(null, "bar");
 
-    lifecycle.await(100); // wait for the executor to finish
+    completionService.waitCompletionFinished();
 
     assertTrue(capture.hasEvent("bar"));
     assertTrue(capture.hasEvent("foo"));
@@ -116,20 +153,9 @@ public class AbstractLifeCycleTest extends TestCase {
    */
   class AwaitingLifeCycle extends AbstractLifeCycle<MockListener, MockEvent> {
 
-    /**
-     * Awaits until all events are dispatched
-     * @param milisconds
-     */
-    public void await(long milisconds) {
-
-        try {
-          executor.awaitTermination(milisconds, TimeUnit.MILLISECONDS);
-        } catch (Exception e) {
-          // ignore
-        }
-
+    AwaitingLifeCycle(LifeCycleCompletionService service) {
+      completionService = service;
     }
-
 
     public void event1(String source, String payload) {
       broadcast(new MockEvent(source, payload));
@@ -141,6 +167,18 @@ public class AbstractLifeCycleTest extends TestCase {
       listener.event1(event);
     }
 
+    @Override
+    protected void broadcast(final MockEvent event) {
+      addTasks(event);
+    }
+
+    @Override
+    protected void begin() {
+    }
+
+    @Override
+    protected void end() {
+    }
   }
 
 

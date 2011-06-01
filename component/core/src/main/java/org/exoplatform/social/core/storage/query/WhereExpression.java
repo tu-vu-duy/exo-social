@@ -27,6 +27,8 @@ public class WhereExpression {
 
   private final StringBuilder builder;
 
+  private int openGroup = 0;
+
   public WhereExpression() {
     builder = new StringBuilder();
   }
@@ -58,11 +60,20 @@ public class WhereExpression {
 
   public WhereExpression startGroup() {
     builder.append("(");
+    ++openGroup;
     return this;
   }
 
   public WhereExpression endGroup() {
     builder.append(") ");
+    --openGroup;
+    return this;
+  }
+
+  public WhereExpression endAllGroup() {
+    while (openGroup > 0) {
+      endGroup();
+    }
     return this;
   }
 

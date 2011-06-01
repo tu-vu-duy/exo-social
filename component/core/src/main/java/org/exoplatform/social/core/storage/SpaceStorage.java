@@ -23,6 +23,8 @@ package org.exoplatform.social.core.storage;
 import org.chromattic.api.query.Query;
 import org.chromattic.api.query.QueryBuilder;
 import org.chromattic.api.query.QueryResult;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.chromattic.entity.*;
 import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
 import org.exoplatform.social.core.space.SpaceFilter;
@@ -39,15 +41,18 @@ import java.util.*;
  */
 public class SpaceStorage extends AbstractStorage {
 
-   private final IdentityStorage identityStorage;
+  /** Logger */
+  private static final Log LOG = ExoLogger.getLogger(SpaceStorage.class);
 
-   public SpaceStorage(IdentityStorage identityStorage) {
-     this.identityStorage = identityStorage;
-   }
+  private final IdentityStorage identityStorage;
 
-   /*
-    Private
-   */
+  public SpaceStorage(IdentityStorage identityStorage) {
+   this.identityStorage = identityStorage;
+ }
+
+  /*
+   Private
+  */
   private void _fillSpaceFormEntity (SpaceEntity entity, Space space) {
 
     space.setApp(entity.getApp());
@@ -175,7 +180,7 @@ public class SpaceStorage extends AbstractStorage {
           ref.setSpaceRef(spaceEntity);
         }
         catch (NodeNotFoundException e) {
-          // TODO : manage
+          LOG.debug(e.getMessage(), e);
         }
       }
 
@@ -187,7 +192,7 @@ public class SpaceStorage extends AbstractStorage {
           getSession().remove(ref);
         }
         catch (NodeNotFoundException e) {
-          // TODO : manage
+          LOG.debug(e.getMessage(), e);
         }
       }
     }
@@ -199,7 +204,6 @@ public class SpaceStorage extends AbstractStorage {
       return false;
     }
 
-    // TODO : do it better
     if (filter.getSpaceNameSearchCondition() != null &&
         filter.getSpaceNameSearchCondition().length() != 0) {
       if (isValidInput(filter.getSpaceNameSearchCondition())) {
@@ -211,6 +215,7 @@ public class SpaceStorage extends AbstractStorage {
       return true;
     }
     return false;
+
   }
 
   public SpaceEntity _createSpace(Space space) throws SpaceStorageException {
@@ -227,6 +232,72 @@ public class SpaceStorage extends AbstractStorage {
 
     return _findById(SpaceEntity.class, space.getId());
 
+  }
+
+  private void _applyFilter(WhereExpression whereExpression, SpaceFilter spaceFilter) {
+
+    String spaceNameSearchCondition = spaceFilter.getSpaceNameSearchCondition();
+    char firstCharacterOfName = spaceFilter.getFirstCharacterOfSpaceName();
+
+    if (spaceNameSearchCondition != null && spaceNameSearchCondition.length() != 0) {
+      if (this.isValidInput(spaceNameSearchCondition)) {
+
+        spaceNameSearchCondition = this.processSearchCondition(spaceNameSearchCondition);
+
+        if (spaceNameSearchCondition.indexOf(PERCENT_STR) >= 0) {
+          whereExpression.startGroup();
+          whereExpression
+              .like(SpaceEntity.name, spaceNameSearchCondition)
+              .or()
+              .like(SpaceEntity.description, spaceNameSearchCondition);
+          whereExpression.endGroup();
+        }
+        else {
+          whereExpression.startGroup();
+          whereExpression
+              .contains(SpaceEntity.name, spaceNameSearchCondition)
+              .or()
+              .contains(SpaceEntity.description, spaceNameSearchCondition);
+          whereExpression.endGroup();
+        }
+      }
+    }
+    else if (!Character.isDigit(firstCharacterOfName)) {
+      String firstCharacterOfNameString = Character.toString(firstCharacterOfName);
+      String firstCharacterOfNameLowerCase = firstCharacterOfNameString.toLowerCase() + PERCENT_STR;
+      whereExpression
+          .like(whereExpression.callFunction(QueryFunction.LOWER, SpaceEntity.name), firstCharacterOfNameLowerCase);
+    }
+  }
+
+  private boolean isValidInput(String input) {
+    if (input == null) {
+      return false;
+    }
+    String cleanString = input.replaceAll("\\*", "");
+    cleanString = cleanString.replaceAll("\\%", "");
+    if (cleanString.length() > 0 && Character.isDigit(cleanString.charAt(0))) {
+       return false;
+    } else if (cleanString.length() == 0) {
+      return false;
+    }
+    return true;
+  }
+
+  private String processSearchCondition(String searchCondition) {
+    StringBuffer searchConditionBuffer = new StringBuffer();
+    if (searchCondition.indexOf(ASTERISK_STR) < 0 && searchCondition.indexOf(PERCENT_STR) < 0) {
+      if (searchCondition.charAt(0) != ASTERISK_CHAR) {
+        searchConditionBuffer.append(ASTERISK_STR).append(searchCondition);
+      }
+      if (searchCondition.charAt(searchCondition.length() - 1) != ASTERISK_CHAR) {
+        searchConditionBuffer.append(ASTERISK_STR);
+      }
+    } else {
+      searchCondition = searchCondition.replace(ASTERISK_STR, PERCENT_STR);
+      searchConditionBuffer.append(PERCENT_STR).append(searchCondition).append(PERCENT_STR);
+    }
+    return searchConditionBuffer.toString();
   }
 
   /*
@@ -260,30 +331,26 @@ public class SpaceStorage extends AbstractStorage {
     QueryBuilder<SpaceEntity> builder = getSession().createQueryBuilder(SpaceEntity.class);
     WhereExpression whereExpression = new WhereExpression();
 
-    if (spaceFilter != null) {
+    if (_validateFilter(spaceFilter)) {
       _applyFilter(whereExpression, spaceFilter);
-    }
-
-    // TODO : remove this crap
-
-    if (spaceFilter != null && userId != null) {
       whereExpression.and();
       whereExpression.startGroup();
     }
-    
-    if (userId != null) {
-      whereExpression
-          .equals(SpaceEntity.membersId, userId)
-          .or()
-          .equals(SpaceEntity.managerMembersId, userId);
-    }
 
-    if (spaceFilter != null && userId != null) {
-      whereExpression.endGroup();
-    }
+    whereExpression
+        .equals(SpaceEntity.membersId, userId)
+        .or()
+        .equals(SpaceEntity.managerMembersId, userId);
+
+
+    whereExpression.endAllGroup();
 
     return builder.where(whereExpression.toString()).get();
 
+  }
+
+  private Query<SpaceEntity> _getPublicSpacesQuery(String userId) {
+    return _getPublicSpacesQuery(userId, null);
   }
 
   private Query<SpaceEntity> _getPublicSpacesQuery(String userId, SpaceFilter spaceFilter) {
@@ -365,71 +432,13 @@ public class SpaceStorage extends AbstractStorage {
 
   }
 
-  private void _applyFilter(WhereExpression whereExpression, SpaceFilter spaceFilter) {
-
-    String spaceNameSearchCondition = spaceFilter.getSpaceNameSearchCondition();
-    char firstCharacterOfName = spaceFilter.getFirstCharacterOfSpaceName();
-
-    if (spaceNameSearchCondition != null && spaceNameSearchCondition.length() != 0) {
-      if (this.isValidInput(spaceNameSearchCondition)) {
-
-        spaceNameSearchCondition = this.processSearchCondition(spaceNameSearchCondition);
-
-        if (spaceNameSearchCondition.indexOf(PERCENT_STR) >= 0) {
-          whereExpression.startGroup();
-          whereExpression
-              .like(SpaceEntity.name, spaceNameSearchCondition)
-              .or()
-              .like(SpaceEntity.description, spaceNameSearchCondition);
-          whereExpression.endGroup();
-        }
-        else {
-          whereExpression.startGroup();
-          whereExpression
-              .contains(SpaceEntity.name, spaceNameSearchCondition)
-              .or()
-              .contains(SpaceEntity.description, spaceNameSearchCondition);
-          whereExpression.endGroup();
-        }
-      }
-    }
-    else if (!Character.isDigit(firstCharacterOfName)) {
-      String firstCharacterOfNameString = Character.toString(firstCharacterOfName);
-      String firstCharacterOfNameLowerCase = firstCharacterOfNameString.toLowerCase() + PERCENT_STR;
-      whereExpression
-          .like(whereExpression.callFunction(QueryFunction.LOWER, SpaceEntity.name), firstCharacterOfNameLowerCase);
-    }
+  private Query<SpaceEntity> _getSpacesByFilterQuery(SpaceFilter spaceFilter) {
+    return _getSpacesByFilterQuery(null, spaceFilter);
   }
 
-  private boolean isValidInput(String input) {
-    if (input == null) {
-      return false;
-    }
-    String cleanString = input.replaceAll("\\*", "");
-    cleanString = cleanString.replaceAll("\\%", "");
-    if (cleanString.length() > 0 && Character.isDigit(cleanString.charAt(0))) {
-       return false;
-    } else if (cleanString.length() == 0) {
-      return false;
-    }
-    return true;
-  }
-
-  private String processSearchCondition(String searchCondition) {
-    StringBuffer searchConditionBuffer = new StringBuffer();
-    if (searchCondition.indexOf(ASTERISK_STR) < 0 && searchCondition.indexOf(PERCENT_STR) < 0) {
-      if (searchCondition.charAt(0) != ASTERISK_CHAR) {
-        searchConditionBuffer.append(ASTERISK_STR).append(searchCondition);
-      }
-      if (searchCondition.charAt(searchCondition.length() - 1) != ASTERISK_CHAR) {
-        searchConditionBuffer.append(ASTERISK_STR);
-      }
-    } else {
-      searchCondition = searchCondition.replace(ASTERISK_STR, PERCENT_STR);
-      searchConditionBuffer.append(PERCENT_STR).append(searchCondition).append(PERCENT_STR);
-    }
-    return searchConditionBuffer.toString();
-  }
+  /*
+    Public.
+   */
 
   public Space getSpaceByDisplayName(String spaceDisplayName) throws SpaceStorageException {
     Space space = null;
@@ -490,9 +499,42 @@ public class SpaceStorage extends AbstractStorage {
     Member spaces
    */
 
-  public List<Space> getMemberSpaces(String userId, long offset, long limit) throws SpaceStorageException {
+  public int getMemberSpacesCount(String userId) throws SpaceStorageException {
+    try {
+       return identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId).getSpaces().getRefs().size();
+    }
+    catch (NodeNotFoundException e){
+       return 0;
+    }
+  }
 
-    // TODO : manage offset
+  public int getMemberSpacesByFilterCount(String userId, SpaceFilter spaceFilter) {
+    return _getSpacesByFilterQuery(userId, spaceFilter).objects().size();
+  }
+
+  public List<Space> getMemberSpaces(String userId) throws SpaceStorageException {
+
+    try {
+
+      IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
+
+      List<Space> spaces = new ArrayList<Space>();
+      for (SpaceRef space : identityEntity.getSpaces().getRefs().values()) {
+
+        Space newSpace = new Space();
+        _fillSpaceFormEntity(space.getSpaceRef(), newSpace);
+        spaces.add(newSpace);
+      }
+
+      return spaces;
+
+    }
+    catch (NodeNotFoundException e) {
+      throw new SpaceStorageException(SpaceStorageException.Type.FAILED_TO_GET_MEMBER_SPACES, e.getMessage(), e);
+    }
+  }
+
+  public List<Space> getMemberSpaces(String userId, long offset, long limit) throws SpaceStorageException {
 
     List<Space> spaces = new ArrayList<Space>();
 
@@ -529,41 +571,6 @@ public class SpaceStorage extends AbstractStorage {
     return spaces;
   }
 
-  public List<Space> getMemberSpaces(String userId) throws SpaceStorageException {
-
-    try {
-
-      IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
-
-      List<Space> spaces = new ArrayList<Space>();
-      for (SpaceRef space : identityEntity.getSpaces().getRefs().values()) {
-
-        Space newSpace = new Space();
-        _fillSpaceFormEntity(space.getSpaceRef(), newSpace);
-        spaces.add(newSpace);
-      }
-
-      return spaces;
-
-    }
-    catch (NodeNotFoundException e) {
-      throw new SpaceStorageException(SpaceStorageException.Type.FAILED_TO_GET_MEMBER_SPACES, e.getMessage(), e);
-    }
-  }
-
-  public int getMemberSpacesByFilterCount(String userId, SpaceFilter spaceFilter) {
-    return _getSpacesByFilterQuery(userId, spaceFilter).objects().size();
-  }
-
-  public int getMemberSpacesCount(String userId) throws SpaceStorageException {
-    try {
-       return identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId).getSpaces().getRefs().size();
-    }
-    catch (NodeNotFoundException e){
-       return 0;
-    }
-  }
-
   public List<Space> getMemberSpacesByFilter(String userId, SpaceFilter spaceFilter, long offset, long limit) {
 
     List<Space> spaces = new ArrayList<Space>();
@@ -585,6 +592,43 @@ public class SpaceStorage extends AbstractStorage {
   /*
     Pending spaces
    */
+
+  public int getPendingSpacesCount(String userId) throws SpaceStorageException {
+    try {
+      IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
+      Collection<SpaceRef> spaceEntities = identityEntity.getPendingSpaces().getRefs().values();
+      return spaceEntities.size();
+    }
+    catch (NodeNotFoundException e) {
+      return 0;
+    }
+  }
+
+  public int getPendingSpacesByFilterCount(String userId, SpaceFilter spaceFilter) {
+    return _getPendingSpacesFilterQuery(userId, spaceFilter).objects().size();
+  }
+
+  public List<Space> getPendingSpaces(String userId) throws SpaceStorageException {
+
+    List<Space> spaces = new ArrayList<Space>();
+
+    try {
+      IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
+      Collection<SpaceRef> spaceEntities = identityEntity.getPendingSpaces().getRefs().values();
+
+      for (SpaceRef ref : spaceEntities) {
+
+        Space space = new Space();
+        _fillEntityFormSpace(space, ref.getSpaceRef());
+        spaces.add(space);
+      }
+    }
+    catch (NodeNotFoundException e) {
+      LOG.debug(e.getMessage(), e);
+    }
+
+    return spaces;
+  }
 
   public List<Space> getPendingSpaces(String userId, long offset, long limit) throws SpaceStorageException {
 
@@ -618,47 +662,10 @@ public class SpaceStorage extends AbstractStorage {
 
     }
     catch (NodeNotFoundException e) {
-      // TODO : manage
+      LOG.debug(e.getMessage(), e);
     }
 
     return spaces;
-  }
-
-  public List<Space> getPendingSpaces(String userId) throws SpaceStorageException {
-
-    List<Space> spaces = new ArrayList<Space>();
-
-    try {
-      IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
-      Collection<SpaceRef> spaceEntities = identityEntity.getPendingSpaces().getRefs().values();
-
-      for (SpaceRef ref : spaceEntities) {
-
-        Space space = new Space();
-        _fillEntityFormSpace(space, ref.getSpaceRef());
-        spaces.add(space);
-      }
-    }
-    catch (NodeNotFoundException e) {
-      // TODO : manage
-    }
-
-    return spaces;
-  }
-
-  public int getPendingSpacesByFilterCount(String userId, SpaceFilter spaceFilter) {
-    return _getPendingSpacesFilterQuery(userId, spaceFilter).objects().size();
-  }
-
-  public int getPendingSpacesCount(String userId) throws SpaceStorageException {
-    try {
-      IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
-      Collection<SpaceRef> spaceEntities = identityEntity.getPendingSpaces().getRefs().values();
-      return spaceEntities.size();
-    }
-    catch (NodeNotFoundException e) {
-      return 0;
-    }
   }
 
   public List<Space> getPendingSpacesByFilter(String userId, SpaceFilter spaceFilter, long offset, long limit) {
@@ -682,6 +689,29 @@ public class SpaceStorage extends AbstractStorage {
     Invited spaces
    */
 
+  public int getInvitedSpacesCount(String userId) throws SpaceStorageException {
+
+    try {
+      IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
+      Collection<SpaceRef> spaceEntities = identityEntity.getInvitedSpaces().getRefs().values();
+      return spaceEntities.size();
+    }
+    catch (NodeNotFoundException e) {
+      return 0;
+    }
+
+  }
+
+  public int getInvitedSpacesByFilterCount(String userId, SpaceFilter spaceFilter) {
+
+    if (_validateFilter(spaceFilter)) {
+      return _getInvitedSpacesFilterQuery(userId, spaceFilter).objects().size();
+    }
+    else {
+      return 0;
+    }
+  }
+
   public List<Space> getInvitedSpaces(String userId) throws SpaceStorageException {
 
     List<Space> spaces = new ArrayList<Space>();
@@ -698,7 +728,7 @@ public class SpaceStorage extends AbstractStorage {
       }
     }
     catch (NodeNotFoundException e) {
-      // TODO : manage
+      LOG.debug(e.getMessage(), e);
     }
 
     return spaces;
@@ -734,33 +764,10 @@ public class SpaceStorage extends AbstractStorage {
 
     }
     catch (NodeNotFoundException e) {
-      // TODO : manage
+      LOG.debug(e.getMessage(), e);
     }
 
     return spaces;
-  }
-
-  public int getInvitedSpacesCount(String userId) throws SpaceStorageException {
-
-    try {
-      IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
-      Collection<SpaceRef> spaceEntities = identityEntity.getInvitedSpaces().getRefs().values();
-      return spaceEntities.size();
-    }
-    catch (NodeNotFoundException e) {
-      return 0;
-    }
-    
-  }
-
-  public int getInvitedSpacesByFilterCount(String userId, SpaceFilter spaceFilter) {
-
-    if (_validateFilter(spaceFilter)) {
-      return _getInvitedSpacesFilterQuery(userId, spaceFilter).objects().size();
-    }
-    else {
-      return 0;
-    }
   }
 
   public List<Space> getInvitedSpacesByFilter(String userId, SpaceFilter spaceFilter, long offset, long limit) {
@@ -783,7 +790,20 @@ public class SpaceStorage extends AbstractStorage {
   /*
     Public spaces
    */
-  
+
+  public int getPublicSpacesCount(String userId) throws SpaceStorageException {
+    return _getPublicSpacesQuery(userId).objects().size();
+  }
+
+  public int getPublicSpacesByFilterCount(String userId, SpaceFilter spaceFilter) {
+    if (_validateFilter(spaceFilter)) {
+      return _getPublicSpacesQuery(userId, spaceFilter).objects().size();
+    }
+    else {
+      return 0;
+    }
+  }
+
   public List<Space> getPublicSpacesByFilter(String userId, SpaceFilter spaceFilter, long offset, long limit) {
 
     try {
@@ -808,24 +828,11 @@ public class SpaceStorage extends AbstractStorage {
     return spaces;
   }
 
-  public int getPublicSpacesCount(String userId) throws SpaceStorageException {
-    return _getPublicSpaces(userId).objects().size();
-  }
-
-  public int getPublicSpacesByFilterCount(String userId, SpaceFilter spaceFilter) {
-    if (_validateFilter(spaceFilter)) {
-      return _getPublicSpacesQuery(userId, spaceFilter).objects().size();
-    }
-    else {
-      return 0;
-    }
-  }
-
   public List<Space> getPublicSpaces(String userId) throws SpaceStorageException {
     List<Space> spaces = new ArrayList<Space>();
 
     //
-    QueryResult<SpaceEntity> results = _getPublicSpaces(userId).objects();
+    QueryResult<SpaceEntity> results = _getPublicSpacesQuery(userId).objects();
 
     while (results.hasNext()) {
       SpaceEntity currentSpace = results.next();
@@ -842,7 +849,7 @@ public class SpaceStorage extends AbstractStorage {
     List<Space> spaces = new ArrayList<Space>();
 
     //
-    QueryResult<SpaceEntity> results = _getPublicSpaces(userId).objects(offset, limit);
+    QueryResult<SpaceEntity> results = _getPublicSpacesQuery(userId).objects(offset, limit);
 
     while (results.hasNext()) {
       SpaceEntity currentSpace = results.next();
@@ -854,13 +861,17 @@ public class SpaceStorage extends AbstractStorage {
     return spaces;
   }
 
-  private Query<SpaceEntity> _getPublicSpaces(String userId) {
-    return _getPublicSpacesQuery(userId, null);
-  }
-
   /*
     Accessible spaces
    */
+
+  public int getAccessibleSpacesCount(String userId) throws SpaceStorageException {
+    return _getAccessibleSpacesByFilterQuery(userId, null).objects().size();
+  }
+
+  public int getAccessibleSpacesByFilterCount(String userId, SpaceFilter spaceFilter) {
+    return _getAccessibleSpacesByFilterQuery(userId, spaceFilter).objects().size();
+  }
 
   public List<Space> getAccessibleSpaces(String userId) throws SpaceStorageException {
 
@@ -893,14 +904,6 @@ public class SpaceStorage extends AbstractStorage {
     }
 
     return spaces;
-  }
-
-  public int getAccessibleSpacesCount(String userId) throws SpaceStorageException {
-    return _getAccessibleSpacesByFilterQuery(userId, null).objects().size();
-  }
-
-  public int getAccessibleSpacesByFilterCount(String userId, SpaceFilter spaceFilter) {
-    return _getAccessibleSpacesByFilterQuery(userId, spaceFilter).objects().size();
   }
 
   public List<Space> getAccessibleSpacesByFilter(String userId, SpaceFilter spaceFilter, long offset, long limit) {
@@ -938,26 +941,35 @@ public class SpaceStorage extends AbstractStorage {
     return _getEditableSpacesFilterQuery(userId, spaceFilter).objects().size();
   }
 
-  public List<Space> getEditableSpacesByFilter(String userId, SpaceFilter spaceFilter, long offset, long limit) {
+  public List<Space> getEditableSpaces(String userId) throws SpaceStorageException {
 
     List<Space> spaces = new ArrayList<Space>();
 
-    //
-    QueryResult<SpaceEntity> results = _getEditableSpacesFilterQuery(userId, spaceFilter).objects(offset, limit);
+    try {
 
-    while (results.hasNext()) {
-      SpaceEntity currentSpace = results.next();
-      Space space = new Space();
-      _fillSpaceFormEntity(currentSpace, space);
-      spaces.add(space);
+      IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
+      Collection<SpaceRef> spaceEntities = identityEntity.getManagerSpaces().getRefs().values();
+
+      if (spaceEntities != null) {
+        for (SpaceRef spaceRef : spaceEntities) {
+
+          Space space = new Space();
+          _fillSpaceFormEntity(spaceRef.getSpaceRef(), space);
+          spaces.add(space);
+        }
+      }
+
+    }
+    catch (NodeNotFoundException e) {
+      LOG.debug(e.getMessage(), e);
     }
 
     return spaces;
+
   }
 
   public List<Space> getEditableSpaces(String userId, long offset, long limit) throws SpaceStorageException {
 
-    // TODO : manage offset
     List<Space> spaces = new ArrayList<Space>();
 
     try {
@@ -987,57 +999,38 @@ public class SpaceStorage extends AbstractStorage {
 
     }
     catch (NodeNotFoundException e) {
-      // TODO : manage
+      LOG.debug(e.getMessage(), e);
     }
 
     return spaces;
   }
 
-  public List<Space> getEditableSpaces(String userId) throws SpaceStorageException {
+  public List<Space> getEditableSpacesByFilter(String userId, SpaceFilter spaceFilter, long offset, long limit) {
 
     List<Space> spaces = new ArrayList<Space>();
 
-    try {
+    //
+    QueryResult<SpaceEntity> results = _getEditableSpacesFilterQuery(userId, spaceFilter).objects(offset, limit);
 
-      IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
-      Collection<SpaceRef> spaceEntities = identityEntity.getManagerSpaces().getRefs().values();
-
-      if (spaceEntities != null) {
-        for (SpaceRef spaceRef : spaceEntities) {
-
-          Space space = new Space();
-          _fillSpaceFormEntity(spaceRef.getSpaceRef(), space);
-          spaces.add(space);
-        }
-      }
-
-    }
-    catch (NodeNotFoundException e) {
-      // TODO : manage
+    while (results.hasNext()) {
+      SpaceEntity currentSpace = results.next();
+      Space space = new Space();
+      _fillSpaceFormEntity(currentSpace, space);
+      spaces.add(space);
     }
 
     return spaces;
-
   }
 
   /*
     All spaces
    */
-  
-  public int getAllSpacesByFilterCount(SpaceFilter spaceFilter) {
-
-    if (_validateFilter(spaceFilter)) {
-      return _getSpacesByFilterQuery(spaceFilter).objects().size();
-    }
-    else {
-      return 0;
-    }
-
-  }
 
   public int getAllSpacesCount() throws SpaceStorageException {
 
-    return getSpaceRoot().getSpaces().size(); // TODO : use property
+    // TODO : use property to improve the perfs
+
+    return getSpaceRoot().getSpaces().size();
 
   }
 
@@ -1055,31 +1048,21 @@ public class SpaceStorage extends AbstractStorage {
 
   }
 
+  public int getAllSpacesByFilterCount(SpaceFilter spaceFilter) {
+
+    if (_validateFilter(spaceFilter)) {
+      return _getSpacesByFilterQuery(spaceFilter).objects().size();
+    }
+    else {
+      return 0;
+    }
+
+  }
+
 
   /*
     Get spaces
    */
-
-  public List<Space> getSpacesByFilter(SpaceFilter spaceFilter, long offset, long limit) {
-
-    List<Space> spaces = new ArrayList<Space>();
-
-    if (!_validateFilter(spaceFilter)) {
-      return spaces;
-    }
-
-    //
-    QueryResult<SpaceEntity> results = _getSpacesByFilterQuery(spaceFilter).objects(offset, limit);
-
-    while (results.hasNext()) {
-      SpaceEntity currentSpace = results.next();
-      Space space = new Space();
-      _fillSpaceFormEntity(currentSpace, space);
-      spaces.add(space);
-    }
-
-    return spaces;
-  }
 
   public List<Space> getSpaces(long offset, long limit) throws SpaceStorageException {
 
@@ -1106,6 +1089,27 @@ public class SpaceStorage extends AbstractStorage {
 
     return spaces;
 
+  }
+
+  public List<Space> getSpacesByFilter(SpaceFilter spaceFilter, long offset, long limit) {
+
+    List<Space> spaces = new ArrayList<Space>();
+
+    if (!_validateFilter(spaceFilter)) {
+      return spaces;
+    }
+
+    //
+    QueryResult<SpaceEntity> results = _getSpacesByFilterQuery(spaceFilter).objects(offset, limit);
+
+    while (results.hasNext()) {
+      SpaceEntity currentSpace = results.next();
+      Space space = new Space();
+      _fillSpaceFormEntity(currentSpace, space);
+      spaces.add(space);
+    }
+
+    return spaces;
   }
 
   public Space getSpaceById(String id) throws SpaceStorageException {
@@ -1197,10 +1201,6 @@ public class SpaceStorage extends AbstractStorage {
       return null;
     }
 
-  }
-
-  private Query<SpaceEntity> _getSpacesByFilterQuery(SpaceFilter spaceFilter) {
-    return _getSpacesByFilterQuery(null, spaceFilter);
   }
 
 }

@@ -18,13 +18,12 @@ package org.exoplatform.social.common.lifecycle;
 
 import org.exoplatform.commons.chromattic.*;
 import org.exoplatform.container.PortalContainer;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Generic implementation a Lifecycle<br/>
@@ -39,7 +38,10 @@ import java.util.concurrent.Executors;
  */
 public abstract class AbstractLifeCycle<T extends LifeCycleListener<E>, E extends LifeCycleEvent<?,?>> {
 
-  protected Set<T>      listeners = new HashSet<T>();
+  /** Logger */
+  private static final Log LOG = ExoLogger.getLogger(AbstractLifeCycle.class);
+
+  protected Set<T> listeners = new HashSet<T>();
 
   protected final PortalContainer container;
 
@@ -108,6 +110,9 @@ public abstract class AbstractLifeCycle<T extends LifeCycleListener<E>, E extend
           try {
             begin();
             dispatchEvent(listener, event);
+          }
+          catch(Exception e) {
+            LOG.debug(e.getMessage(), e);
           }
           finally {
             end();

@@ -37,6 +37,48 @@
 	font-weight:normal;
 }
 
+body{
+	background: #eee;
+	font-family: Lucida, arial, tahoma !important;
+}
+
+div, table, tr, td, img, form{
+	font-family: Lucida, arial, tahoma !important;
+	font-size: 12px;
+}
+
+h1 {font-size: 22px;}
+
+h2 {font-size: 18px;}
+
+h3 {font-size: 16px;}
+
+h4 {font-size: 14px;}
+
+h5 {font-size: 12px;}
+
+h6 {font-size: 11px;}
+
+img {
+	border: none;
+}
+
+ul {
+	list-style: none;
+	padding: 0px;
+	margin: 0px;
+}
+
+.FL {
+	float: left; /* orientation=lt */
+	float: right; /* orientation=rt */
+}
+
+.FR {
+	float: right; /* orientation=lt */
+	float: left; /* orientation=rt */
+}
+
 .UIWorkingWorkspace .UIPageBody .VIEW-PAGEBODY .UIPage{
 	padding: 0px 8px;
 }
@@ -53,54 +95,9 @@
 	background:#EEEEEE;
 }
 
-body{
-	background: #eee;
-	font-family: Lucida, arial, tahoma !important;
-}
-
-div, table, tr, td, img, form{
-	font-family: Lucida, arial, tahoma !important;
-	font-size: 12px;
-}
-
 .UIWorkingWorkspace{
 	width: 100%;
 	background: #eee;
-}
-
-.FL {
-	float: left; /* orientation=lt */
-	float: right; /* orientation=rt */
-}
-
-.FR {
-	float: right; /* orientation=lt */
-	float: left; /* orientation=rt */
-}
-
-img {
-	border: none;
-}
-
-
-ul {
-	list-style: none;
-	padding: 0px;
-	margin: 0px;
-}
-
-.ClearFix:after {
-	content: ".";
-	display: block;
-	height: 0px;
-	clear: both;
-	visibility: hidden;
-}
-
-.ClearFix {
-	!display: inline-block;
-	!zoom: 1;
-	!display: block;
 }
 
 .UIWorkingWorkspace .UIPageBody .VIEW-PAGEBODY .UIPage {
@@ -112,11 +109,104 @@ ul {
 }
 
 #UIPortalApplication .UIWorkingWorkspace {
-	  background-color: #eee;
-	  margin:auto;
-	  width:100%;
+	background-color: #eee;
+	margin:auto;
+	width:100%;
 }
 
-p, h1, h2, h3, h4, h5, h6 {
+.UISocApplication .UISocTitleBar {
+	background: url("/social-portlet/skin/social/portlet/UIPeoplePortlet/DefaultSkin/background/ATitleBarC.gif") no-repeat 20px top;
+	padding-bottom: 4px;
+	margin-top: 8px;
+}
+
+.UISocApplication .UISocTitleBar .TitleBar {
+	background: #9d9d9d;
+	border-radius: 5px 5px 0px 0px;
+	-moz-border-radius: 5px 5px 0px 0px;
+	-webkit-border-radius: 5px 5px 0px 0px;
+	height: 21px;
+	padding: 0px 15px;
+	line-height: 21px;
+	color: white;
 	margin: 0px;
+	font-size: 12px;
+}
+
+.UISocApplication .UISocTitleBar .TitIcon {
+	float: right;
+	display: block;
+}
+
+/***************************************************************************/
+.UISocApplication .CommonTitleBar {
+	background: #EBEBEB;
+    color: #7D7D7D;
+    height: 21px;
+    line-height: 21px;
+    margin: 0;
+    text-align: center;
+}
+
+.UISocApplication .ContainerSpace {
+	background: #FFFFFF;
+    padding: 10px;
+}
+
+.UISocApplication .ContainerSpace .ImgAvatar {
+    background: #FFFFFF;
+    border: 1px solid #EBEBEB;
+    border-radius: 5px 5px 5px 5px;
+	-moz-border-radius: 5px 5px 5px 5px;
+	-webkit-border-radius: 5px 5px 5px 5px;
+    float: left;
+    margin: 5px 0 8px 7px;
+    padding: 5px;
+}
+
+.UISocApplication .UITabPane img {
+    height: 47px;
+    width: 47px;
+}
+
+.UISocApplication .ContainerSpace .ContentSpace {
+    background: #FBFBFB;
+    margin-bottom: 1px;
+    padding: 8px;
+}
+
+.UISocApplication .ContainerSpace .ContentSpaceGray {
+	background: white;
+	padding: 8px;
+	margin-bottom: 1px;
+	background: #f3f3f3;
+}
+
+.UISocApplication .ContainerSpace .InviteTitle {
+    color: #AFAFAF;
+    cursor: pointer;
+    float: left;
+}
+
+.UISocApplication .ContainerSpace .CommunityMane {
+	color: #0d6e8f;
+	height: 20px;
+	font-size: 12px;
+	font-weight: bold;
+	margin: 0px 0px 5px 92px;
+	border-bottom:1px solid #B7B7B7;
+}
+
+.UISocApplication .ContainerSpace .WaitingConfirmation {
+    font-size: 11px;
+    padding-left: 5px;
+}
+
+.UISocApplication .ContainerSpace .NotYet {
+	color:gray;
+	text-align:center;
+}
+
+.UISocApplication .ContainerSpace .CommunityContent {
+	margin: 0px 0px 0px 92px;
 }

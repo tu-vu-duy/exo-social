@@ -4,12 +4,12 @@
 <head profile="http://selenium-ide.openqa.org/profiles/test-case">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link rel="selenium.base" href="" />
-<title>Test_SNF_SOC_01_Demo_AccessSpace</title>
+<title>Test_SNF_SOC_23_Demo_AddDeteteUserActivity</title>
 </head>
 <body>
 <table cellpadding="1" cellspacing="1" border="1">
 <thead>
-<tr><td rowspan="1" colspan="3">Test_SNF_SOC_01_Demo_AccessSpace</td></tr>
+<tr><td rowspan="1" colspan="3">Test_SNF_SOC_23_Demo_AddDeteteUserActivity</td></tr>
 </thead><tbody>
 <tr>
 	<td>open</td>
@@ -19,11 +19,6 @@
 <tr>
 	<td>windowMaximize</td>
 	<td></td>
-	<td></td>
-</tr>
-<tr>
-	<td>echo</td>
-	<td>--Access Space--</td>
 	<td></td>
 </tr>
 <tr>
@@ -39,7 +34,7 @@
 <tr>
 	<td>type</td>
 	<td>username</td>
-	<td>root</td>
+	<td>demo</td>
 </tr>
 <tr>
 	<td>type</td>
@@ -53,126 +48,186 @@
 </tr>
 <tr>
 	<td>waitForElementPresent</td>
-	<td>link=Spaces</td>
+	<td>link=Activities</td>
 	<td></td>
 </tr>
 <tr>
-	<td>clickAndWait</td>
-	<td>link=Spaces</td>
+	<td>click</td>
+	<td>link=Activities</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>link=My Status</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>link=My Status</td>
 	<td></td>
 </tr>
 <tr>
 	<td>echo</td>
-	<td>-- Add a new Space</td>
-	<td></td>
-</tr>
-<tr>
-	<td>waitForElementPresent</td>
-	<td>link=Add New Space</td>
-	<td></td>
-</tr>
-<tr>
-	<td>click</td>
-	<td>link=Add New Space</td>
-	<td></td>
-</tr>
-<tr>
-	<td>waitForElementPresent</td>
-	<td>displayName</td>
+	<td>-- Add Activites</td>
 	<td></td>
 </tr>
 <tr>
 	<td>type</td>
-	<td>displayName</td>
-	<td>Space01</td>
+	<td>composerInput</td>
+	<td>This is activity for User_Demo_23</td>
 </tr>
 <tr>
-	<td>type</td>
-	<td>description</td>
-	<td>This is description for Space_01</td>
+	<td>keyPress</td>
+	<td>composerInput</td>
+	<td>\13</td>
+</tr>
+<tr>
+	<td>echo</td>
+	<td>-- share link</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>//form[@id='UIComposer']/div[2]/div[2]/div/a</td>
+	<td></td>
 </tr>
 <tr>
 	<td>click</td>
-	<td>link=Create</td>
+	<td>//form[@id='UIComposer']/div[2]/div[2]/div/a</td>
+	<td></td>
+</tr>
+<tr>
+	<td>echo</td>
+	<td>-- enter link</td>
 	<td></td>
 </tr>
 <tr>
 	<td>pause</td>
-	<td>2000</td>
-	<td></td>
-</tr>
-<tr>
-	<td>echo</td>
-	<td>-- Verify space created in the list</td>
+	<td>1000</td>
 	<td></td>
 </tr>
 <tr>
 	<td>waitForElementPresent</td>
-	<td>link=Space01</td>
+	<td>InputLink</td>
 	<td></td>
 </tr>
 <tr>
-	<td>verifyElementPresent</td>
-	<td>link=Space01</td>
+	<td>type</td>
+	<td>InputLink</td>
+	<td>http://google.com</td>
+</tr>
+<tr>
+	<td>echo</td>
+	<td>-- click attach button</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>AttachButton</td>
 	<td></td>
 </tr>
 <tr>
 	<td>click</td>
-	<td>link=Space01</td>
+	<td>AttachButton</td>
+	<td></td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>1000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>echo</td>
+	<td>-- share all</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>ShareButton</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>ShareButton</td>
+	<td></td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>1000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>echo</td>
+	<td>-- Verify activity is added</td>
 	<td></td>
 </tr>
 <tr>
 	<td>waitForTextPresent</td>
-	<td>Space01 was created</td>
+	<td></td>
+	<td>This is activity for User_Demo_23</td>
+</tr>
+<tr>
+	<td>verifyTextPresent</td>
+	<td></td>
+	<td>This is activity for User_Demo_23</td>
+</tr>
+<tr>
+	<td>verifyElementPresent</td>
+	<td>link=Google</td>
 	<td></td>
 </tr>
 <tr>
 	<td>verifyTextPresent</td>
-	<td>Space01 was created</td>
 	<td></td>
+	<td>Source : http://www.google.com</td>
 </tr>
 <tr>
 	<td>echo</td>
-	<td>-- Delete Space created</td>
-	<td></td>
-</tr>
-<tr>
-	<td>click</td>
-	<td>link=Spaces</td>
+	<td>--Delete User Activity</td>
 	<td></td>
 </tr>
 <tr>
 	<td>waitForElementPresent</td>
-	<td>//a[@title='Delete Space']</td>
+	<td>//h5/span</td>
 	<td></td>
 </tr>
 <tr>
 	<td>click</td>
-	<td>//a[@title='Delete Space']</td>
+	<td>//h5/span</td>
 	<td></td>
 </tr>
 <tr>
-	<td>waitForConfirmation</td>
-	<td>Are you sure to delete this space? This can not be undone. All page navigations and this group will be deleted, too.</td>
-	<td></td>
-</tr>
-<tr>
-	<td>echo</td>
-	<td>-- Verify space deleted</td>
+	<td>assertConfirmation</td>
+	<td>Are you sure to delete this activity?</td>
 	<td></td>
 </tr>
 <tr>
 	<td>waitForTextNotPresent</td>
-	<td>Space01</td>
+	<td>This is activity for User_Demo_23</td>
 	<td></td>
 </tr>
 <tr>
 	<td>verifyTextNotPresent</td>
-	<td>Space01</td>
+	<td>This is activity for User_Demo_23</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForTextNotPresent</td>
+	<td>Source : http://www.google.com</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyTextNotPresent</td>
+	<td>Source : http://www.google.com</td>
 	<td></td>
 </tr>
 <tr>
 	<td>waitForElementPresent</td>
+	<td>link=Sign out</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
 	<td>link=Sign out</td>
 	<td></td>
 </tr>

@@ -19,37 +19,29 @@
   def relationIdx = 0;
   def isOwner = Utils.isOwner();
 %>
-<div class="UIMyRelations" id="$uicomponent.id">
-  <div class="UITabPane">
-    <div class="ActivitiesTitleBarM">
-     <% if (isOwner) {%>
-        <%=_ctx.appRes(uicomponent.id + ".label.MyRelationsList")%>
-     <%} else {
-        def userRelationList = _ctx.appRes(uicomponent.id + ".label.UserRelationList");
-        userRelationList = userRelationList.replace("{0}", currIdentity.profile.fullName);
-     %>
-      <%= userRelationList %>
+<h5 class="CommonTitleBar">
+ <% if (isOwner) {%>
+	<%=_ctx.appRes(uicomponent.id + ".label.MyRelationsList")%>
+ <%} else {
+	def userRelationList = _ctx.appRes(uicomponent.id + ".label.UserRelationList");
+	userRelationList = userRelationList.replace("{0}", currIdentity.profile.fullName);
+ %>
+  <%= userRelationList %>
 
-     <%}%>
+ <%}%>
 
-    </div>
-    <div class="ContainerSpace">
+</h5>
+<div class="UIMyRelations UITabPane ContainerSpace" id="$uicomponent.id">
       <% uicomponent.renderChild(UIProfileUserSearch.class); %>
 
-       <div class="ATitleBarL">
-        <div class="ATitleBarR">
-          <div class="ATitleBarM">
-            <div class="ATitleBarC">
-            <%=_ctx.appRes(uicomponent.getId() + ".label.RelationsListing")%>
-            </div>
-          </div>
-        </div>
+       <div class="UISocTitleBar">
+            <h5 class="TitleBar"><%=_ctx.appRes(uicomponent.getId() + ".label.RelationsListing")%></h5>
       </div>
       <%if ((myRelation == null) || (myRelation.size() == 0)) {%>
         <div class="ContentSpace">
-            <div class="NotYet"><%=_ctx.appRes(uicomponent.getId() + ".label.NotYet")%>
+            <p class="NotYet"><%=_ctx.appRes(uicomponent.getId() + ".label.NotYet")%>
             <% def peopleURL = portalURI + "people" %>
-            </div>
+            </p>
         <% if (isOwner) {%>
         <div class="UIAction">
             <table class="ActionContainer">
@@ -71,7 +63,6 @@
             </table>
          </div>
          <% } %>
-            <div style="clear: left;"><span></span></div>
          </div>
       <%}%>
 
@@ -93,24 +84,18 @@
          <% } else {%>
           <div class="ContentSpace ClearFix">
        <% }%>
-        <div class="AvartarPeopleBG">
-             <img src="$imageSource"/>
-          </div>
-        <div class="CommunityContainer">
-          <div class="CommunityMane Line">
-              <div style="float: left; cursor: pointer;" class="CommunityName"><a class="CommunityNameMiddle" href="${profileURL}">${fullName}</a></div>
-       <% if (isEditable) {%>
-                 <a href="#" onclick="$actionLink" title="Remove" class="DeleteIcon">&nbsp;</a>
-       <% } %>
-              <div style="clear: both;"><span/></div>
-          </div>
+		  <img class="ImgAvatar" src="$imageSource" alt="#"/>
+		  <div class="CommunityMane ClearFix">
+			  <a class="CommunityName InviteTitle" href="${profileURL}">${fullName}</a>
+			   <% if (isEditable) {%>
+						 <a href="#" onclick="$actionLink" title="Remove" class="DeleteIcon">&nbsp;</a>
+			   <% } %>
+		  </div>
        <% if(position.length() > 0) { %>
-        <div class="CommunityContent" style="padding: 4px;">
+        <div class="CommunityContent">
           <%=_ctx.appRes(uicomponent.getId() + ".label.Position") + ": "%>${position}
         </div>
        <% } %>
-        </div>
-        <div style="clear: left;"><span></span></div>
       </div>
     <%  }
       }
@@ -119,5 +104,3 @@
       }
      %>
     </div>
-  </div>
-</div>

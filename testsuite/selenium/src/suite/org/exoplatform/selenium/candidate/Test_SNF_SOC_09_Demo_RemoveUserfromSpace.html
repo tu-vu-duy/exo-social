@@ -167,8 +167,13 @@
 	<td>mary</td>
 </tr>
 <tr>
+	<td>waitForElementPresent</td>
+	<td>//form[@id='UISpaceMember']/div[2]/div/a[2]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>click</td>
-	<td>//div[@class='SearchAddMemberIcon']</td>
+	<td>//form[@id='UISpaceMember']/div[2]/div/a[2]</td>
 	<td></td>
 </tr>
 <tr>
@@ -277,6 +282,31 @@
 	<td></td>
 </tr>
 <tr>
+	<td>echo</td>
+	<td>--Check My space list of user after accept invitation--</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>link=My Spaces</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>link=My Spaces</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForTextPresent</td>
+	<td>This is description for Space_09</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyTextPresent</td>
+	<td>This is description for Space_09</td>
+	<td></td>
+</tr>
+<tr>
 	<td>waitForElementPresent</td>
 	<td>link=Sign out</td>
 	<td></td>
@@ -368,12 +398,12 @@
 </tr>
 <tr>
 	<td>waitForElementPresent</td>
-	<td>//form[@id='UISpaceMember']/div[3]/table/tbody/tr[2]/td[3]/a[@class='DeleteMemberButton']</td>
+	<td>//form[@id='UISpaceMember']/table/tbody/tr[2]/td[3]/a</td>
 	<td></td>
 </tr>
 <tr>
 	<td>click</td>
-	<td>//form[@id='UISpaceMember']/div[3]/table/tbody/tr[2]/td[3]/a[@class='DeleteMemberButton']</td>
+	<td>//form[@id='UISpaceMember']/table/tbody/tr[2]/td[3]/a</td>
 	<td></td>
 </tr>
 <tr>

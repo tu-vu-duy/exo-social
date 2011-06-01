@@ -18,9 +18,9 @@ package org.exoplatform.social.webui.space;
 
 import java.util.ResourceBundle;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.exoplatform.portal.webui.util.Util;
 import org.exoplatform.portal.webui.workspace.UIPortalApplication;
-import org.exoplatform.portal.webui.workspace.UIWorkingWorkspace;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.space.SpaceException;
@@ -29,6 +29,7 @@ import org.exoplatform.social.core.space.impl.DefaultSpaceApplicationHandler;
 import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.space.spi.SpaceService;
 import org.exoplatform.social.webui.UISocialGroupSelector;
+import org.exoplatform.social.webui.Utils;
 import org.exoplatform.web.application.ApplicationMessage;
 import org.exoplatform.webui.application.WebuiRequestContext;
 import org.exoplatform.webui.config.annotation.ComponentConfig;
@@ -125,8 +126,11 @@ public class UISpaceAddForm extends UIFormTabPane {
       Space space = new Space();
       uiAddForm.invokeSetBindingBean(space);
       space.setDisplayName(space.getDisplayName().trim());
-      if (space.getDescription() == null) {
+      String spaceDescription = space.getDescription();
+      if ((spaceDescription == null) || (spaceDescription.trim().length() == 0)) {
         space.setDescription(resApp.getString(MSG_DEFAULT_SPACE_DESCRIPTION));
+      } else {
+        space.setDescription(StringEscapeUtils.escapeHtml(spaceDescription));  
       }
       String msg = MSG_SPACE_CREATION_SUCCESS;
       try {
@@ -167,9 +171,7 @@ public class UISpaceAddForm extends UIFormTabPane {
       uiPopup.setShow(false);
       UIPortalApplication uiPortalApp = Util.getUIPortalApplication();
       uiPortalApp.localizeNavigations();
-      UIWorkingWorkspace uiWorkingWS = uiPortalApp.getChild(UIWorkingWorkspace.class);
-      uiWorkingWS.updatePortletsByName("SocialUserToolBarGroupPortlet");
-      uiWorkingWS.updatePortletsByName("SpacesToolbarPortlet"); // For social demo
+      Utils.updateWorkingWorkSpace();
     }
   }
 

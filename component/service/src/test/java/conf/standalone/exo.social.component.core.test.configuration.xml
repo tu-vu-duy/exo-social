@@ -383,7 +383,6 @@
         <values-param>
           <name>autoCreatedInNewRepository</name>
           <description>Node types configuration file</description>
-          <value>jar:/conf/portal/core-nodetypes.xml</value>
           <value>jar:/conf/portal/chromattic-nodetypes.xml</value>
         </values-param>
       </init-params>

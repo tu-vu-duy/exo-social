@@ -1157,14 +1157,28 @@ public class SpaceStorage extends AbstractStorage {
     // TODO : JCR query
 
     QueryBuilder<SpaceEntity> builder = getSession().createQueryBuilder(SpaceEntity.class);
-    builder.where("soc:url = '" + url + "'");
 
-    SpaceEntity entity =  builder.get().objects().next();
-    Space space = new Space();
+    if (url != null) {
+      WhereExpression whereExpression = new WhereExpression();
+      whereExpression.equals(SpaceEntity.url, url);
+      builder.where(whereExpression.toString());
+    }
 
-    _fillSpaceFormEntity(entity, space);
+    QueryResult<SpaceEntity> result = builder.get().objects();
 
-    return space;
+    if (result.hasNext()) {
+
+      Space space = new Space();
+      SpaceEntity entity =  builder.get().objects().next();
+
+      _fillSpaceFormEntity(entity, space);
+
+      return space;
+
+    }
+    else {
+      return null;
+    }
 
   }
 

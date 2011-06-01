@@ -84,6 +84,7 @@ public abstract class SpaceEntity {
   @Property(name = "soc:url")
   public abstract String getURL();
   public abstract void setURL(String url);
+  public static final PropertyLiteralExpression url = new PropertyLiteralExpression(String.class, "soc:url");
 
   @Property(name = "soc:membersId")
   public abstract String[] getMembersId();

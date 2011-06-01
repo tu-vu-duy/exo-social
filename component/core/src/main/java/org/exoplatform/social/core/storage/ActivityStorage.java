@@ -210,17 +210,42 @@ public class ActivityStorage extends AbstractStorage {
 
   public List<ExoSocialActivity> getActivities(Identity owner, long offset, long limit) throws ActivityStorageException {
 
-    // TODO : manage offset
-
     List<ExoSocialActivity> activities = new ArrayList<ExoSocialActivity>();
     int nb = 0;
 
     try {
       IdentityEntity identityEntity = _findById(IdentityEntity.class, owner.getId());
-      for (ActivityYearEntity years : identityEntity.getActivityList().getYears().values()) {
-        for (ActivityMonthEntity months : years.getMonths().values()) {
-          for (ActivityDayEntity days : months.getDays().values()) {
-            for (ActivityEntity activityEntity : days.getActivities()) {
+
+      int allNumber = identityEntity.getActivityList().getNumber();
+      if (offset >= allNumber) {
+        return activities;
+      }
+
+      for (ActivityYearEntity year : identityEntity.getActivityList().getYears().values()) {
+
+        int yearNumber = year.getNumber();
+        if (offset > yearNumber) {
+          offset -= yearNumber;
+          continue;
+        }
+
+        for (ActivityMonthEntity month : year.getMonths().values()) {
+
+          int monthNumber = month.getNumber();
+          if (offset > monthNumber) {
+            offset -= monthNumber;
+            continue;
+          }
+
+          for (ActivityDayEntity day : month.getDays().values()) {
+
+            int dayNumber = day.getNumber();
+            if (offset > dayNumber) {
+              offset -= dayNumber;
+              continue;
+            }
+            
+            for (ActivityEntity activityEntity : day.getActivities()) {
 
               //
               ExoSocialActivity newActivity = new ExoSocialActivityImpl();

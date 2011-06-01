@@ -31,6 +31,7 @@ import org.exoplatform.social.core.relationship.model.Relationship;
 import org.exoplatform.social.core.storage.exception.NodeNotFoundException;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -223,6 +224,8 @@ public class RelationshipStorage extends AbstractStorage {
 
   List<Relationship> _getSenderRelationships(final Identity sender, final Relationship.Type type,
                                                    final List<Identity> listCheckIdentity) throws NodeNotFoundException {
+
+    // TODO : listCheckIdentity ?
 
     List<Relationship> relationships = new ArrayList<Relationship>();
 
@@ -425,8 +428,6 @@ public class RelationshipStorage extends AbstractStorage {
   public List<Relationship> getSenderRelationships(final Identity sender, final Relationship.Type type,
                                                    final List<Identity> listCheckIdentity) throws RelationshipStorageException {
 
-    // TODO : check listCheckIdentityId later
-
     try {
       return _getSenderRelationships(sender, type, listCheckIdentity);
     }
@@ -438,8 +439,6 @@ public class RelationshipStorage extends AbstractStorage {
 
   public List<Relationship> getReceiverRelationships(final Identity receiver, final Relationship.Type type,
                                                    final List<Identity> listCheckIdentity) throws RelationshipStorageException {
-
-    // TODO : check listCheckIdentityId later
 
     try {
       return _getReceiverRelationships(receiver, type, listCheckIdentity);
@@ -505,7 +504,12 @@ public class RelationshipStorage extends AbstractStorage {
     try {
       IdentityEntity identityEntity = _findById(IdentityEntity.class, identity.getId());
 
-      for (RelationshipEntity relationshipEntity : identityEntity.getRelationship().getRelationships().values()) {
+      Iterator<RelationshipEntity> it = identityEntity.getRelationship().getRelationships().values().iterator();
+      _skip(it, offset);
+
+      while (it.hasNext()) {
+
+        RelationshipEntity relationshipEntity = it.next();
 
         IdentityEntity targetIdentity = relationshipEntity.getTo();
         Identity gotIdentity = new Identity(targetIdentity.getId());
@@ -529,7 +533,7 @@ public class RelationshipStorage extends AbstractStorage {
 
     try {
 
-      // TODO : user property
+      // TODO : use property to improve the perfs
 
       IdentityEntity identityEntity = _findById(IdentityEntity.class, identity.getId());
       return identityEntity.getRelationship().getRelationships().size();

@@ -55,8 +55,6 @@ public class IdentityStorage extends AbstractStorage {
   /** Logger */
   private static final Log LOG = ExoLogger.getLogger(IdentityStorage.class);
 
-  private static final String VOID = "void.";
-
   static enum PropNs {
 
     VOID("void"),
@@ -419,6 +417,7 @@ public class IdentityStorage extends AbstractStorage {
     return identityEntity;
 
   }
+
   /**
    * Public.
    */
@@ -528,7 +527,7 @@ public class IdentityStorage extends AbstractStorage {
 
   public int getIdentitiesCount (final String providerId) throws IdentityStorageException {
 
-    // TODO : use jcr property for better perf
+    // TODO : use jcr property to improve the perfs
     ProviderEntity providerEntity = getProviderRoot().getProviders().get(providerId);
     int nb = providerEntity.getIdentities().size();
 

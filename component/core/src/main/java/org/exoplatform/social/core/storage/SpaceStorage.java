@@ -87,7 +87,7 @@ public class SpaceStorage extends AbstractStorage {
 
   }
 
-   private enum RefType {
+  private enum RefType {
     MEMBER() {
       @Override
       public SpaceListEntity refsOf(IdentityEntity identityEntity) {
@@ -235,8 +235,6 @@ public class SpaceStorage extends AbstractStorage {
   
   private Query<SpaceEntity> _getSpacesByFilterQuery(String userId, SpaceFilter spaceFilter) {
 
-    // TODO : JCR query
-
     QueryBuilder<SpaceEntity> builder = getSession().createQueryBuilder(SpaceEntity.class);
     WhereExpression whereExpression = new WhereExpression();
 
@@ -258,8 +256,6 @@ public class SpaceStorage extends AbstractStorage {
   }
 
   private Query<SpaceEntity> _getAccessibleSpacesByFilterQuery(String userId, SpaceFilter spaceFilter) {
-
-    // TODO : JCR query
 
     QueryBuilder<SpaceEntity> builder = getSession().createQueryBuilder(SpaceEntity.class);
     WhereExpression whereExpression = new WhereExpression();
@@ -292,8 +288,6 @@ public class SpaceStorage extends AbstractStorage {
 
   private Query<SpaceEntity> _getPublicSpacesQuery(String userId, SpaceFilter spaceFilter) {
 
-    // TODO : JCR query
-
     QueryBuilder<SpaceEntity> builder = getSession().createQueryBuilder(SpaceEntity.class);
     WhereExpression whereExpression = new WhereExpression();
 
@@ -316,8 +310,6 @@ public class SpaceStorage extends AbstractStorage {
 
   private Query<SpaceEntity> _getPendingSpacesFilterQuery(String userId, SpaceFilter spaceFilter) {
 
-    // TODO : JCR query
-
     QueryBuilder<SpaceEntity> builder = getSession().createQueryBuilder(SpaceEntity.class);
     WhereExpression whereExpression = new WhereExpression();
 
@@ -337,8 +329,6 @@ public class SpaceStorage extends AbstractStorage {
 
   private Query<SpaceEntity> _getInvitedSpacesFilterQuery(String userId, SpaceFilter spaceFilter) {
 
-    // TODO : JCR query
-    
     QueryBuilder<SpaceEntity> builder = getSession().createQueryBuilder(SpaceEntity.class);
     WhereExpression whereExpression = new WhereExpression();
 
@@ -357,8 +347,6 @@ public class SpaceStorage extends AbstractStorage {
   }
 
   private Query<SpaceEntity> _getEditableSpacesFilterQuery(String userId, SpaceFilter spaceFilter) {
-
-    // TODO : JCR query
 
     QueryBuilder<SpaceEntity> builder = getSession().createQueryBuilder(SpaceEntity.class);
     WhereExpression whereExpression = new WhereExpression();
@@ -515,7 +503,13 @@ public class SpaceStorage extends AbstractStorage {
       Collection<SpaceRef> spaceEntities = identityEntity.getSpaces().getRefs().values();
 
       if (spaceEntities != null) {
-        for (SpaceRef spaceRef : spaceEntities) {
+
+        Iterator<SpaceRef> it = spaceEntities.iterator();
+        _skip(it, offset);
+
+        while (it.hasNext()) {
+
+          SpaceRef spaceRef = it.next();
 
           Space space = new Space();
           _fillSpaceFormEntity(spaceRef.getSpaceRef(), space);
@@ -604,7 +598,13 @@ public class SpaceStorage extends AbstractStorage {
       Collection<SpaceRef> spaceEntities = identityEntity.getPendingSpaces().getRefs().values();
 
       if (spaceEntities != null) {
-        for (SpaceRef spaceRef : spaceEntities) {
+
+        Iterator<SpaceRef> it = spaceEntities.iterator();
+        _skip(it, offset);
+
+        while (it.hasNext()) {
+
+          SpaceRef spaceRef = it.next();
 
           Space space = new Space();
           _fillSpaceFormEntity(spaceRef.getSpaceRef(), space);
@@ -714,7 +714,13 @@ public class SpaceStorage extends AbstractStorage {
       Collection<SpaceRef> spaceEntities = identityEntity.getInvitedSpaces().getRefs().values();
 
       if (spaceEntities != null) {
-        for (SpaceRef spaceRef : spaceEntities) {
+
+        Iterator<SpaceRef> it = spaceEntities.iterator();
+        _skip(it, offset);
+
+        while (it.hasNext()) {
+
+          SpaceRef spaceRef = it.next();
 
           Space space = new Space();
           _fillSpaceFormEntity(spaceRef.getSpaceRef(), space);
@@ -961,7 +967,13 @@ public class SpaceStorage extends AbstractStorage {
       Collection<SpaceRef> spaceEntities = identityEntity.getManagerSpaces().getRefs().values();
 
       if (spaceEntities != null) {
-        for (SpaceRef spaceRef : spaceEntities) {
+
+        Iterator<SpaceRef> it = spaceEntities.iterator();
+        _skip(it, offset);
+
+        while (it.hasNext()) {
+
+          SpaceRef spaceRef = it.next();
 
           Space space = new Space();
           _fillSpaceFormEntity(spaceRef.getSpaceRef(), space);
@@ -1071,12 +1083,16 @@ public class SpaceStorage extends AbstractStorage {
 
   public List<Space> getSpaces(long offset, long limit) throws SpaceStorageException {
 
-    // TODO : manage offset
-
     List<Space> spaces = new ArrayList<Space>();
 
     int i = 0;
-    for (SpaceEntity spaceEntity : getSpaceRoot().getSpaces().values()) {
+
+    Iterator<SpaceEntity> it = getSpaceRoot().getSpaces().values().iterator();
+    _skip(it, offset);
+    
+    while (it.hasNext()) {
+
+      SpaceEntity spaceEntity = it.next();
 
       Space space = new Space();
       _fillSpaceFormEntity(spaceEntity, space);
@@ -1130,7 +1146,7 @@ public class SpaceStorage extends AbstractStorage {
 
   public Space getSpaceByGroupId(String groupId) throws SpaceStorageException {
 
-    // TODO : JCR query
+    // TODO : avoid JCR query ?
 
     QueryBuilder<SpaceEntity> builder = getSession().createQueryBuilder(SpaceEntity.class);
     WhereExpression whereExpression = new WhereExpression();
@@ -1154,7 +1170,8 @@ public class SpaceStorage extends AbstractStorage {
   }
 
   public Space getSpaceByUrl(String url) throws SpaceStorageException {
-    // TODO : JCR query
+
+    // TODO : avoid JCR query ?
 
     QueryBuilder<SpaceEntity> builder = getSession().createQueryBuilder(SpaceEntity.class);
 

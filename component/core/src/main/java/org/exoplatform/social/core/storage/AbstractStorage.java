@@ -28,6 +28,7 @@ import org.exoplatform.social.core.chromattic.entity.SpaceRootEntity;
 import org.exoplatform.social.core.storage.exception.NodeNotFoundException;
 
 import java.text.DateFormatSymbols;
+import java.util.Iterator;
 import java.util.Locale;
 
 /**
@@ -130,5 +131,20 @@ public abstract class AbstractStorage {
 
   protected boolean isJcrProperty(String name) {
     return !name.startsWith(NS_JCR);
+  }
+
+  protected void _skip(Iterator<?> it, long offset) {
+
+    // TODO : user JCR skip
+
+    while (it.hasNext()) {
+      if (offset == 0) {
+        return;
+      }
+      else {
+        it.next();
+        --offset;
+      }
+    }
   }
 }

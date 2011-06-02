@@ -23,7 +23,9 @@ package org.exoplatform.social.core.storage.query;
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class JCRProperties {
+public class FakeEntity {
 
-  public static final PropertyLiteralExpression<String> path = new PropertyLiteralExpression<String>(String.class, "jcr:path");
+  public static final PropertyLiteralExpression<String> strProperty = new PropertyLiteralExpression<String>(String.class, "strProperty");
+  public static final PropertyLiteralExpression<Integer> intProperty = new PropertyLiteralExpression<Integer>(Integer.class, "intProperty");
+
 }

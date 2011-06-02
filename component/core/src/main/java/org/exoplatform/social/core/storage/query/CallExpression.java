@@ -29,6 +29,15 @@ public class CallExpression <T> {
   private final PropertyLiteralExpression<T> property;
 
   public CallExpression(final QueryFunction function, final PropertyLiteralExpression<T> property) {
+
+    if (function == null) {
+      throw new NullPointerException();
+    }
+    
+    if (property == null) {
+      throw new NullPointerException();
+    }
+
     this.function = function;
     this.property = property;
   }

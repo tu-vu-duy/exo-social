@@ -34,27 +34,36 @@ public class WhereExpression {
   }
 
   public <T> WhereExpression equals(PropertyLiteralExpression<T> property, T value) {
+    checkParam(property, value);
+
     builder.append(String.format("%s = '%s' ", property.getName(), value));
     return this;
   }
 
   public <T> WhereExpression like(PropertyLiteralExpression<T> property, T value) {
+    checkParam(property, value);
+
     builder.append(String.format("%s LIKE '%s' ", property.getName(), value));
     return this;
   }
 
   public <T> WhereExpression like(CallExpression<T> call, T value) {
+    checkParam(call.getProperty(), value);
+
     builder.append(String.format("%s(%s) LIKE '%s' ", call.getFunction(), call.getProperty().getName(), value));
     return this;
   }
 
   public <T> WhereExpression contains(PropertyLiteralExpression<T> property, T value) {
+
+    checkParam(property, value);
+
     builder.append(String.format("CONTAINS (%s, '%s') ", property.getName(), value));
     return this;
   }
 
   public <T> WhereExpression orderBy(PropertyLiteralExpression<T> property, Order order) {
-    builder.append(String.format(" ORDER BY %s %s", property.getName(), order.toString()));
+    builder.append(String.format("ORDER BY %s %s", property.getName(), order.toString()));
     return this;
   }
 
@@ -98,6 +107,12 @@ public class WhereExpression {
 
   public <T> CallExpression callFunction(QueryFunction function, PropertyLiteralExpression<T> property) {
     return new CallExpression(function, property);
+  }
+
+  private <T> void checkParam(PropertyLiteralExpression<T> property, T value) {
+    if (!property.getType().equals(value.getClass())) {
+      throw new IllegalArgumentException();
+    }
   }
   
 }

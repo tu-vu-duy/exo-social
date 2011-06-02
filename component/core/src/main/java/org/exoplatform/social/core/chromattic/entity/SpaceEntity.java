@@ -48,12 +48,12 @@ public abstract class SpaceEntity {
   @Property(name = "soc:name")
   public abstract String getPrettyName();
   public abstract void setPrettyName(String prettyName);
-  public static final PropertyLiteralExpression name = new PropertyLiteralExpression(String.class, "soc:displayName");
+  public static final PropertyLiteralExpression<String> name = new PropertyLiteralExpression<String>(String.class, "soc:displayName");
 
   @Property(name = "soc:displayName")
   public abstract String getDisplayName();
   public abstract void setDisplayName(String displayName);
-  public static final PropertyLiteralExpression displayName = new PropertyLiteralExpression(String.class, "soc:displayName");
+  public static final PropertyLiteralExpression<String> displayName = new PropertyLiteralExpression<String>(String.class, "soc:displayName");
 
   @Property(name = "soc:registration")
   public abstract String getRegistration();
@@ -62,7 +62,7 @@ public abstract class SpaceEntity {
   @Property(name = "soc:description")
   public abstract String getDescription();
   public abstract void setDescription(String description);
-  public static final PropertyLiteralExpression description = new PropertyLiteralExpression(String.class, "soc:description");
+  public static final PropertyLiteralExpression<String> description = new PropertyLiteralExpression<String>(String.class, "soc:description");
 
   @Property(name = "soc:type")
   public abstract String getType();
@@ -79,32 +79,32 @@ public abstract class SpaceEntity {
   @Property(name = "soc:groupId")
   public abstract String getGroupId();
   public abstract void setGroupId(String groupId);
-  public static final PropertyLiteralExpression groupId = new PropertyLiteralExpression(String.class, "soc:groupId");
+  public static final PropertyLiteralExpression<String> groupId = new PropertyLiteralExpression<String>(String.class, "soc:groupId");
 
   @Property(name = "soc:url")
   public abstract String getURL();
   public abstract void setURL(String url);
-  public static final PropertyLiteralExpression url = new PropertyLiteralExpression(String.class, "soc:url");
+  public static final PropertyLiteralExpression<String> url = new PropertyLiteralExpression<String>(String.class, "soc:url");
 
   @Property(name = "soc:membersId")
   public abstract String[] getMembersId();
   public abstract void setMembersId(String[] membersId);
-  public static final PropertyLiteralExpression membersId = new PropertyLiteralExpression(String.class, "soc:membersId");
+  public static final PropertyLiteralExpression<String> membersId = new PropertyLiteralExpression<String>(String.class, "soc:membersId");
 
   @Property(name = "soc:pendingMembersId")
   public abstract String[] getPendingMembersId();
   public abstract void setPendingMembersId(String[] pendingMembersId);
-  public static final PropertyLiteralExpression pendingMembersId = new PropertyLiteralExpression(String.class, "soc:pendingMembersId");
+  public static final PropertyLiteralExpression<String> pendingMembersId = new PropertyLiteralExpression<String>(String.class, "soc:pendingMembersId");
 
   @Property(name = "soc:invitedMembersId")
   public abstract String[] getInvitedMembersId();
   public abstract void setInvitedMembersId(String[] invitedMembersId);
-  public static final PropertyLiteralExpression invitedMembersId = new PropertyLiteralExpression(String.class, "soc:invitedMembersId");
+  public static final PropertyLiteralExpression<String> invitedMembersId = new PropertyLiteralExpression<String>(String.class, "soc:invitedMembersId");
 
   @Property(name = "soc:managerMembersId")
   public abstract String[] getManagerMembersId();
   public abstract void setManagerMembersId(String[] managerMembersId);
-  public static final PropertyLiteralExpression managerMembersId = new PropertyLiteralExpression(String.class, "soc:managerMembersId");
+  public static final PropertyLiteralExpression<String> managerMembersId = new PropertyLiteralExpression<String>(String.class, "soc:managerMembersId");
 
   public String[] safeGetMembersId() {
 

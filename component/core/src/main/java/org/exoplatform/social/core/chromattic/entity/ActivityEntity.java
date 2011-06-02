@@ -60,7 +60,7 @@ public abstract class ActivityEntity {
   @ManyToOne(type = RelationshipType.REFERENCE)
   public abstract IdentityEntity getIdentity();
   public abstract void setIdentity(IdentityEntity identity);
-  public static final PropertyLiteralExpression identity = new PropertyLiteralExpression(String.class, "soc:identity");
+  public static final PropertyLiteralExpression<String> identity = new PropertyLiteralExpression<String>(String.class, "soc:identity");
 
   @Property(name = "soc:title")
   public abstract String getTitle();
@@ -78,12 +78,12 @@ public abstract class ActivityEntity {
   @DefaultValue("false")
   public abstract Boolean isComment();
   public abstract void setComment(Boolean isComment);
-  public static final PropertyLiteralExpression isComment = new PropertyLiteralExpression(Boolean.class, "soc:isComment");
+  public static final PropertyLiteralExpression<Boolean> isComment = new PropertyLiteralExpression<Boolean>(Boolean.class, "soc:isComment");
 
   @Property(name = "soc:postedTime")
   public abstract Long getPostedTime();
   public abstract void setPostedTime(Long postedTime);
-  public static final PropertyLiteralExpression postedTime = new PropertyLiteralExpression(Long.class, "soc:postedTime");
+  public static final PropertyLiteralExpression<Long> postedTime = new PropertyLiteralExpression<Long>(Long.class, "soc:postedTime");
 
   @MappedBy("soc:params")
   @OneToOne

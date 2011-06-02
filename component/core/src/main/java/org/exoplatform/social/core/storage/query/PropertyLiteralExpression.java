@@ -25,15 +25,24 @@ package org.exoplatform.social.core.storage.query;
  */
 public class PropertyLiteralExpression<T>  {
 
-  private final T type;
+  private final Class<T> type;
   private final String name;
 
-  public PropertyLiteralExpression(final T type, final String name) {
+  public PropertyLiteralExpression(final Class<T> type, final String name) {
+
+    if (type == null) {
+      throw new NullPointerException();
+    }
+
+    if (name == null) {
+      throw new NullPointerException();
+    }
+
     this.type = type;
     this.name = name;
   }
 
-  public T getType() {
+  public Class<T> getType() {
     return type;
   }
 

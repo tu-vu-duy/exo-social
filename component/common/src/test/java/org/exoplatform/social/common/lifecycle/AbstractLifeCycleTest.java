@@ -21,31 +21,33 @@ package org.exoplatform.social.common.lifecycle;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import junit.framework.TestCase;
 import org.exoplatform.component.test.AbstractKernelTest;
-import org.exoplatform.component.test.ConfigurationUnit;
-import org.exoplatform.component.test.ConfiguredBy;
-import org.exoplatform.component.test.ContainerScope;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ValueParam;
 
-import javax.faces.lifecycle.Lifecycle;
-
 public class AbstractLifeCycleTest extends AbstractKernelTest {
 
-  private LifeCycleCompletionService completionService;
+  private LifeCycleCompletionService asyncCompletionService;
+  private LifeCycleCompletionService syncCompletionService;
 
   @Override
   public void setUp() throws Exception {
 
     super.setUp();
 
-    InitParams params = new InitParams();
+    InitParams asyncParams = new InitParams();
 
-    params.addParameter(createParam("thread-number", "10"));
-    params.addParameter(createParam("async-execution", "true"));
+    asyncParams.addParameter(createParam("thread-number", "10"));
+    asyncParams.addParameter(createParam("async-execution", "true"));
 
-    completionService = new LifeCycleCompletionService(params);
+    asyncCompletionService = new LifeCycleCompletionService(asyncParams);
+
+    InitParams syncParams = new InitParams();
+
+    syncParams.addParameter(createParam("thread-number", "10"));
+    syncParams.addParameter(createParam("async-execution", "false"));
+
+    syncCompletionService = new LifeCycleCompletionService(syncParams);
 
   }
 
@@ -64,9 +66,9 @@ public class AbstractLifeCycleTest extends AbstractKernelTest {
     return valueParam;
   }
 
-  public void testSimpleBroadcast() {
+  public void testAsyncSimpleBroadcast() {
 
-    AwaitingLifeCycle lifecycle = new AwaitingLifeCycle(completionService);
+    AwaitingLifeCycle lifecycle = new AwaitingLifeCycle(asyncCompletionService);
 
     MockListener capture = new MockListener();
     lifecycle.addListener(capture);
@@ -76,7 +78,7 @@ public class AbstractLifeCycleTest extends AbstractKernelTest {
     lifecycle.event1(null, "foo");
     lifecycle.event1(null, "bar");
 
-    completionService.waitCompletionFinished();
+    asyncCompletionService.waitCompletionFinished();
 
     assertTrue(capture.hasEvent("bar"));
     assertTrue(capture.hasEvent("foo"));
@@ -86,9 +88,9 @@ public class AbstractLifeCycleTest extends AbstractKernelTest {
 
   }
 
-  public void testBroadcastWithFailingListener() {
+  public void testAsyncBroadcastWithFailingListener() {
 
-    AwaitingLifeCycle lifecycle = new AwaitingLifeCycle(completionService);
+    AwaitingLifeCycle lifecycle = new AwaitingLifeCycle(asyncCompletionService);
     MockListener capture = new MockListener();
     lifecycle.addListener(capture);
     MockFailingListener failing = new MockFailingListener();
@@ -99,7 +101,50 @@ public class AbstractLifeCycleTest extends AbstractKernelTest {
     lifecycle.event1(null, "foo");
     lifecycle.event1(null, "bar");
 
-    completionService.waitCompletionFinished();
+    asyncCompletionService.waitCompletionFinished();
+
+    assertTrue(capture.hasEvent("bar"));
+    assertTrue(capture.hasEvent("foo"));
+    assertTrue(capture2.hasEvent("bar"));
+    assertTrue(capture2.hasEvent("foo"));
+    assertFalse(failing.hasEvent("bar"));
+    assertFalse(failing.hasEvent("foo"));
+
+
+  }
+
+  public void testSyncSimpleBroadcast() {
+
+    AwaitingLifeCycle lifecycle = new AwaitingLifeCycle(syncCompletionService);
+
+    MockListener capture = new MockListener();
+    lifecycle.addListener(capture);
+    MockListener capture2 = new MockListener();
+    lifecycle.addListener(capture2);
+
+    lifecycle.event1(null, "foo");
+    lifecycle.event1(null, "bar");
+
+    assertTrue(capture.hasEvent("bar"));
+    assertTrue(capture.hasEvent("foo"));
+    assertTrue(capture2.hasEvent("bar"));
+    assertTrue(capture2.hasEvent("foo"));
+
+
+  }
+
+  public void testSyncBroadcastWithFailingListener() {
+
+    AwaitingLifeCycle lifecycle = new AwaitingLifeCycle(syncCompletionService);
+    MockListener capture = new MockListener();
+    lifecycle.addListener(capture);
+    MockFailingListener failing = new MockFailingListener();
+    lifecycle.addListener(failing);
+    MockListener capture2 = new MockListener();
+    lifecycle.addListener(capture2);
+
+    lifecycle.event1(null, "foo");
+    lifecycle.event1(null, "bar");
 
     assertTrue(capture.hasEvent("bar"));
     assertTrue(capture.hasEvent("foo"));

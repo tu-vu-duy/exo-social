@@ -55,7 +55,7 @@ public abstract class ProfileEntity {
   @Property(name = "soc:parentId")
   public abstract String getParentId();
   public abstract void setParentId(String parentid);
-  public static final PropertyLiteralExpression parentId = new PropertyLiteralExpression(String.class, "soc:parentId");
+  public static final PropertyLiteralExpression<String> parentId = new PropertyLiteralExpression<String>(String.class, "soc:parentId");
 
   @OneToMany
   @Owner
@@ -63,10 +63,10 @@ public abstract class ProfileEntity {
 
   @Properties
   public abstract Map<String, List<String>> getProperties();
-  public static final PropertyLiteralExpression firstName = new PropertyLiteralExpression(String.class, "void-firstName");
-  public static final PropertyLiteralExpression fullName = new PropertyLiteralExpression(String.class, "void-fullName");
-  public static final PropertyLiteralExpression position = new PropertyLiteralExpression(String.class, "void-position");
-  public static final PropertyLiteralExpression gender = new PropertyLiteralExpression(String.class, "void-gender");
+  public static final PropertyLiteralExpression<String> firstName = new PropertyLiteralExpression<String>(String.class, "void-firstName");
+  public static final PropertyLiteralExpression<String> fullName = new PropertyLiteralExpression<String>(String.class, "void-fullName");
+  public static final PropertyLiteralExpression<String> position = new PropertyLiteralExpression<String>(String.class, "void-position");
+  public static final PropertyLiteralExpression<String> gender = new PropertyLiteralExpression<String>(String.class, "void-gender");
 
   @Create
   public abstract NTFile createAvatar();

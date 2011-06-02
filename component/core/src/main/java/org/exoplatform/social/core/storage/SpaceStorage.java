@@ -437,9 +437,17 @@ public class SpaceStorage extends AbstractStorage {
   }
 
   /*
-    Public.
+    Public
    */
 
+  /**
+   * Gets a space by its display name.
+   *
+   * @param spaceDisplayName
+   * @return the space with spaceDisplayName that matches the spaceDisplayName input.
+   * @since  1.2.0-GA
+   * @throws SpaceStorageException
+   */
   public Space getSpaceByDisplayName(String spaceDisplayName) throws SpaceStorageException {
     Space space = null;
 
@@ -458,6 +466,14 @@ public class SpaceStorage extends AbstractStorage {
     return space;
   }
 
+  /**
+   * Saves a space. If isNew is true, creates new space. If not only updates space
+   * an saves it.
+   *
+   * @param space
+   * @param isNew
+   * @throws SpaceStorageException
+   */
   public void saveSpace(Space space, boolean isNew) throws SpaceStorageException {
 
     SpaceEntity entity;
@@ -478,6 +494,13 @@ public class SpaceStorage extends AbstractStorage {
       //
       getSession().save();
 
+      //
+      LOG.debug(String.format(
+          "Space %s (%s) saved",
+          space.getPrettyName(),
+          space.getId()
+      ));
+
     }
     catch (NodeNotFoundException e) {
       throw new SpaceStorageException(SpaceStorageException.Type.FAILED_TO_SAVE_SPACE, e.getMessage(), e);
@@ -485,20 +508,49 @@ public class SpaceStorage extends AbstractStorage {
 
   }
 
+  /**
+   * Deletes a space by space id.
+   *
+   * @param id
+   * @throws SpaceStorageException
+   */
   public void deleteSpace(String id) throws SpaceStorageException {
+
+    String name;
+
+    //
+    try {
+      name = _findById(SpaceEntity.class, id).getPrettyName();
+    }
+    catch (NodeNotFoundException e) {
+      throw new SpaceStorageException(SpaceStorageException.Type.FAILED_TO_DELETE_SPACE, e.getMessage());
+    }
 
     //
     _removeById(SpaceEntity.class, id);
 
     //
     getSession().save();
-    
+
+    //
+    LOG.debug(String.format(
+        "Space %s removed",
+        name)
+    );
   }
 
   /*
     Member spaces
    */
 
+  /**
+   * Gets the count of the spaces that a user has the "member" role.
+   *
+   * @param userId
+   * @return the count of the member spaces
+   * @throws SpaceStorageException
+   * @since 1.2.0-GA
+   */
   public int getMemberSpacesCount(String userId) throws SpaceStorageException {
     try {
        return identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId).getSpaces().getRefs().size();
@@ -508,10 +560,26 @@ public class SpaceStorage extends AbstractStorage {
     }
   }
 
+  /**
+   * Gets the count of the spaces which user has "member" role by filter.
+   *
+   * @param userId
+   * @param spaceFilter
+   * @return
+   * @since 1.2.0-GA
+   */
   public int getMemberSpacesByFilterCount(String userId, SpaceFilter spaceFilter) {
     return _getSpacesByFilterQuery(userId, spaceFilter).objects().size();
   }
 
+  /**
+   * Gets the spaces that a user has the "member" role.
+   *
+   * @param userId
+   * @return a list of the member spaces
+   * @throws SpaceStorageException
+   * @since 1.2.0-GA
+   */
   public List<Space> getMemberSpaces(String userId) throws SpaceStorageException {
 
     try {
@@ -534,6 +602,16 @@ public class SpaceStorage extends AbstractStorage {
     }
   }
 
+  /**
+   * Gets the spaces that a user has the "member" role with offset, limit.
+   *
+   * @param userId
+   * @param offset
+   * @param limit
+   * @return a list of the member spaces with offset, limit
+   * @throws SpaceStorageException
+   * @since 1.2.0-GA
+   */
   public List<Space> getMemberSpaces(String userId, long offset, long limit) throws SpaceStorageException {
 
     List<Space> spaces = new ArrayList<Space>();
@@ -571,6 +649,16 @@ public class SpaceStorage extends AbstractStorage {
     return spaces;
   }
 
+  /**
+   * Gets the member spaces of the user id by the filter with offset, limit.
+   *
+   * @param userId
+   * @param spaceFilter
+   * @param offset
+   * @param limit
+   * @return
+   * @since 1.2.0-GA
+   */
   public List<Space> getMemberSpacesByFilter(String userId, SpaceFilter spaceFilter, long offset, long limit) {
 
     List<Space> spaces = new ArrayList<Space>();
@@ -593,6 +681,14 @@ public class SpaceStorage extends AbstractStorage {
     Pending spaces
    */
 
+  /**
+   * Gets the count of the pending spaces of the userId.
+   *
+   * @param userId
+   * @return the count of the pending spaces
+   * @throws SpaceStorageException
+   * @since 1.2.0-GA
+   */
   public int getPendingSpacesCount(String userId) throws SpaceStorageException {
     try {
       IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
@@ -604,10 +700,26 @@ public class SpaceStorage extends AbstractStorage {
     }
   }
 
+  /**
+   * Gets the count of the pending spaces of the user by space filter.
+   *
+   * @param userId
+   * @param spaceFilter
+   * @return
+   * @since 1.2.0-GA
+   */
   public int getPendingSpacesByFilterCount(String userId, SpaceFilter spaceFilter) {
     return _getPendingSpacesFilterQuery(userId, spaceFilter).objects().size();
   }
 
+  /**
+   * Gets a user's pending spaces and that the user can revoke that request.
+   *
+   * @param userId
+   * @return a list of the pending spaces
+   * @throws SpaceStorageException
+   * @since 1.2.0-GA
+   */
   public List<Space> getPendingSpaces(String userId) throws SpaceStorageException {
 
     List<Space> spaces = new ArrayList<Space>();
@@ -630,6 +742,16 @@ public class SpaceStorage extends AbstractStorage {
     return spaces;
   }
 
+  /**
+   * Gets a user's pending spaces and that the user can revoke that request with offset, limit.
+   *
+   * @param userId
+   * @param offset
+   * @param limit
+   * @return a list of the pending spaces with offset, limit
+   * @throws SpaceStorageException
+   * @since 1.2.0-GA
+   */
   public List<Space> getPendingSpaces(String userId, long offset, long limit) throws SpaceStorageException {
 
     List<Space> spaces = new ArrayList<Space>();
@@ -668,6 +790,16 @@ public class SpaceStorage extends AbstractStorage {
     return spaces;
   }
 
+  /**
+   * Gets the pending spaces of the user by space filter with offset, limit.
+   *
+   * @param userId
+   * @param spaceFilter
+   * @param offset
+   * @param limit
+   * @return
+   * @since 1.2.0-GA
+   */
   public List<Space> getPendingSpacesByFilter(String userId, SpaceFilter spaceFilter, long offset, long limit) {
 
     List<Space> spaces = new ArrayList<Space>();
@@ -689,6 +821,14 @@ public class SpaceStorage extends AbstractStorage {
     Invited spaces
    */
 
+  /**
+   * Gets the count of the invited spaces of the userId.
+   *
+   * @param userId
+   * @return the count of the invited spaces
+   * @throws SpaceStorageException
+   * @since 1.2.0-GA
+   */
   public int getInvitedSpacesCount(String userId) throws SpaceStorageException {
 
     try {
@@ -702,6 +842,14 @@ public class SpaceStorage extends AbstractStorage {
 
   }
 
+  /**
+   * Gets the count of the invited spaces of the user by filter.
+   *
+   * @param userId
+   * @param spaceFilter
+   * @return
+   * @since 1.2.0-GA
+   */
   public int getInvitedSpacesByFilterCount(String userId, SpaceFilter spaceFilter) {
 
     if (_validateFilter(spaceFilter)) {
@@ -712,6 +860,14 @@ public class SpaceStorage extends AbstractStorage {
     }
   }
 
+  /**
+   * Gets a user's invited spaces and that user can accept or deny the request.
+   *
+   * @param userId
+   * @return a list of the invited spaces.
+   * @throws SpaceStorageException
+   * @since 1.2.0-GA
+   */
   public List<Space> getInvitedSpaces(String userId) throws SpaceStorageException {
 
     List<Space> spaces = new ArrayList<Space>();
@@ -734,6 +890,16 @@ public class SpaceStorage extends AbstractStorage {
     return spaces;
   }
 
+  /**
+   * Gets a user's invited spaces and that user can accept or deny the request with offset, limit.
+   *
+   * @param userId
+   * @param offset
+   * @param limit
+   * @return a list of the invited spaces with offset, limit
+   * @throws SpaceStorageException
+   * @since 1.2.0-GA
+   */
   public List<Space> getInvitedSpaces(String userId, long offset, long limit) throws SpaceStorageException {
     List<Space> spaces = new ArrayList<Space>();
 
@@ -770,6 +936,16 @@ public class SpaceStorage extends AbstractStorage {
     return spaces;
   }
 
+  /**
+   * Gets the invited spaces of the user by space filter with offset, limit.
+   *
+   * @param userId
+   * @param spaceFilter
+   * @param offset
+   * @param limit
+   * @return
+   * @since 1.2.0-GA
+   */
   public List<Space> getInvitedSpacesByFilter(String userId, SpaceFilter spaceFilter, long offset, long limit) {
 
     List<Space> spaces = new ArrayList<Space>();
@@ -791,10 +967,26 @@ public class SpaceStorage extends AbstractStorage {
     Public spaces
    */
 
+  /**
+   * Gets the count of the public spaces of the userId.
+   *
+   * @param userId
+   * @return the count of the spaces in which the user can request to join
+   * @throws SpaceStorageException
+   * @since 1.2.0-GA
+   */
   public int getPublicSpacesCount(String userId) throws SpaceStorageException {
     return _getPublicSpacesQuery(userId).objects().size();
   }
 
+  /**
+   * Gets the count of the public spaces of the user by space filter.
+   *
+   * @param userId
+   * @param spaceFilter
+   * @return
+   * @since 1.2.0-GA
+   */
   public int getPublicSpacesByFilterCount(String userId, SpaceFilter spaceFilter) {
     if (_validateFilter(spaceFilter)) {
       return _getPublicSpacesQuery(userId, spaceFilter).objects().size();
@@ -804,6 +996,16 @@ public class SpaceStorage extends AbstractStorage {
     }
   }
 
+  /**
+   * Gets the public spaces of the user by filter with offset, limit.
+   *
+   * @param userId
+   * @param spaceFilter
+   * @param offset
+   * @param limit
+   * @return
+   * @since 1.2.0-GA
+   */
   public List<Space> getPublicSpacesByFilter(String userId, SpaceFilter spaceFilter, long offset, long limit) {
 
     try {
@@ -828,6 +1030,14 @@ public class SpaceStorage extends AbstractStorage {
     return spaces;
   }
 
+  /**
+   * Gets a user's public spaces and that user can request to join.
+   *
+   * @param userId
+   * @return spaces list in which the user can request to join.
+   * @throws SpaceStorageException
+   * @since 1.2.0-GA
+   */
   public List<Space> getPublicSpaces(String userId) throws SpaceStorageException {
     List<Space> spaces = new ArrayList<Space>();
 
@@ -844,6 +1054,16 @@ public class SpaceStorage extends AbstractStorage {
     return spaces;
   }
 
+  /**
+   * Gets a user's public spaces and that user can request to join with offset, limit.
+   *
+   * @param userId
+   * @param offset
+   * @param limit
+   * @return spaces list in which the user can request to join with offset, limit
+   * @throws SpaceStorageException
+   * @since 1.2.0-GA
+   */
   public List<Space> getPublicSpaces(String userId, long offset, long limit) throws SpaceStorageException {
 
     List<Space> spaces = new ArrayList<Space>();
@@ -865,14 +1085,38 @@ public class SpaceStorage extends AbstractStorage {
     Accessible spaces
    */
 
+  /**
+   * Gets the count of the accessible spaces of the userId.
+   *
+   * @param userId
+   * @return the count of the accessible spaces
+   * @throws SpaceStorageException
+   * @since 1.2.0-GA
+   */
   public int getAccessibleSpacesCount(String userId) throws SpaceStorageException {
     return _getAccessibleSpacesByFilterQuery(userId, null).objects().size();
   }
 
+  /**
+   * Gets the count of the accessible spaces of the user by filter.
+   *
+   * @param userId
+   * @param spaceFilter
+   * @return
+   * @since 1.2.0-GA
+   */
   public int getAccessibleSpacesByFilterCount(String userId, SpaceFilter spaceFilter) {
     return _getAccessibleSpacesByFilterQuery(userId, spaceFilter).objects().size();
   }
 
+  /**
+   * Gets the spaces of a user which that user has the "member" role or edit permission.
+   *
+   * @param userId the userId
+   * @return a list of the accessible spaces
+   * @throws SpaceStorageException
+   * @since 1.2.0-GA
+   */
   public List<Space> getAccessibleSpaces(String userId) throws SpaceStorageException {
 
     List<Space> spaces = new ArrayList<Space>();
@@ -890,6 +1134,16 @@ public class SpaceStorage extends AbstractStorage {
     return spaces;
   }
 
+  /**
+   * Gets the spaces of a user which that user has "member" role or edit permission with offset, limit.
+   *
+   * @param userId the userId
+   * @param offset
+   * @param limit
+   * @return a list of the accessible space with offset, limit
+   * @throws SpaceStorageException
+   * @since 1.2.0-GA
+   */
   public List<Space> getAccessibleSpaces(String userId, long offset, long limit) throws SpaceStorageException {
     List<Space> spaces = new ArrayList<Space>();
 
@@ -906,6 +1160,16 @@ public class SpaceStorage extends AbstractStorage {
     return spaces;
   }
 
+  /**
+   * Gets the accessible spaces of the user by filter with offset, limit.
+   *
+   * @param userId
+   * @param spaceFilter
+   * @param offset
+   * @param limit
+   * @return
+   * @since 1.2.0-GA
+   */
   public List<Space> getAccessibleSpacesByFilter(String userId, SpaceFilter spaceFilter, long offset, long limit) {
 
     List<Space> spaces = new ArrayList<Space>();
@@ -927,6 +1191,14 @@ public class SpaceStorage extends AbstractStorage {
     Editable spaces    
    */
 
+  /**
+   * Gets the count of the spaces of a user which that user has the edit permission.
+   *
+   * @param userId
+   * @return the count of the editable spaces.
+   * @throws SpaceStorageException
+   * @since 1.2.0-GA
+   */
   public int getEditableSpacesCount(String userId) throws SpaceStorageException {
     try {
       IdentityEntity identityEntity = identityStorage._findIdentityEntity(OrganizationIdentityProvider.NAME, userId);
@@ -937,10 +1209,26 @@ public class SpaceStorage extends AbstractStorage {
     }
   }
 
+  /**
+   * Gets the count of the editable spaces of the user by filter.
+   *
+   * @param userId
+   * @param spaceFilter
+   * @return
+   * @since 1.2.0-GA
+   */
   public int getEditableSpacesByFilterCount(String userId, SpaceFilter spaceFilter) {
     return _getEditableSpacesFilterQuery(userId, spaceFilter).objects().size();
   }
 
+  /**
+   * Gets the spaces of a user which that user has the edit permission.
+   *
+   * @param userId
+   * @return a list of the editable spaces.
+   * @throws SpaceStorageException
+   * @since 1.2.0-GA
+   */
   public List<Space> getEditableSpaces(String userId) throws SpaceStorageException {
 
     List<Space> spaces = new ArrayList<Space>();
@@ -968,6 +1256,16 @@ public class SpaceStorage extends AbstractStorage {
 
   }
 
+  /**
+   * Gets the spaces of a user which that user has the edit permission with offset, limit.
+   *
+   * @param userId
+   * @param offset
+   * @param limit
+   * @return a list of the spaces with offset, limit
+   * @throws SpaceStorageException
+   * @since 1.2.0-GA
+   */
   public List<Space> getEditableSpaces(String userId, long offset, long limit) throws SpaceStorageException {
 
     List<Space> spaces = new ArrayList<Space>();
@@ -1005,6 +1303,16 @@ public class SpaceStorage extends AbstractStorage {
     return spaces;
   }
 
+  /**
+   * Gets the editable spaces of the user by filter with offset, limit.
+   *
+   * @param userId
+   * @param spaceFilter
+   * @param offset
+   * @param limit
+   * @return
+   * @since 1.2.0-GA
+   */
   public List<Space> getEditableSpacesByFilter(String userId, SpaceFilter spaceFilter, long offset, long limit) {
 
     List<Space> spaces = new ArrayList<Space>();
@@ -1026,6 +1334,13 @@ public class SpaceStorage extends AbstractStorage {
     All spaces
    */
 
+  /**
+   * Gets the count of the spaces.
+   *
+   * @return the count of all spaces
+   * @throws SpaceStorageException
+   * @since 1.2.0-GA
+   */
   public int getAllSpacesCount() throws SpaceStorageException {
 
     // TODO : use property to improve the perfs
@@ -1034,6 +1349,12 @@ public class SpaceStorage extends AbstractStorage {
 
   }
 
+  /**
+   * Gets all the spaces. By the default get the all spaces with OFFSET = 0, LIMIT = 200;
+   *
+   * @throws SpaceStorageException
+   * @return the list of all spaces
+   */
   public List<Space> getAllSpaces() throws SpaceStorageException {
 
     List<Space> spaces = new ArrayList<Space>();
@@ -1048,6 +1369,13 @@ public class SpaceStorage extends AbstractStorage {
 
   }
 
+  /**
+   * Gets the count of the spaces which are searched by space filter.
+   *
+   * @param spaceFilter
+   * @return
+   * @since 1.2.0-GA
+   */
   public int getAllSpacesByFilterCount(SpaceFilter spaceFilter) {
 
     if (_validateFilter(spaceFilter)) {
@@ -1064,6 +1392,15 @@ public class SpaceStorage extends AbstractStorage {
     Get spaces
    */
 
+  /**
+   * Gets the spaces with offset, limit.
+   *
+   * @param offset
+   * @param limit
+   * @return the list of the spaces with offset, limit
+   * @throws SpaceStorageException
+   * @since 1.2.0-GA
+   */
   public List<Space> getSpaces(long offset, long limit) throws SpaceStorageException {
 
     List<Space> spaces = new ArrayList<Space>();
@@ -1091,6 +1428,15 @@ public class SpaceStorage extends AbstractStorage {
 
   }
 
+  /**
+   * Gets the spaces by space filter with offset, limit.
+   *
+   * @param spaceFilter
+   * @param offset
+   * @param limit
+   * @return
+   * @throws SpaceStorageException
+   */
   public List<Space> getSpacesByFilter(SpaceFilter spaceFilter, long offset, long limit) {
 
     List<Space> spaces = new ArrayList<Space>();
@@ -1112,6 +1458,13 @@ public class SpaceStorage extends AbstractStorage {
     return spaces;
   }
 
+  /**
+   * Gets a space by its space id.
+   *
+   * @param id
+   * @return space with id specified
+   * @throws SpaceStorageException
+   */
   public Space getSpaceById(String id) throws SpaceStorageException {
 
     try {
@@ -1131,6 +1484,14 @@ public class SpaceStorage extends AbstractStorage {
 
   }
 
+  /**
+   * Gets a space by its pretty name.
+   *
+   * @param spacePrettyName
+   * @return the space with spacePrettyName that matches spacePrettyName input.
+   * @throws SpaceStorageException
+   * @since 1.2.0-GA
+   */
   public Space getSpaceByPrettyName(String spacePrettyName) throws SpaceStorageException {
 
     try {
@@ -1148,6 +1509,14 @@ public class SpaceStorage extends AbstractStorage {
     }
   }
 
+  /**
+   * Gets a space by its associated group id.
+   *
+   * @param  groupId
+   * @return the space that has group id matching the groupId string input.
+   * @throws SpaceStorageException
+   * @since  1.2.0-GA
+   */
   public Space getSpaceByGroupId(String groupId) throws SpaceStorageException {
 
     // TODO : avoid JCR query ?
@@ -1173,6 +1542,13 @@ public class SpaceStorage extends AbstractStorage {
 
   }
 
+  /**
+   * Gets a space by its url.
+   *
+   * @param url
+   * @return the space with string url specified
+   * @throws SpaceStorageException
+   */
   public Space getSpaceByUrl(String url) throws SpaceStorageException {
 
     // TODO : avoid JCR query ?

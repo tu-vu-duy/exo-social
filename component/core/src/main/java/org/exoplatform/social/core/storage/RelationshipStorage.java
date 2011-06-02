@@ -105,8 +105,8 @@ public class RelationshipStorage extends AbstractStorage {
     }
   }
 
-  /**
-   * Private.
+  /*
+   * Internal
    */
 
   RelationshipEntity _createRelationship(final Relationship relationship) throws NodeNotFoundException {
@@ -319,7 +319,7 @@ public class RelationshipStorage extends AbstractStorage {
     return relationship;
   }
 
-  public Relationship _getRelationship(final Identity identity1, final Identity identity2) throws RelationshipStorageException, NodeNotFoundException {
+  Relationship _getRelationship(final Identity identity1, final Identity identity2) throws RelationshipStorageException, NodeNotFoundException {
 
     IdentityEntity identityEntity1 = _findById(IdentityEntity.class, identity1.getId());
     IdentityEntity identityEntity2 = _findById(IdentityEntity.class, identity2.getId());
@@ -358,10 +358,16 @@ public class RelationshipStorage extends AbstractStorage {
     return relationship;
   }
 
-  /**
-   * Public.
+  /*
+   * Public
    */
 
+  /**
+   * Saves relationship.
+   *
+   * @param relationship the relationship
+   * @throws RelationshipStorageException
+   */
   public Relationship saveRelationship(final Relationship relationship) throws RelationshipStorageException {
     try {
       if (relationship.getId() == null) {
@@ -378,6 +384,12 @@ public class RelationshipStorage extends AbstractStorage {
     return relationship;
   }
 
+  /**
+   * Removes the relationship.
+   *
+   * @param relationship the relationship
+   * @throws RelationshipStorageException
+   */
   public void removeRelationship(Relationship relationship) throws RelationshipStorageException {
 
     try {
@@ -415,6 +427,13 @@ public class RelationshipStorage extends AbstractStorage {
     }
   }
 
+  /**
+   * Gets the relationship.
+   *
+   * @param uuid the uuid
+   * @return the relationship
+   * @throws RelationshipStorageException
+   */
   public Relationship getRelationship(String uuid) throws RelationshipStorageException {
 
     try {
@@ -425,6 +444,16 @@ public class RelationshipStorage extends AbstractStorage {
     }
   }
 
+  /**
+   * Gets the list of relationship by identity id matching with checking
+   * identity ids
+   *
+   * @param sender the identity
+   * @param type
+   * @param listCheckIdentity identity the checking identities
+   * @return the relationship
+   * @throws RelationshipStorageException
+   */
   public List<Relationship> getSenderRelationships(final Identity sender, final Relationship.Type type,
                                                    final List<Identity> listCheckIdentity) throws RelationshipStorageException {
 
@@ -437,6 +466,16 @@ public class RelationshipStorage extends AbstractStorage {
     }
   }
 
+  /**
+   * Gets the list of relationship by identity id matching with checking
+   * identity ids
+   *
+   * @param receiver the identity id
+   * @param type
+   * @param listCheckIdentity identityId the checking identity ids
+   * @return the relationship
+   * @throws RelationshipStorageException
+   */
   public List<Relationship> getReceiverRelationships(final Identity receiver, final Relationship.Type type,
                                                    final List<Identity> listCheckIdentity) throws RelationshipStorageException {
 
@@ -449,6 +488,14 @@ public class RelationshipStorage extends AbstractStorage {
     }
   }
 
+  /**
+   * Gets the relationship of 2 identities.
+   *
+   * @param identity1 the identity1
+   * @param identity2 the identity2
+   * @return the relationship
+   * @throws RelationshipStorageException
+   */
   public Relationship getRelationship(final Identity identity1, final Identity identity2) throws RelationshipStorageException {
     try {
       return _getRelationship(identity1, identity2);
@@ -458,6 +505,16 @@ public class RelationshipStorage extends AbstractStorage {
     }
   }
 
+  /**
+   * Gets the list of relationship by identity id matching with checking
+   * identity ids
+   *
+   * @param identity the identity
+   * @param type
+   * @param listCheckIdentity identity the checking identities
+   * @return the relationship
+   * @throws RelationshipStorageException
+   */
   public List<Relationship> getRelationships(final Identity identity, final Relationship.Type type,
                                              final List<Identity> listCheckIdentity) throws RelationshipStorageException {
     try {
@@ -495,6 +552,16 @@ public class RelationshipStorage extends AbstractStorage {
     }
   }
 
+  /**
+   * Gets connections with the identity.
+   *
+   * @param identity
+   * @param offset
+   * @param limit
+   * @return number of connections belong to limitation of offset and limit.
+   * @throws RelationshipStorageException
+   * @since 1.2.0-GA
+   */
   public List<Identity> getConnections(Identity identity, int offset, int limit) throws RelationshipStorageException {
 
     //
@@ -529,6 +596,14 @@ public class RelationshipStorage extends AbstractStorage {
     }
   }
 
+  /**
+   * Gets count of connection with the identity.
+   *
+   * @param identity
+   * @return
+   * @throws RelationshipStorageException
+   * @since 1.2.0-GA
+   */
   public int getConnectionsCount(Identity identity) throws RelationshipStorageException {
 
     try {

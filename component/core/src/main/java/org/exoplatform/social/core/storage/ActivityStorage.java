@@ -58,8 +58,44 @@ public class ActivityStorage extends AbstractStorage {
   /** Logger */
   private static final Log LOG = ExoLogger.getLogger(ActivityStorage.class);
 
-  /**
-   * Private.
+  /*
+   * Internal
+   */
+
+  void _createActivity(Identity owner, ExoSocialActivity activity) throws NodeNotFoundException {
+
+    IdentityEntity identityEntity = _findById(IdentityEntity.class, owner.getId());
+
+    // Get ActivityList
+    ActivityListEntity activityListEntity = identityEntity.getActivityList();
+
+    ActivityDayEntity activityDayEntity = _getCurrentActivityDay(activityListEntity);
+
+    // Create activity
+    long currentMillis = System.currentTimeMillis();
+    ActivityEntity activityEntity = activityDayEntity.createActivity(String.valueOf(currentMillis));
+    activityDayEntity.getActivities().add(0, activityEntity);
+    activityEntity.setIdentity(identityEntity);
+    activityEntity.setComment(Boolean.FALSE);
+    activityEntity.setPostedTime(currentMillis);
+
+    activity.setId(activityEntity.getId());
+    activity.setStreamOwner(identityEntity.getRemoteId());
+
+    _fillActivityEntityFromActivity(activity, activityEntity);
+
+    activityDayEntity.inc();
+  }
+
+  void _saveActivity(ExoSocialActivity activity) throws NodeNotFoundException {
+
+    ActivityEntity activityEntity = _findById(ActivityEntity.class, activity.getId());
+    _fillActivityEntityFromActivity(activity, activityEntity);
+
+  }
+
+  /*
+   * Private
    */
   private ActivityDayEntity _getCurrentActivityDay(ActivityListEntity activityListEntity) {
 
@@ -145,42 +181,16 @@ public class ActivityStorage extends AbstractStorage {
 
   }
 
-  /**
-   * Internal
+  /*
+   * Public
    */
 
-  void _createActivity(Identity owner, ExoSocialActivity activity) throws NodeNotFoundException {
-
-    IdentityEntity identityEntity = _findById(IdentityEntity.class, owner.getId());
-
-    // Get ActivityList
-    ActivityListEntity activityListEntity = identityEntity.getActivityList();
-
-    ActivityDayEntity activityDayEntity = _getCurrentActivityDay(activityListEntity);
-
-    // Create activity
-    long currentMillis = System.currentTimeMillis();
-    ActivityEntity activityEntity = activityDayEntity.createActivity(String.valueOf(currentMillis));
-    activityDayEntity.getActivities().add(0, activityEntity);
-    activityEntity.setIdentity(identityEntity);
-    activityEntity.setComment(Boolean.FALSE);
-    activityEntity.setPostedTime(currentMillis);
-
-    activity.setId(activityEntity.getId());
-    activity.setStreamOwner(identityEntity.getRemoteId());
-
-    _fillActivityEntityFromActivity(activity, activityEntity);
-
-    activityDayEntity.inc();
-  }
-
-  void _saveActivity(ExoSocialActivity activity) throws NodeNotFoundException {
-
-    ActivityEntity activityEntity = _findById(ActivityEntity.class, activity.getId());
-    _fillActivityEntityFromActivity(activity, activityEntity);
-
-  }
-
+  /**
+   * Load an activity by its id.
+   *
+   * @param activityId the id of the activity. An UUID.
+   * @return the activity
+   */
   public ExoSocialActivity getActivity(String activityId) throws ActivityStorageException {
 
     try {
@@ -202,12 +212,28 @@ public class ActivityStorage extends AbstractStorage {
     }
   }
 
+  /**
+   * Gets all the activities by identity.
+   *
+   * @param owner the identity
+   * @return the activities
+   */
   public List<ExoSocialActivity> getActivities(Identity owner) throws ActivityStorageException {
 
     return getActivities(owner, 0, 0);
     
   }
 
+  /**
+   * Gets the activities by identity.
+   *
+   * Access a user's activity stream by specifying the offset and limit.
+   *
+   * @param owner the identity
+   * @param offset
+   * @param limit
+   * @return the activities
+   */
   public List<ExoSocialActivity> getActivities(Identity owner, long offset, long limit) throws ActivityStorageException {
 
     List<ExoSocialActivity> activities = new ArrayList<ExoSocialActivity>();
@@ -271,6 +297,14 @@ public class ActivityStorage extends AbstractStorage {
     return activities;
   }
   
+  /**
+   * Save comment to an activity.
+   * activity's ownerstream has to be the same as ownerStream param here.
+   *
+   * @param activity
+   * @param comment
+   * @since 1.1.1
+   */
   public void saveComment(ExoSocialActivity activity, ExoSocialActivity comment) throws ActivityStorageException {
 
     try {
@@ -306,6 +340,17 @@ public class ActivityStorage extends AbstractStorage {
     ));
   }
 
+  /**
+     * Saves an activity into a stream.
+     * Note that the field {@link org.exoplatform.social.core.activity.model.ExoSocialActivity#setUserId(String)}
+     * should be the id of an identity {@link Identity#getId()}
+     * @param owner owner of the stream where this activity is bound.
+     *              Usually a user or space identity
+     * @param activity the activity to save
+     * @return stored activity
+     * @throws ActivityStorageException activity storage exception with type: ActivityStorageException.Type.FAILED_TO_SAVE_ACTIVITY
+     * @since 1.1.1
+     */
   public ExoSocialActivity saveActivity(Identity owner, ExoSocialActivity activity) throws ActivityStorageException {
     try {
       Validate.notNull(owner, "owner must not be null.");
@@ -350,6 +395,12 @@ public class ActivityStorage extends AbstractStorage {
     }
   }
 
+  /**
+   * Deletes activity by its id.
+   * This will delete comments from this activity first, then delete the activity.
+   *
+   * @param activityId the activity id
+   */
   public void deleteActivity(String activityId) throws ActivityStorageException {
 
     try {
@@ -389,12 +440,30 @@ public class ActivityStorage extends AbstractStorage {
     }
   }
 
+  /**
+   * Delete comment by its id.
+   *
+   * @param activityId
+   * @param commentId
+   */
   public void deleteComment(String activityId, String commentId) throws ActivityStorageException {
 
     deleteActivity(commentId);
 
   }
 
+  /**
+   * Gets the activities for a list of identities.
+   *
+   * Access a activity stream of a list of identities by specifying the offset and limit.
+   *
+   * @param connectionList the list of connections for which we want to get
+   * the latest activities
+   * @param offset
+   * @param limit
+   * @return the activities related to the list of connections
+   * @since 1.2.0-GA
+   */
   public List<ExoSocialActivity> getActivitiesOfConnections(List<Identity> connectionList,
                                                             long offset, long limit) throws ActivityStorageException {
 
@@ -436,6 +505,12 @@ public class ActivityStorage extends AbstractStorage {
     return activities;
   }
 
+  /**
+   * Count the number of activities from an ownerIdentity
+   *
+   * @param owner
+   * @return the number of activities
+   */
   public int getActivitiesCount(Identity owner) throws ActivityStorageException {
 
     try {

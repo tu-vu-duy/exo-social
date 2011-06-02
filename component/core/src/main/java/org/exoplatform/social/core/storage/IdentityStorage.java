@@ -135,8 +135,8 @@ public class IdentityStorage extends AbstractStorage {
     profileEntity.setProperty(key, new ArrayList<String>(params.keySet()));
   }
 
-  /**
-   * Internal.
+  /*
+   * Internal
    */
 
   IdentityEntity _createIdentity(final Identity identity) throws NodeAlreadyExistsException {
@@ -418,278 +418,8 @@ public class IdentityStorage extends AbstractStorage {
 
   }
 
-  /**
-   * Public.
-   */
-
-  public final void saveIdentity(final Identity identity) throws IdentityStorageException {
-
-    try {
-      try {
-        _findById(IdentityEntity.class, identity.getId()); // Throw NodeNotFoundException if the identity doesn't exists
-        _saveIdentity(identity);
-      }
-      catch (NodeNotFoundException e) {
-        _createIdentity(identity);
-        _saveIdentity(identity);
-      }
-    }
-    catch (NodeAlreadyExistsException e1) {
-      throw new IdentityStorageException(IdentityStorageException.Type.FAIL_TO_SAVE_IDENTITY, e1.getMessage(), e1);
-    }
-    catch (NodeNotFoundException e1) {
-      throw new IdentityStorageException(IdentityStorageException.Type.FAIL_TO_SAVE_IDENTITY, e1.getMessage(), e1);
-    }
-  }
-
-  public Identity updateIdentity(final Identity identity) throws IdentityStorageException {
-
-    //
-    saveIdentity(identity);
-
-    //
-    return findIdentityById(identity.getId());
-
-  }
-
-  public final Identity findIdentityById(final String nodeId) throws IdentityStorageException {
-
-    try {
-
-      //
-      IdentityEntity identityEntity = _findById(IdentityEntity.class, nodeId);
-      Identity identity = new Identity(nodeId);
-      identity.setDeleted(identityEntity.isDeleted());
-      identity.setRemoteId(identityEntity.getRemoteId());
-      identity.setProviderId(identityEntity.getProviderId());
-
-      //
-      return identity;
-    }
-    catch (NodeNotFoundException e) {
-      return null;
-    }
-  }
-
-  public final void deleteIdentity(final Identity identity) throws IdentityStorageException {
-    try {
-      _deleteIdentity(identity);
-    }
-    catch (NodeNotFoundException e) {
-      throw new IdentityStorageException(IdentityStorageException.Type.FAIL_TO_DELETE_IDENTITY, e.getMessage(), e);
-    }
-  }
-
-  public final void loadProfile(final Profile profile) throws IdentityStorageException {
-    try {
-      _loadProfile(profile);
-    }
-    catch (NodeNotFoundException e) {
-      try {
-        _createProfile(profile);
-      }
-      catch (NodeNotFoundException e1) {
-        throw new IdentityStorageException(IdentityStorageException.Type.FAIL_TO_FIND_IDENTITY_BY_NODE_ID, e1.getMessage(), e1);
-      }
-    }
-
-    profile.clearHasChanged();
-  }
-
-  public final Identity findIdentity(final String providerId, final String remoteId) throws IdentityStorageException {
-    try {
-      return _findIdentity(providerId, remoteId);
-    }
-    catch (NodeNotFoundException e) {
-      return null;
-    }
-  }
-
-  public final void saveProfile(final Profile profile) throws IdentityStorageException {
-
-    try {
-      if (profile.getId() == null) {
-        _createProfile(profile);
-      }
-      else {
-        _saveProfile(profile);
-      }
-    }
-    catch (NodeNotFoundException e) {
-      LOG.debug(e.getMessage(), e); // should never be thrown
-    }
-    profile.clearHasChanged();
-  }
-
-  public final void updateProfile(final Profile profile) throws IdentityStorageException {
-    saveProfile(profile);
-  }
-
-  public int getIdentitiesCount (final String providerId) throws IdentityStorageException {
-
-    // TODO : use jcr property to improve the perfs
-    ProviderEntity providerEntity = getProviderRoot().getProviders().get(providerId);
-    int nb = providerEntity.getIdentities().size();
-
-    //
-    return nb;
-  }
-
-  public final List<Identity> getIdentitiesByProfileFilter(
-      final String providerId, final ProfileFilter profileFilter, long offset, long limit, boolean forceLoadOrReloadProfile)
-      throws IdentityStorageException {
-
-    if (offset < 0) {
-      offset = 0;
-    }
-
-    String inputName = profileFilter.getName().replace(ASTERISK_STR, PERCENT_STR);
-    processUsernameSearchPattern(inputName.trim());
-    List<Identity> excludedIdentityList = profileFilter.getExcludedIdentityList();
-    List<Identity> listIdentity = new ArrayList<Identity>();
-
-    QueryBuilder<ProfileEntity> builder = getSession().createQueryBuilder(ProfileEntity.class);
-    WhereExpression whereExpression = new WhereExpression();
-
-    whereExpression
-        .like(JCRProperties.path, getProviderRoot().getProviders().get(providerId).getPath() + SLASH_STR + PERCENT_STR);
-
-    applyExcludes(whereExpression, excludedIdentityList);
-    applyFilter(whereExpression, profileFilter);
-
-    whereExpression.orderBy(ProfileEntity.fullName, Order.ASC);
-
-    QueryResult<ProfileEntity> results = builder.where(whereExpression.toString()).get().objects(offset, limit);
-    while (results.hasNext()) {
-
-      ProfileEntity profileEntity = results.next();
-
-      Identity identity = createIdentityFromEntity(profileEntity.getIdentity());
-      Profile profile = new Profile(identity);
-      populateProfile(profile, profileEntity);
-      identity.setProfile(profile);
-      listIdentity.add(identity);
-
-    }
-
-    return listIdentity;
-  }
-
-  public int getIdentitiesByProfileFilterCount(final String providerId, final ProfileFilter profileFilter)
-      throws IdentityStorageException {
-
-    List<Identity> excludedIdentityList = profileFilter.getExcludedIdentityList();
-
-    QueryBuilder<ProfileEntity> builder = getSession().createQueryBuilder(ProfileEntity.class);
-    WhereExpression whereExpression = new WhereExpression();
-
-    whereExpression
-        .like(JCRProperties.path, getProviderRoot().getProviders().get(providerId).getPath() + SLASH_STR + PERCENT_STR);
-
-    applyExcludes(whereExpression, excludedIdentityList);
-    applyFilter(whereExpression, profileFilter);
-
-    builder.where(whereExpression.toString());
-
-    return builder.get().objects().size();
-
-  }
-
-  public int getIdentitiesByFirstCharacterOfNameCount(final String providerId, final ProfileFilter profileFilter) throws IdentityStorageException {
-
-    List<Identity> excludedIdentityList = profileFilter.getExcludedIdentityList();
-
-    QueryBuilder<ProfileEntity> builder = getSession().createQueryBuilder(ProfileEntity.class);
-    WhereExpression whereExpression = new WhereExpression();
-
-    whereExpression
-        .like(JCRProperties.path, getProviderRoot().getProviders().get(providerId).getPath() + SLASH_STR + PERCENT_STR);
-
-    applyExcludes(whereExpression, excludedIdentityList);
-
-    whereExpression.and().like(
-        whereExpression.callFunction(QueryFunction.LOWER, ProfileEntity.firstName),
-        Character.toString(profileFilter.getFirstCharacterOfName()).toLowerCase() + PERCENT_STR
-    );
-
-    builder.where(whereExpression.toString());
-
-    return builder.get().objects().size();
-
-  }
-
-  public List<Identity> getIdentitiesByFirstCharacterOfName(final String providerId, final ProfileFilter profileFilter,
-      long offset, long limit, boolean forceLoadOrReloadProfile) throws IdentityStorageException {
-
-    List<Identity> excludedIdentityList = profileFilter.getExcludedIdentityList();
-    List<Identity> listIdentity = new ArrayList<Identity>();
-
-    //
-    QueryBuilder<ProfileEntity> builder = getSession().createQueryBuilder(ProfileEntity.class);
-    WhereExpression whereExpression = new WhereExpression();
-
-    whereExpression
-        .like(JCRProperties.path, getProviderRoot().getProviders().get(providerId).getPath() + SLASH_STR + PERCENT_STR);
-
-    applyExcludes(whereExpression, excludedIdentityList);
-
-    whereExpression.and().like(
-        whereExpression.callFunction(QueryFunction.LOWER, ProfileEntity.firstName),
-        Character.toString(profileFilter.getFirstCharacterOfName()).toLowerCase() + PERCENT_STR
-    );
-
-    QueryResult<ProfileEntity> results = builder.where(whereExpression.toString()).get().objects(offset, limit);
-    while (results.hasNext()) {
-
-      ProfileEntity profileEntity = results.next();
-
-      Identity identity = createIdentityFromEntity(profileEntity.getIdentity());
-      Profile profile = new Profile(identity);
-      populateProfile(profile, profileEntity);
-      identity.setProfile(profile);
-      listIdentity.add(identity);
-
-    }
-
-    return listIdentity;
-
-  }
-
-  public final String getType(final String nodetype, final String property) {
-
-    // TODO : move to appropriate classe
-
-    Session jcrSession = getSession().getJCRSession();
-    try {
-
-      NodeTypeManager ntManager = jcrSession.getWorkspace().getNodeTypeManager();
-      NodeType nt = ntManager.getNodeType(nodetype);
-      PropertyDefinition[] pDefs = nt.getDeclaredPropertyDefinitions();
-
-      for (PropertyDefinition pDef : pDefs) {
-        if (pDef.getName().equals(property)) {
-          return PropertyType.nameFromValue(pDef.getRequiredType());
-        }
-      }
-
-    }
-    catch (RepositoryException e) {
-      return null;
-    }
-
-    return null;
-  }
-
-  public final void addOrModifyProfileProperties(final Profile profile) throws IdentityStorageException {
-    try {
-      _saveProfile(profile);
-    } catch (NodeNotFoundException e) {
-      throw new IdentityStorageException(IdentityStorageException.Type.FAIL_TO_ADD_OR_MODIFY_PROPERTIES, e.getMessage(), e);
-    }
-  }
-
-  /**
-   * Private.
+  /*
+   * Private
    */
 
   private String addPositionSearchPattern(final String position) {
@@ -824,5 +554,391 @@ public class IdentityStorage extends AbstractStorage {
     }
 
     profile.setProperty(Profile.EXPERIENCES, xpData);
+  }
+
+  /*
+   * Public
+   */
+
+  /**
+   * Saves identity.
+   *
+   * @param identity the identity
+   * @throws IdentityStorageException
+   */
+  public final void saveIdentity(final Identity identity) throws IdentityStorageException {
+
+    try {
+      try {
+        _findById(IdentityEntity.class, identity.getId()); // Throw NodeNotFoundException if the identity doesn't exists
+        _saveIdentity(identity);
+      }
+      catch (NodeNotFoundException e) {
+        _createIdentity(identity);
+        _saveIdentity(identity);
+      }
+    }
+    catch (NodeAlreadyExistsException e1) {
+      throw new IdentityStorageException(IdentityStorageException.Type.FAIL_TO_SAVE_IDENTITY, e1.getMessage(), e1);
+    }
+    catch (NodeNotFoundException e1) {
+      throw new IdentityStorageException(IdentityStorageException.Type.FAIL_TO_SAVE_IDENTITY, e1.getMessage(), e1);
+    }
+  }
+
+  /**
+   * Updates existing identity's properties.
+   *
+   * @param identity the identity to be updated.
+   * @return the updated identity.
+   * @throws IdentityStorageException
+   * @since  1.2.0-GA
+   */
+  public Identity updateIdentity(final Identity identity) throws IdentityStorageException {
+
+    //
+    saveIdentity(identity);
+
+    //
+    return findIdentityById(identity.getId());
+
+  }
+
+  /**
+   * Gets the identity by his id.
+   *
+   * @param nodeId the id of identity
+   * @return the identity
+   * @throws IdentityStorageException
+   */
+  public final Identity findIdentityById(final String nodeId) throws IdentityStorageException {
+
+    try {
+
+      //
+      IdentityEntity identityEntity = _findById(IdentityEntity.class, nodeId);
+      Identity identity = new Identity(nodeId);
+      identity.setDeleted(identityEntity.isDeleted());
+      identity.setRemoteId(identityEntity.getRemoteId());
+      identity.setProviderId(identityEntity.getProviderId());
+
+      //
+      return identity;
+    }
+    catch (NodeNotFoundException e) {
+      return null;
+    }
+  }
+
+  /**
+   * Deletes an identity from JCR
+   *
+   * @param identity
+   * @throws IdentityStorageException
+   */
+  public final void deleteIdentity(final Identity identity) throws IdentityStorageException {
+    try {
+      _deleteIdentity(identity);
+    }
+    catch (NodeNotFoundException e) {
+      throw new IdentityStorageException(IdentityStorageException.Type.FAIL_TO_DELETE_IDENTITY, e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Load profile.
+   *
+   * @param profile the profile
+   * @throws IdentityStorageException
+   */
+  public final void loadProfile(final Profile profile) throws IdentityStorageException {
+    try {
+      _loadProfile(profile);
+    }
+    catch (NodeNotFoundException e) {
+      try {
+        _createProfile(profile);
+      }
+      catch (NodeNotFoundException e1) {
+        throw new IdentityStorageException(IdentityStorageException.Type.FAIL_TO_FIND_IDENTITY_BY_NODE_ID, e1.getMessage(), e1);
+      }
+    }
+
+    profile.clearHasChanged();
+  }
+
+  /**
+   * Gets the identity by remote id.
+   *
+   * @param providerId the identity provider
+   * @param remoteId   the id
+   * @return the identity by remote id
+   * @throws IdentityStorageException
+   */
+  public final Identity findIdentity(final String providerId, final String remoteId) throws IdentityStorageException {
+    try {
+      return _findIdentity(providerId, remoteId);
+    }
+    catch (NodeNotFoundException e) {
+      return null;
+    }
+  }
+
+  /**
+   * Saves profile.
+   *
+   * @param profile the profile
+   * @throws IdentityStorageException
+   */
+  public final void saveProfile(final Profile profile) throws IdentityStorageException {
+
+    try {
+      if (profile.getId() == null) {
+        _createProfile(profile);
+      }
+      else {
+        _saveProfile(profile);
+      }
+    }
+    catch (NodeNotFoundException e) {
+      LOG.debug(e.getMessage(), e); // should never be thrown
+    }
+    profile.clearHasChanged();
+  }
+
+  /**
+   * Updates profile.
+   *
+   * @param profile the profile
+   * @throws IdentityStorageException
+   * @since 1.2.0-GA
+   */
+  public final void updateProfile(final Profile profile) throws IdentityStorageException {
+    saveProfile(profile);
+  }
+
+  /**
+   * Gets total number of identities in storage depend on providerId.
+   * @throws IdentityStorageException
+   */
+  public int getIdentitiesCount (final String providerId) throws IdentityStorageException {
+
+    // TODO : use jcr property to improve the perfs
+    ProviderEntity providerEntity = getProviderRoot().getProviders().get(providerId);
+    int nb = providerEntity.getIdentities().size();
+
+    //
+    return nb;
+  }
+
+  /**
+   * Gets the identities by profile filter.
+   *
+   * @param providerId Id of provider.
+   * @param profileFilter    Information of profile that used in filtering.
+   * @param offset           Start index of list to be get.
+   * @param limit            End index of list to be get.
+   * @param forceLoadOrReloadProfile Load profile or not.
+   * @return the identities by profile filter.
+   * @throws IdentityStorageException
+   * @since 1.2.0-GA
+   */
+  public final List<Identity> getIdentitiesByProfileFilter(
+      final String providerId, final ProfileFilter profileFilter, long offset, long limit, boolean forceLoadOrReloadProfile)
+      throws IdentityStorageException {
+
+    if (offset < 0) {
+      offset = 0;
+    }
+
+    String inputName = profileFilter.getName().replace(ASTERISK_STR, PERCENT_STR);
+    processUsernameSearchPattern(inputName.trim());
+    List<Identity> excludedIdentityList = profileFilter.getExcludedIdentityList();
+    List<Identity> listIdentity = new ArrayList<Identity>();
+
+    QueryBuilder<ProfileEntity> builder = getSession().createQueryBuilder(ProfileEntity.class);
+    WhereExpression whereExpression = new WhereExpression();
+
+    whereExpression
+        .like(JCRProperties.path, getProviderRoot().getProviders().get(providerId).getPath() + SLASH_STR + PERCENT_STR);
+
+    applyExcludes(whereExpression, excludedIdentityList);
+    applyFilter(whereExpression, profileFilter);
+
+    whereExpression.orderBy(ProfileEntity.fullName, Order.ASC);
+
+    QueryResult<ProfileEntity> results = builder.where(whereExpression.toString()).get().objects(offset, limit);
+    while (results.hasNext()) {
+
+      ProfileEntity profileEntity = results.next();
+
+      Identity identity = createIdentityFromEntity(profileEntity.getIdentity());
+      Profile profile = new Profile(identity);
+      populateProfile(profile, profileEntity);
+      identity.setProfile(profile);
+      listIdentity.add(identity);
+
+    }
+
+    return listIdentity;
+  }
+
+  /**
+   * Counts the number of identity by profile filter.
+   *
+   * @param providerId Id of Provider.
+   * @param profileFilter Information of profile are used in filtering.
+   * @return Number of identities that are filtered by profile.
+   * @throws IdentityStorageException
+   * @since 1.2.0-GA
+   */
+  public int getIdentitiesByProfileFilterCount(final String providerId, final ProfileFilter profileFilter)
+      throws IdentityStorageException {
+
+    List<Identity> excludedIdentityList = profileFilter.getExcludedIdentityList();
+
+    QueryBuilder<ProfileEntity> builder = getSession().createQueryBuilder(ProfileEntity.class);
+    WhereExpression whereExpression = new WhereExpression();
+
+    whereExpression
+        .like(JCRProperties.path, getProviderRoot().getProviders().get(providerId).getPath() + SLASH_STR + PERCENT_STR);
+
+    applyExcludes(whereExpression, excludedIdentityList);
+    applyFilter(whereExpression, profileFilter);
+
+    builder.where(whereExpression.toString());
+
+    return builder.get().objects().size();
+
+  }
+
+  /**
+   * Counts the number of identities that match the first character of name.
+   *
+   * @param providerId
+   * @param profileFilter Profile filter object.
+   * @return Number of identities that start with the first character of name.
+   * @throws IdentityStorageException
+   * @since 1.2.0-GA
+   */
+  public int getIdentitiesByFirstCharacterOfNameCount(final String providerId, final ProfileFilter profileFilter) throws IdentityStorageException {
+
+    List<Identity> excludedIdentityList = profileFilter.getExcludedIdentityList();
+
+    QueryBuilder<ProfileEntity> builder = getSession().createQueryBuilder(ProfileEntity.class);
+    WhereExpression whereExpression = new WhereExpression();
+
+    whereExpression
+        .like(JCRProperties.path, getProviderRoot().getProviders().get(providerId).getPath() + SLASH_STR + PERCENT_STR);
+
+    applyExcludes(whereExpression, excludedIdentityList);
+
+    whereExpression.and().like(
+        whereExpression.callFunction(QueryFunction.LOWER, ProfileEntity.firstName),
+        Character.toString(profileFilter.getFirstCharacterOfName()).toLowerCase() + PERCENT_STR
+    );
+
+    builder.where(whereExpression.toString());
+
+    return builder.get().objects().size();
+
+  }
+
+  /**
+   * Gets the identities that match the first character of name.
+   *
+   * @param providerId Id of provider.
+   * @param profileFilter Profile filter object.
+   * @param offset   Start index of list to be get.
+   * @param limit    End index of list to be get.
+   * @param forceLoadOrReloadProfile Load profile or not.
+   * @return Identities that have name start with the first character.
+   * @throws IdentityStorageException
+   * @since 1.2.0-GA
+   */
+  public List<Identity> getIdentitiesByFirstCharacterOfName(final String providerId, final ProfileFilter profileFilter,
+      long offset, long limit, boolean forceLoadOrReloadProfile) throws IdentityStorageException {
+
+    List<Identity> excludedIdentityList = profileFilter.getExcludedIdentityList();
+    List<Identity> listIdentity = new ArrayList<Identity>();
+
+    //
+    QueryBuilder<ProfileEntity> builder = getSession().createQueryBuilder(ProfileEntity.class);
+    WhereExpression whereExpression = new WhereExpression();
+
+    whereExpression
+        .like(JCRProperties.path, getProviderRoot().getProviders().get(providerId).getPath() + SLASH_STR + PERCENT_STR);
+
+    applyExcludes(whereExpression, excludedIdentityList);
+
+    whereExpression.and().like(
+        whereExpression.callFunction(QueryFunction.LOWER, ProfileEntity.firstName),
+        Character.toString(profileFilter.getFirstCharacterOfName()).toLowerCase() + PERCENT_STR
+    );
+
+    QueryResult<ProfileEntity> results = builder.where(whereExpression.toString()).get().objects(offset, limit);
+    while (results.hasNext()) {
+
+      ProfileEntity profileEntity = results.next();
+
+      Identity identity = createIdentityFromEntity(profileEntity.getIdentity());
+      Profile profile = new Profile(identity);
+      populateProfile(profile, profileEntity);
+      identity.setProfile(profile);
+      listIdentity.add(identity);
+
+    }
+
+    return listIdentity;
+
+  }
+
+  /**
+   * Gets the type.
+   *
+   * @param nodetype the nodetype
+   * @param property the property
+   * @return the type
+   * @throws IdentityStorageException
+   */
+  public final String getType(final String nodetype, final String property) {
+
+    // TODO : move to appropriate classe
+
+    Session jcrSession = getSession().getJCRSession();
+    try {
+
+      NodeTypeManager ntManager = jcrSession.getWorkspace().getNodeTypeManager();
+      NodeType nt = ntManager.getNodeType(nodetype);
+      PropertyDefinition[] pDefs = nt.getDeclaredPropertyDefinitions();
+
+      for (PropertyDefinition pDef : pDefs) {
+        if (pDef.getName().equals(property)) {
+          return PropertyType.nameFromValue(pDef.getRequiredType());
+        }
+      }
+
+    }
+    catch (RepositoryException e) {
+      return null;
+    }
+
+    return null;
+  }
+
+  /**
+   * Add or modify properties of profile and persist to JCR. Profile parameter is a lightweight that
+   * contains only the property that you want to add or modify. NOTE: The method will
+   * not delete the properties on old profile when the param profile have not those keys.
+   *
+   * @param profile
+   * @throws IdentityStorageException
+   */
+  public final void addOrModifyProfileProperties(final Profile profile) throws IdentityStorageException {
+    try {
+      _saveProfile(profile);
+    } catch (NodeNotFoundException e) {
+      throw new IdentityStorageException(IdentityStorageException.Type.FAIL_TO_ADD_OR_MODIFY_PROPERTIES, e.getMessage(), e);
+    }
   }
 }

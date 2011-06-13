@@ -17,8 +17,12 @@
 
 package org.exoplatform.social.core.storage;
 
+import org.exoplatform.services.cache.ExoCache;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.relationship.model.Relationship;
+import org.exoplatform.social.core.storage.cache.RelationshipData;
+import org.exoplatform.social.core.storage.cache.RelationshipIdentityKey;
+import org.exoplatform.social.core.storage.cache.RelationshipKey;
 
 import java.util.List;
 
@@ -28,12 +32,35 @@ import java.util.List;
  */
 public class SynchronizedRelationshipStorage extends RelationshipStorage {
 
+  private final ExoCache<RelationshipKey, RelationshipData> relationshipCacheById;
+  private final ExoCache<RelationshipIdentityKey, RelationshipKey> relationshipCacheByIdentity;
+
+  private static final RelationshipKey RELATIONSHIP_NOT_FOUND = new RelationshipKey(null);
+
+  public SynchronizedRelationshipStorage() {
+    super();
+
+    relationshipCacheById = caches.getRelationshipCacheById();
+    relationshipCacheByIdentity = caches.getRelationshipCacheByIdentity();
+  }
+
   @Override
   public Relationship saveRelationship(final Relationship relationship) throws RelationshipStorageException {
 
     boolean created = startSynchronization();
     try {
-      return super.saveRelationship(relationship);
+
+      Relationship saved = super.saveRelationship(relationship);
+
+      RelationshipIdentityKey identityKey1 = new RelationshipIdentityKey(saved.getSender().getId(), saved.getReceiver().getId());
+      RelationshipIdentityKey identityKey2 = new RelationshipIdentityKey(saved.getReceiver().getId(), saved.getSender().getId());
+      RelationshipKey key = new RelationshipKey(relationship.getId());
+
+      relationshipCacheById.put(key, new RelationshipData(saved));
+      relationshipCacheByIdentity.put(identityKey1, key);
+      relationshipCacheByIdentity.put(identityKey2, key);
+      
+      return saved;
     }
     finally {
       stopSynchronization(created);
@@ -44,10 +71,10 @@ public class SynchronizedRelationshipStorage extends RelationshipStorage {
   @Override
   public void removeRelationship(final Relationship relationship) throws RelationshipStorageException {
 
-
     boolean created = startSynchronization();
     try {
       super.removeRelationship(relationship);
+      relationshipCacheById.remove(new RelationshipKey(relationship.getId()));
     }
     finally {
       stopSynchronization(created);
@@ -58,19 +85,29 @@ public class SynchronizedRelationshipStorage extends RelationshipStorage {
   @Override
   public Relationship getRelationship(final String uuid) throws RelationshipStorageException {
 
+    RelationshipKey key = new RelationshipKey(uuid);
+    RelationshipData data = relationshipCacheById.get(key);
+
+    if (data != null) {
+      return data.build();
+    }
 
     boolean created = startSynchronization();
     try {
-      return super.getRelationship(uuid);
+      Relationship relationship = super.getRelationship(uuid);
+      if (relationship != null) {
+        relationshipCacheById.put(key, new RelationshipData(relationship));
+      }
+      return relationship;
     }
     finally {
       stopSynchronization(created);
     }
+
   }
 
   @Override
   public List<Relationship> getSenderRelationships(final Identity sender, final Relationship.Type type, final List<Identity> listCheckIdentity) throws RelationshipStorageException {
-
 
     boolean created = startSynchronization();
     try {
@@ -85,7 +122,6 @@ public class SynchronizedRelationshipStorage extends RelationshipStorage {
   @Override
   public List<Relationship> getReceiverRelationships(final Identity receiver, final Relationship.Type type, final List<Identity> listCheckIdentity) throws RelationshipStorageException {
 
-
     boolean created = startSynchronization();
     try {
       return super.getReceiverRelationships(receiver, type, listCheckIdentity);
@@ -99,9 +135,35 @@ public class SynchronizedRelationshipStorage extends RelationshipStorage {
   @Override
   public Relationship getRelationship(final Identity identity1, final Identity identity2) throws RelationshipStorageException {
 
+    RelationshipIdentityKey identityKey = new RelationshipIdentityKey(identity1.getId(), identity2.getId());
+    RelationshipKey key = relationshipCacheByIdentity.get(identityKey);
+
+    if (key == RELATIONSHIP_NOT_FOUND) {
+      return null;
+    }
+
+    if (key != null) {
+      RelationshipData data = relationshipCacheById.get(key);
+      if (data != null) {
+        return data.build();
+      }
+      else {
+        relationshipCacheByIdentity.remove(identityKey);
+      }
+    }
+
     boolean created = startSynchronization();
     try {
-      return super.getRelationship(identity1, identity2);
+      Relationship relationship = super.getRelationship(identity1, identity2);
+      if (relationship != null) {
+        relationshipCacheByIdentity.put(identityKey, key);
+        key = new RelationshipKey(relationship.getId());
+        relationshipCacheById.put(key, new RelationshipData(relationship));
+      }
+      else {
+        relationshipCacheByIdentity.put(identityKey, RELATIONSHIP_NOT_FOUND);
+      }
+      return relationship;
     }
     finally {
       stopSynchronization(created);
@@ -111,7 +173,6 @@ public class SynchronizedRelationshipStorage extends RelationshipStorage {
 
   @Override
   public List<Relationship> getRelationships(final Identity identity, final Relationship.Type type, final List<Identity> listCheckIdentity) throws RelationshipStorageException {
-
 
     boolean created = startSynchronization();
     try {
@@ -124,22 +185,7 @@ public class SynchronizedRelationshipStorage extends RelationshipStorage {
   }
 
   @Override
-  public List<Identity> getConnections(final Identity identity, final int offset, final int limit) throws RelationshipStorageException {
-
-
-    boolean created = startSynchronization();
-    try {
-      return super.getConnections(identity, offset, limit);
-    }
-    finally {
-      stopSynchronization(created);
-    }
-
-  }
-
-  @Override
   public int getConnectionsCount(final Identity identity) throws RelationshipStorageException {
-
 
     boolean created = startSynchronization();
     try {
@@ -150,5 +196,4 @@ public class SynchronizedRelationshipStorage extends RelationshipStorage {
     }
 
   }
-
 }

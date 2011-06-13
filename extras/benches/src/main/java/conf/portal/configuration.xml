@@ -24,11 +24,11 @@
    xmlns="http://www.exoplaform.org/xml/ns/kernel_1_0.xsd">
 
   <component>
-    <type>org.exoplatform.social.benches.DataInjector</type>
+    <type>org.exoplatform.social.extras.benches.DataInjector</type>
   </component>
 
   <component>
-    <type>org.exoplatform.social.benches.StartupInjectionConfig</type>
+    <type>org.exoplatform.social.extras.benches.StartupInjectionConfig</type>
     <init-params>
       <properties-param>
         <name>inject.conf</name>

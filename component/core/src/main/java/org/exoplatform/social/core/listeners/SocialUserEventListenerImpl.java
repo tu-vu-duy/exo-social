@@ -45,7 +45,6 @@ public class SocialUserEventListenerImpl extends UserEventListener {
    * @throws Exception
    */
   public void postSave(User user, boolean isNew) throws Exception {
-    RequestLifeCycle.begin(PortalContainer.getInstance());
     ExoContainer container = ExoContainerContext.getCurrentContainer();
     IdentityManager idm = (IdentityManager) container.getComponentInstanceOfType(IdentityManager.class);
     Identity identity = idm.getOrCreateIdentity(OrganizationIdentityProvider.NAME, user.getUserName(), true);
@@ -84,6 +83,5 @@ public class SocialUserEventListenerImpl extends UserEventListener {
         idm.updateProfile(profile);
       }
     }
-    RequestLifeCycle.end();
   }
 }

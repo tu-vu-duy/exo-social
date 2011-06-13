@@ -17,11 +17,16 @@
 
 package org.exoplatform.social.core.storage;
 
+import java.util.List;
+
+import org.exoplatform.services.cache.ExoCache;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.model.Profile;
 import org.exoplatform.social.core.profile.ProfileFilter;
-
-import java.util.List;
+import org.exoplatform.social.core.storage.cache.IdentityCompositeKey;
+import org.exoplatform.social.core.storage.cache.IdentityData;
+import org.exoplatform.social.core.storage.cache.IdentityKey;
+import org.exoplatform.social.core.storage.cache.ProfileData;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
@@ -29,12 +34,28 @@ import java.util.List;
  */
 public class SynchronizedIdentityStorage extends IdentityStorage {
 
+  private final ExoCache<IdentityKey, IdentityData> identityCacheById;
+  private final ExoCache<IdentityCompositeKey, IdentityKey> identityIndexCache;
+  private final ExoCache<IdentityKey, ProfileData> profileCacheById;
+
+  public SynchronizedIdentityStorage() {
+    super();
+    identityCacheById = caches.getIdentityCacheById();
+    identityIndexCache = caches.getIdentityIndexCache();
+    profileCacheById = caches.getProfileCacheById();
+  }
+
   @Override
   public void saveIdentity(final Identity identity) throws IdentityStorageException {
 
     boolean created = startSynchronization();
     try {
       super.saveIdentity(identity);
+      IdentityKey key = new IdentityKey(identity.getId());
+      IdentityCompositeKey compositeKey = new IdentityCompositeKey(identity.getProviderId(), identity.getProviderId());
+      identityCacheById.put(key, new IdentityData(identity));
+      identityIndexCache.put(compositeKey, key);
+
     }
     finally {
       stopSynchronization(created);
@@ -58,9 +79,21 @@ public class SynchronizedIdentityStorage extends IdentityStorage {
   @Override
   public Identity findIdentityById(final String nodeId) throws IdentityStorageException {
 
+    IdentityKey key = new IdentityKey(nodeId);
+
+    IdentityData got = identityCacheById.get(key);
+
+    if (got != null) {
+      return got.build();
+    }
+
     boolean created = startSynchronization();
     try {
-      return super.findIdentityById(nodeId);
+      Identity identity = super.findIdentityById(nodeId);
+      if (identity != null) {
+        identityCacheById.put(key, new IdentityData(identity));
+      }
+      return identity;
     }
     finally {
       stopSynchronization(created);
@@ -73,6 +106,11 @@ public class SynchronizedIdentityStorage extends IdentityStorage {
 
     boolean created = startSynchronization();
     try {
+      IdentityKey key = new IdentityKey(identity.getId());
+      IdentityData data = identityCacheById.remove(key);
+      if (data != null) {
+        identityIndexCache.remove(new IdentityCompositeKey(data.getProviderId(), data.getRemoteId()));
+      }
       super.deleteIdentity(identity);
     }
     finally {
@@ -82,11 +120,20 @@ public class SynchronizedIdentityStorage extends IdentityStorage {
   }
 
   @Override
-  public void loadProfile(final Profile profile) throws IdentityStorageException {
+  public Profile loadProfile(Profile profile) throws IdentityStorageException {
+
+    IdentityKey key = new IdentityKey(profile.getIdentity().getId());
+    ProfileData data = profileCacheById.get(key);
+
+    if (data != null) {
+      return data.build();
+    }
 
     boolean created = startSynchronization();
     try {
-      super.loadProfile(profile);
+      profile = super.loadProfile(profile);
+      profileCacheById.put(key, new ProfileData(profile));
+      return profile;
     }
     finally {
       stopSynchronization(created);
@@ -97,9 +144,34 @@ public class SynchronizedIdentityStorage extends IdentityStorage {
   @Override
   public Identity findIdentity(final String providerId, final String remoteId) throws IdentityStorageException {
 
+    IdentityCompositeKey compositeKey = new IdentityCompositeKey(providerId, remoteId);
+    IdentityKey gotKey = identityIndexCache.get(compositeKey);
+
+    if (gotKey != null) {
+      IdentityData got = identityCacheById.get(gotKey);
+      if (got != null) {
+        return got.build();
+      }
+      else {
+        identityIndexCache.remove(gotKey);
+      }
+    }
+
     boolean created = startSynchronization();
     try {
-      return super.findIdentity(providerId, remoteId);
+
+      Identity identity = super.findIdentity(providerId, remoteId);
+
+      if (identity != null) {
+
+        IdentityKey key = new IdentityKey(identity.getId());
+
+        identityCacheById.put(key, new IdentityData(identity));
+        identityIndexCache.put(compositeKey, key);
+
+      }
+
+      return identity;
     }
     finally {
       stopSynchronization(created);
@@ -113,6 +185,8 @@ public class SynchronizedIdentityStorage extends IdentityStorage {
     boolean created = startSynchronization();
     try {
       super.saveProfile(profile);
+      IdentityKey key = new IdentityKey(profile.getIdentity().getId());
+      profileCacheById.put(key, new ProfileData(profile));
     }
     finally {
       stopSynchronization(created);

@@ -27,6 +27,7 @@ import org.exoplatform.container.PortalContainer;
 import org.exoplatform.social.common.lifecycle.SocialChromatticLifeCycle;
 import org.exoplatform.social.core.chromattic.entity.ProviderRootEntity;
 import org.exoplatform.social.core.chromattic.entity.SpaceRootEntity;
+import org.exoplatform.social.core.storage.cache.SocialStorageCacheService;
 import org.exoplatform.social.core.storage.exception.NodeNotFoundException;
 
 /**
@@ -39,6 +40,7 @@ public abstract class AbstractStorage {
   protected final PortalContainer container;
   protected final ChromatticManager manager;
   protected final SocialChromatticLifeCycle lifeCycle;
+  protected final SocialStorageCacheService caches;
 
   //
   protected String[] MONTH_NAME = new DateFormatSymbols(Locale.ENGLISH).getMonths();
@@ -66,6 +68,7 @@ public abstract class AbstractStorage {
 
     this.container = PortalContainer.getInstance();
     this.manager = (ChromatticManager) container.getComponentInstanceOfType(ChromatticManager.class);
+    this.caches = (SocialStorageCacheService) container.getComponentInstanceOfType(SocialStorageCacheService.class);
     this.lifeCycle = (SocialChromatticLifeCycle) manager.getLifeCycle(SocialChromatticLifeCycle.SOCIAL_LIFECYCLE_NAME);
 
   }

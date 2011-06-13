@@ -104,7 +104,8 @@ public class IdentityManagerImpl implements IdentityManager {
   public Profile getProfile(Identity identity) {
     Profile profile = identity.getProfile();
     if (profile.getId() == null) {
-      identityStorage.loadProfile(profile);
+      profile = identityStorage.loadProfile(profile);
+      identity.setProfile(profile);
     }
     return profile;
   }
@@ -265,7 +266,8 @@ public class IdentityManagerImpl implements IdentityManager {
 
     if (returnIdentity != null) {
       if (forceLoadOrReloadProfile) {
-        this.getIdentityStorage().loadProfile(returnIdentity.getProfile());
+        Profile profile = this.getIdentityStorage().loadProfile(returnIdentity.getProfile());
+        returnIdentity.setProfile(profile);
       }
     } else {
       LOG.info("Can not get identity with id: " + identityId);
@@ -318,7 +320,8 @@ public class IdentityManagerImpl implements IdentityManager {
         return null;
       }
       if (forceLoadOrReloadProfile) {
-        this.getIdentityStorage().loadProfile(result.getProfile());
+        Profile profile = this.getIdentityStorage().loadProfile(result.getProfile());
+        result.setProfile(profile);
       }
     }
     returnIdentity = result;

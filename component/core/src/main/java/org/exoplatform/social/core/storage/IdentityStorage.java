@@ -241,7 +241,7 @@ public class IdentityStorage extends AbstractStorage {
     ));
   }
 
-  protected void _createProfile(final Profile profile) throws NodeNotFoundException {
+  protected Profile _createProfile(final Profile profile) throws NodeNotFoundException {
 
     //
     Identity identity = profile.getIdentity();
@@ -268,9 +268,12 @@ public class IdentityStorage extends AbstractStorage {
     ));
 
     _saveProfile(profile);
+
+    return profile;
+
   }
 
-  protected void _loadProfile(final Profile profile) throws NodeNotFoundException {
+  protected Profile _loadProfile(final Profile profile) throws NodeNotFoundException {
 
     //
     if (profile.getIdentity().getId() == null) {
@@ -295,6 +298,8 @@ public class IdentityStorage extends AbstractStorage {
         identityEntity.getRemoteId(),
         identityEntity.getId()
     ));
+
+    return profile;
   }
 
   protected void _saveProfile(final Profile profile) throws NodeNotFoundException {
@@ -674,13 +679,14 @@ public class IdentityStorage extends AbstractStorage {
    * @param profile the profile
    * @throws IdentityStorageException
    */
-  public void loadProfile(final Profile profile) throws IdentityStorageException {
+  public Profile loadProfile(Profile profile) throws IdentityStorageException {
+
     try {
-      _loadProfile(profile);
+      profile = _loadProfile(profile);
     }
     catch (NodeNotFoundException e) {
       try {
-        _createProfile(profile);
+        profile = _createProfile(profile);
       }
       catch (NodeNotFoundException e1) {
         throw new IdentityStorageException(
@@ -690,6 +696,8 @@ public class IdentityStorage extends AbstractStorage {
     }
 
     profile.clearHasChanged();
+
+    return profile;
   }
 
   /**
@@ -786,7 +794,7 @@ public class IdentityStorage extends AbstractStorage {
     WhereExpression whereExpression = new WhereExpression();
 
     whereExpression
-        .like(JCRProperties.path, getProviderRoot().getProviders().get(providerId).getPath() + SLASH_STR + PERCENT_STR);
+        .like(JCRProperties.path, "/production/soc:providers/soc:" + providerId + SLASH_STR + PERCENT_STR);
 
     applyExcludes(whereExpression, excludedIdentityList);
     applyFilter(whereExpression, profileFilter);
@@ -799,9 +807,10 @@ public class IdentityStorage extends AbstractStorage {
       ProfileEntity profileEntity = results.next();
 
       Identity identity = createIdentityFromEntity(profileEntity.getIdentity());
-      Profile profile = new Profile(identity);
-      populateProfile(profile, profileEntity);
+
+      Profile profile = loadProfile(new Profile(identity));
       identity.setProfile(profile);
+
       listIdentity.add(identity);
 
     }
@@ -827,7 +836,7 @@ public class IdentityStorage extends AbstractStorage {
     WhereExpression whereExpression = new WhereExpression();
 
     whereExpression
-        .like(JCRProperties.path, getProviderRoot().getProviders().get(providerId).getPath() + SLASH_STR + PERCENT_STR);
+        .like(JCRProperties.path, "/production/soc:providers/soc:" + providerId + SLASH_STR + PERCENT_STR);
 
     applyExcludes(whereExpression, excludedIdentityList);
     applyFilter(whereExpression, profileFilter);
@@ -856,7 +865,7 @@ public class IdentityStorage extends AbstractStorage {
     WhereExpression whereExpression = new WhereExpression();
 
     whereExpression
-        .like(JCRProperties.path, getProviderRoot().getProviders().get(providerId).getPath() + SLASH_STR + PERCENT_STR);
+        .like(JCRProperties.path, "/production/soc:providers/soc:" + providerId + SLASH_STR + PERCENT_STR);
 
     applyExcludes(whereExpression, excludedIdentityList);
 
@@ -894,7 +903,7 @@ public class IdentityStorage extends AbstractStorage {
     WhereExpression whereExpression = new WhereExpression();
 
     whereExpression
-        .like(JCRProperties.path, getProviderRoot().getProviders().get(providerId).getPath() + SLASH_STR + PERCENT_STR);
+        .like(JCRProperties.path, "/production/soc:providers/soc:" + providerId + SLASH_STR + PERCENT_STR);
 
     applyExcludes(whereExpression, excludedIdentityList);
 
@@ -909,9 +918,10 @@ public class IdentityStorage extends AbstractStorage {
       ProfileEntity profileEntity = results.next();
 
       Identity identity = createIdentityFromEntity(profileEntity.getIdentity());
-      Profile profile = new Profile(identity);
-      populateProfile(profile, profileEntity);
+
+      Profile profile = loadProfile(new Profile(identity));
       identity.setProfile(profile);
+
       listIdentity.add(identity);
 
     }

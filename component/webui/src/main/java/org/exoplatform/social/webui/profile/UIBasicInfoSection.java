@@ -88,7 +88,7 @@ public class UIBasicInfoSection extends UIProfileSection {
    * Reloads basic info in each request call
    */
   public void reloadBasicInfo() {
-    Identity ownerIdentity = Utils.getOwnerIdentity(false);
+    Identity ownerIdentity = Utils.getOwnerIdentity(true);
     Profile profile = ownerIdentity.getProfile();
     this.getUIStringInput(Profile.USERNAME).setValue((String) profile.getProperty(Profile.USERNAME));
     this.getUIStringInput(Profile.FIRST_NAME).setValue((String) profile.getProperty(Profile.FIRST_NAME));

@@ -554,7 +554,7 @@ public class RelationshipStorageNewTestCase extends AbstractCoreTest {
     identityStorage.saveIdentity(tmp5);
 
     Profile profile = new Profile(tmp1);
-    identityStorage.loadProfile(profile);
+    profile = identityStorage.loadProfile(profile);
 
     profile.setProperty(Profile.POSITION, "my position");
     profile.setProperty(Profile.AVATAR_URL, "my avatar url");

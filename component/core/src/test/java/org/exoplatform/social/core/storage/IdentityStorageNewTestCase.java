@@ -224,7 +224,7 @@ public class IdentityStorageNewTestCase extends AbstractCoreTest {
     assertNotNull(profile.getId());
 
     //
-    storage._loadProfile(profile);
+    profile = storage._loadProfile(profile);
     assertNotNull(profile.getId());
 
     //
@@ -455,7 +455,7 @@ public class IdentityStorageNewTestCase extends AbstractCoreTest {
 
    //
    Profile toLoadAfterUpdateProfile = new Profile(newIdentity);
-   storage.loadProfile(toLoadAfterUpdateProfile);
+   toLoadAfterUpdateProfile = storage.loadProfile(toLoadAfterUpdateProfile);
    assertEquals("updated user", toLoadAfterUpdateProfile.getProperty(Profile.USERNAME));
    assertEquals("updated last", toLoadAfterUpdateProfile.getProperty(Profile.LAST_NAME));
    assertEquals("avatarurl", toLoadAfterUpdateProfile.getProperty(Profile.AVATAR_URL));

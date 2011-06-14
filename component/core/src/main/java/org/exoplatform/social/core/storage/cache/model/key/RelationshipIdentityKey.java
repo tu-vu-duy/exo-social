@@ -15,7 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.core.storage.cache;
+package org.exoplatform.social.core.storage.cache.model.key;
 
 import java.io.Serializable;
 
@@ -23,16 +23,22 @@ import java.io.Serializable;
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class IdentityKey implements Serializable {
+public class RelationshipIdentityKey implements Serializable {
 
-  private final String id;
+  private final String identityId1;
+  private final String identityId2;
 
-  public IdentityKey(final String id) {
-    this.id = id;
+  public RelationshipIdentityKey(final String identityId1, final String identityId2) {
+    this.identityId1 = identityId1;
+    this.identityId2 = identityId2;
   }
 
-  public String getId() {
-    return id;
+  public String getIdentityId1() {
+    return identityId1;
+  }
+
+  public String getIdentityId2() {
+    return identityId2;
   }
 
   @Override
@@ -44,9 +50,12 @@ public class IdentityKey implements Serializable {
       return false;
     }
 
-    IdentityKey that = (IdentityKey) o;
+    RelationshipIdentityKey that = (RelationshipIdentityKey) o;
 
-    if (id != null ? !id.equals(that.id) : that.id != null) {
+    if (identityId1 != null ? !identityId1.equals(that.identityId1) : that.identityId1 != null) {
+      return false;
+    }
+    if (identityId2 != null ? !identityId2.equals(that.identityId2) : that.identityId2 != null) {
       return false;
     }
 
@@ -55,7 +64,8 @@ public class IdentityKey implements Serializable {
 
   @Override
   public int hashCode() {
-    return id != null ? id.hashCode() : 0;
+    int result = identityId1 != null ? identityId1.hashCode() : 0;
+    result = 31 * result + (identityId2 != null ? identityId2.hashCode() : 0);
+    return result;
   }
-
 }

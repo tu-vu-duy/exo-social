@@ -23,10 +23,12 @@ import org.exoplatform.services.cache.ExoCache;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.model.Profile;
 import org.exoplatform.social.core.profile.ProfileFilter;
-import org.exoplatform.social.core.storage.cache.IdentityCompositeKey;
-import org.exoplatform.social.core.storage.cache.IdentityData;
-import org.exoplatform.social.core.storage.cache.IdentityKey;
-import org.exoplatform.social.core.storage.cache.ProfileData;
+import org.exoplatform.social.core.storage.cache.model.data.IdentityData;
+import org.exoplatform.social.core.storage.cache.model.data.ProfileData;
+import org.exoplatform.social.core.storage.cache.model.data.SimpleCacheData;
+import org.exoplatform.social.core.storage.cache.model.key.IdentityCompositeKey;
+import org.exoplatform.social.core.storage.cache.model.key.IdentityFilterKey;
+import org.exoplatform.social.core.storage.cache.model.key.IdentityKey;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
@@ -37,12 +39,14 @@ public class SynchronizedIdentityStorage extends IdentityStorage {
   private final ExoCache<IdentityKey, IdentityData> identityCacheById;
   private final ExoCache<IdentityCompositeKey, IdentityKey> identityIndexCache;
   private final ExoCache<IdentityKey, ProfileData> profileCacheById;
+  private final ExoCache<IdentityFilterKey, SimpleCacheData<Integer>> countCacheByFilter;
 
   public SynchronizedIdentityStorage() {
     super();
     identityCacheById = caches.getIdentityCacheById();
     identityIndexCache = caches.getIdentityIndexCache();
     profileCacheById = caches.getProfileCacheById();
+    countCacheByFilter = caches.getCountCacheByFilter();
   }
 
   @Override
@@ -55,6 +59,7 @@ public class SynchronizedIdentityStorage extends IdentityStorage {
       IdentityCompositeKey compositeKey = new IdentityCompositeKey(identity.getProviderId(), identity.getProviderId());
       identityCacheById.put(key, new IdentityData(identity));
       identityIndexCache.put(compositeKey, key);
+      countCacheByFilter.clearCache();
 
     }
     finally {
@@ -111,6 +116,7 @@ public class SynchronizedIdentityStorage extends IdentityStorage {
       if (data != null) {
         identityIndexCache.remove(new IdentityCompositeKey(data.getProviderId(), data.getRemoteId()));
       }
+      countCacheByFilter.clearCache();
       super.deleteIdentity(identity);
     }
     finally {
@@ -186,7 +192,7 @@ public class SynchronizedIdentityStorage extends IdentityStorage {
     try {
       super.saveProfile(profile);
       IdentityKey key = new IdentityKey(profile.getIdentity().getId());
-      profileCacheById.put(key, new ProfileData(profile));
+      profileCacheById.remove(key);
     }
     finally {
       stopSynchronization(created);
@@ -229,6 +235,27 @@ public class SynchronizedIdentityStorage extends IdentityStorage {
     boolean created = startSynchronization();
     try {
        return super.getIdentitiesByProfileFilter(providerId, profileFilter, offset, limit, forceLoadOrReloadProfile);
+      /*
+            List<Relationship> got = super.getSenderRelationships(sender, type, listCheckIdentity);
+      int nb = caches.numberBlocks(got);
+
+      for (int i = nb; nb > 0; --i) {
+
+        // Compute current block
+        int currentBlock = i * caches.BLOCK_SIZE;
+
+        // Prepare block data
+        List<RelationshipData> dataList = new ArrayList<RelationshipData>();
+        for (Relationship relationship : got.subList(currentBlock, got.size())) {
+          dataList.add(new RelationshipData(relationship));
+        }
+
+        RelationshipListKey key = new RelationshipListKey(i, new IdentityKey(sender.getId()), type);
+        RelationshipListData data = new RelationshipListData(null, dataList);
+
+      }
+      return got;
+       */
     }
     finally {
       stopSynchronization(created);
@@ -240,9 +267,19 @@ public class SynchronizedIdentityStorage extends IdentityStorage {
   public int getIdentitiesByProfileFilterCount(final String providerId, final ProfileFilter profileFilter)
       throws IdentityStorageException {
 
+    IdentityFilterKey key = new IdentityFilterKey(providerId, profileFilter);
+
+    SimpleCacheData<Integer> data = countCacheByFilter.get(key);
+
+    if (data != null) {
+      return data.build();
+    }
+
     boolean created = startSynchronization();
     try {
-      return super.getIdentitiesByProfileFilterCount(providerId, profileFilter);
+      int count = super.getIdentitiesByProfileFilterCount(providerId, profileFilter);
+      countCacheByFilter.put(key, new SimpleCacheData<Integer>(count));
+      return count;
     }
     finally {
       stopSynchronization(created);
@@ -254,9 +291,19 @@ public class SynchronizedIdentityStorage extends IdentityStorage {
   public int getIdentitiesByFirstCharacterOfNameCount(final String providerId, final ProfileFilter profileFilter)
       throws IdentityStorageException {
 
+    IdentityFilterKey key = new IdentityFilterKey(providerId, profileFilter);
+
+    SimpleCacheData<Integer> data = countCacheByFilter.get(key);
+
+    if (data != null) {
+      return data.build();
+    }
+
     boolean created = startSynchronization();
     try {
-      return super.getIdentitiesByFirstCharacterOfNameCount(providerId, profileFilter);
+      int count = super.getIdentitiesByFirstCharacterOfNameCount(providerId, profileFilter);
+      countCacheByFilter.put(key, new SimpleCacheData<Integer>(count));
+      return count;
     }
     finally {
       stopSynchronization(created);

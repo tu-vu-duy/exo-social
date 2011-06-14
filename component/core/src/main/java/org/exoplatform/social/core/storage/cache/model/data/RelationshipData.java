@@ -15,49 +15,39 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.core.storage.cache;
+package org.exoplatform.social.core.storage.cache.model.data;
 
-import org.exoplatform.social.core.identity.model.Identity;
+import org.exoplatform.social.core.relationship.model.Relationship;
+import org.exoplatform.social.core.storage.cache.CacheData;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class IdentityData {
+public class RelationshipData implements CacheData<Relationship> {
 
   private final String id;
 
-  private final String providerId;
+  private final IdentityData sender;
+  private final IdentityData receiver;
 
-  private final String remoteId;
+  private final Relationship.Type type;
 
-  private final boolean isDeleted;
-
-  public IdentityData(final Identity identity) {
-    this.id = identity.getId();
-    this.providerId = identity.getProviderId();
-    this.remoteId = identity.getRemoteId();
-    this.isDeleted = identity.isDeleted();
+  public RelationshipData(final Relationship relationship) {
+    this.id = relationship.getId();
+    this.sender = new IdentityData(relationship.getSender());
+    this.receiver = new IdentityData(relationship.getReceiver());
+    this.type = relationship.getStatus();
   }
 
-  public String getId() {
-    return id;
+  public Relationship.Type getType() {
+    return type;
   }
 
-  public String getProviderId() {
-    return providerId;
-  }
-
-  public String getRemoteId() {
-    return remoteId;
-  }
-
-  public Identity build() {
-    Identity identity = new Identity(id);
-    identity.setProviderId(providerId);
-    identity.setRemoteId(remoteId);
-    identity.setDeleted(isDeleted);
-    return identity;
+  public Relationship build() {
+    Relationship relationship = new Relationship(sender.build(), receiver.build(), type);
+    relationship.setId(this.id);
+    return relationship;
   }
 
 }

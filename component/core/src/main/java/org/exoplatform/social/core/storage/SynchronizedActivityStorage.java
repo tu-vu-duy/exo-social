@@ -17,8 +17,13 @@
 
 package org.exoplatform.social.core.storage;
 
+import org.exoplatform.services.cache.ExoCache;
 import org.exoplatform.social.core.activity.model.ExoSocialActivity;
 import org.exoplatform.social.core.identity.model.Identity;
+import org.exoplatform.social.core.storage.cache.model.data.ActivityData;
+import org.exoplatform.social.core.storage.cache.model.data.IdentityData;
+import org.exoplatform.social.core.storage.cache.model.key.ActivityKey;
+import org.exoplatform.social.core.storage.cache.model.key.IdentityKey;
 
 import java.util.List;
 
@@ -27,12 +32,30 @@ import java.util.List;
  * @version $Revision$
  */
 public class SynchronizedActivityStorage extends ActivityStorage {
+
+  private final ExoCache<ActivityKey, ActivityData> activityCacheById;
+
+
+  public SynchronizedActivityStorage() {
+    super();
+    activityCacheById = caches.getActivityCacheById();
+  }
+
   @Override
   public ExoSocialActivity getActivity(final String activityId) throws ActivityStorageException {
 
+    ActivityKey key = new ActivityKey(activityId);
+
+    ActivityData got = activityCacheById.get(key);
+    if (got != null) {
+      return got.build();
+    }
+
     boolean created = startSynchronization();
     try {
-      return super.getActivity(activityId);
+      ExoSocialActivity activity = super.getActivity(activityId);
+      activityCacheById.put(key, new ActivityData(activity));
+      return activity;
     }
     finally {
       stopSynchronization(created);
@@ -69,6 +92,9 @@ public class SynchronizedActivityStorage extends ActivityStorage {
   @Override
   public void saveComment(final ExoSocialActivity activity, final ExoSocialActivity comment) throws ActivityStorageException {
 
+    ActivityKey key = new ActivityKey(activity.getId());
+    activityCacheById.remove(key);
+
     boolean created = startSynchronization();
     try {
       super.saveComment(activity, comment);
@@ -95,6 +121,9 @@ public class SynchronizedActivityStorage extends ActivityStorage {
   @Override
   public void deleteActivity(final String activityId) throws ActivityStorageException {
 
+    ActivityKey key = new ActivityKey(activityId);
+    activityCacheById.remove(key);
+    
     boolean created = startSynchronization();
     try {
       super.deleteActivity(activityId);
@@ -107,6 +136,9 @@ public class SynchronizedActivityStorage extends ActivityStorage {
 
   @Override
   public void deleteComment(final String activityId, final String commentId) throws ActivityStorageException {
+
+    ActivityKey key = new ActivityKey(activityId);
+    activityCacheById.remove(key);
 
     boolean created = startSynchronization();
     try {

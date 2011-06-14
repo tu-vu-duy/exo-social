@@ -15,47 +15,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.core.storage.cache;
+package org.exoplatform.social.core.storage.cache.model.data;
 
-import java.io.Serializable;
+import org.exoplatform.social.core.storage.cache.CacheData;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class RelationshipKey implements Serializable {
+public class SimpleCacheData<T> implements CacheData<T> {
 
-  private final String id;
+  private final T t;
 
-  public RelationshipKey(final String id) {
-    this.id = id;
+  public SimpleCacheData(final T t) {
+    this.t = t;
   }
 
-  public String getId() {
-    return id;
+  public T build() {
+    return t;
   }
-
-  @Override
-  public boolean equals(final Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-
-    RelationshipKey key = (RelationshipKey) o;
-
-    if (id != null ? !id.equals(key.id) : key.id != null) {
-      return false;
-    }
-
-    return true;
-  }
-
-  @Override
-  public int hashCode() {
-    return id != null ? id.hashCode() : 0;
-  }
-  
 }

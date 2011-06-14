@@ -207,7 +207,7 @@ public class ActivityStorageNewTestCase extends AbstractCoreTest {
     activity = activityStorage.getActivity(activity.getId());
     for (String commentId : activity.getReplyToId().split(",")) {
       if (!"".equals(commentId) && i < 5) {
-        activityStorage.deleteActivity(commentId);
+        activityStorage.deleteComment(activity.getId(), commentId);
         ++i;
       }
     }

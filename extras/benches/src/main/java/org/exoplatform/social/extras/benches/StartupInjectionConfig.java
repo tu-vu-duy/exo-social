@@ -128,11 +128,11 @@ public class StartupInjectionConfig implements Startable {
   private void inject() {
     LOG.info("starting...");
     boolean nothingWasDone = true;
-    if (people > 0) {
+    //if (people > 0) {
       nothingWasDone = false;
-      LOG.info("\t> about to inject " + people + " people.");
-      injector.generatePeople(people);
-    }
+      LOG.info("\t> about to inject " + 200 + " people.");
+      injector.generatePeople(200);
+    //}
     if (relations > 0) {
       nothingWasDone = false;
       LOG.info("\t> about to inject " + relations + " connections.");

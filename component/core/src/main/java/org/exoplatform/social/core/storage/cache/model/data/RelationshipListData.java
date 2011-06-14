@@ -15,38 +15,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.core.storage.cache;
+package org.exoplatform.social.core.storage.cache.model.data;
 
 import org.exoplatform.social.core.relationship.model.Relationship;
+import org.exoplatform.social.core.storage.cache.CachedListData;
+import org.exoplatform.social.core.storage.cache.model.key.RelationshipKey;
+
+import java.util.List;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class RelationshipData {
+public class RelationshipListData extends CachedListData<Relationship, RelationshipKey, RelationshipData> {
 
-  private final String id;
-
-  private final IdentityData sender;
-  private final IdentityData receiver;
-
-  private final Relationship.Type type;
-
-  public RelationshipData(final Relationship relationship) {
-    this.id = relationship.getId();
-    this.sender = new IdentityData(relationship.getSender());
-    this.receiver = new IdentityData(relationship.getReceiver());
-    this.type = relationship.getStatus();
+  public RelationshipListData(final RelationshipKey next, final List<RelationshipData> relationshipDatas) {
+    super(next, relationshipDatas);
   }
-
-  public Relationship.Type getType() {
-    return type;
-  }
-
-  public Relationship build() {
-    Relationship relationship = new Relationship(sender.build(), receiver.build(), type);
-    relationship.setId(this.id);
-    return relationship;
-  }
-
 }

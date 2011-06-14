@@ -15,23 +15,34 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.core.storage.cache;
+package org.exoplatform.social.core.storage.cache.model.data;
 
-import java.io.Serializable;
+import org.exoplatform.social.core.identity.model.Identity;
+import org.exoplatform.social.core.storage.cache.CacheData;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class IdentityCompositeKey implements Serializable {
+public class IdentityData implements CacheData<Identity> {
+
+  private final String id;
 
   private final String providerId;
 
   private final String remoteId;
 
-  public IdentityCompositeKey(final String providerId, final String remoteId) {
-    this.providerId = providerId;
-    this.remoteId = remoteId;
+  private final boolean isDeleted;
+
+  public IdentityData(final Identity identity) {
+    this.id = identity.getId();
+    this.providerId = identity.getProviderId();
+    this.remoteId = identity.getRemoteId();
+    this.isDeleted = identity.isDeleted();
+  }
+
+  public String getId() {
+    return id;
   }
 
   public String getProviderId() {
@@ -42,31 +53,12 @@ public class IdentityCompositeKey implements Serializable {
     return remoteId;
   }
 
-  @Override
-  public boolean equals(final Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-
-    IdentityCompositeKey that = (IdentityCompositeKey) o;
-
-    if (providerId != null ? !providerId.equals(that.providerId) : that.providerId != null) {
-      return false;
-    }
-    if (remoteId != null ? !remoteId.equals(that.remoteId) : that.remoteId != null) {
-      return false;
-    }
-
-    return true;
+  public Identity build() {
+    Identity identity = new Identity(id);
+    identity.setProviderId(providerId);
+    identity.setRemoteId(remoteId);
+    identity.setDeleted(isDeleted);
+    return identity;
   }
 
-  @Override
-  public int hashCode() {
-    int result = providerId != null ? providerId.hashCode() : 0;
-    result = 31 * result + (remoteId != null ? remoteId.hashCode() : 0);
-    return result;
-  }
 }

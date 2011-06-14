@@ -20,9 +20,9 @@ package org.exoplatform.social.core.storage;
 import org.exoplatform.services.cache.ExoCache;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.relationship.model.Relationship;
-import org.exoplatform.social.core.storage.cache.RelationshipData;
-import org.exoplatform.social.core.storage.cache.RelationshipIdentityKey;
-import org.exoplatform.social.core.storage.cache.RelationshipKey;
+import org.exoplatform.social.core.storage.cache.model.data.RelationshipData;
+import org.exoplatform.social.core.storage.cache.model.key.RelationshipIdentityKey;
+import org.exoplatform.social.core.storage.cache.model.key.RelationshipKey;
 
 import java.util.List;
 

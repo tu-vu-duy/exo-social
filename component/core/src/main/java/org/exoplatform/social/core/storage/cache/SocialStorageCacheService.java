@@ -19,6 +19,19 @@ package org.exoplatform.social.core.storage.cache;
 
 import org.exoplatform.services.cache.CacheService;
 import org.exoplatform.services.cache.ExoCache;
+import org.exoplatform.social.core.storage.cache.model.data.ActivityData;
+import org.exoplatform.social.core.storage.cache.model.data.IdentityData;
+import org.exoplatform.social.core.storage.cache.model.data.ProfileData;
+import org.exoplatform.social.core.storage.cache.model.data.RelationshipData;
+import org.exoplatform.social.core.storage.cache.model.data.SimpleCacheData;
+import org.exoplatform.social.core.storage.cache.model.key.ActivityKey;
+import org.exoplatform.social.core.storage.cache.model.key.IdentityCompositeKey;
+import org.exoplatform.social.core.storage.cache.model.key.IdentityFilterKey;
+import org.exoplatform.social.core.storage.cache.model.key.IdentityKey;
+import org.exoplatform.social.core.storage.cache.model.key.RelationshipIdentityKey;
+import org.exoplatform.social.core.storage.cache.model.key.RelationshipKey;
+
+import java.util.List;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
@@ -26,22 +39,31 @@ import org.exoplatform.services.cache.ExoCache;
  */
 public class SocialStorageCacheService {
 
+  public final static int BLOCK_SIZE = 10;
+
   // IdentityStorage
   private final ExoCache<IdentityKey, IdentityData> identityCacheById;
   private final ExoCache<IdentityCompositeKey, IdentityKey> identityIndexCache;
   private final ExoCache<IdentityKey, ProfileData> profileCacheById;
+  private final ExoCache<IdentityFilterKey, SimpleCacheData<Integer>> countCacheByFilter;
   
-  // IdentityRelationship
+  // RelationshipStorage
   private final ExoCache<RelationshipKey, RelationshipData> relationshipCacheById;
   private final ExoCache<RelationshipIdentityKey, RelationshipKey> relationshipCacheByIdentity;
+
+  // ActivityStorage
+  private final ExoCache<ActivityKey, ActivityData> activityCacheById;
 
   public SocialStorageCacheService(CacheService cacheService) {
     this.identityCacheById = cacheService.getCacheInstance("org.exoplatform.social.core.storage.IdentityCacheById");
     this.identityIndexCache = cacheService.getCacheInstance("org.exoplatform.social.core.storage.IdentityIndexCache");
     this.profileCacheById = cacheService.getCacheInstance("org.exoplatform.social.core.storage.ProfileCacheById");
+    this.countCacheByFilter = cacheService.getCacheInstance("org.exoplatform.social.core.storage.CountCacheByFilter");
 
     this.relationshipCacheById = cacheService.getCacheInstance("org.exoplatform.social.core.storage.RelationshipCacheById");
     this.relationshipCacheByIdentity = cacheService.getCacheInstance("org.exoplatform.social.core.storage.RelationshipCacheByIdentity");
+    
+    this.activityCacheById = cacheService.getCacheInstance("org.exoplatform.social.core.storage.ActivityCacheById");
   }
 
   public ExoCache<IdentityKey, IdentityData> getIdentityCacheById() {
@@ -63,4 +85,17 @@ public class SocialStorageCacheService {
   public ExoCache<RelationshipIdentityKey, RelationshipKey> getRelationshipCacheByIdentity() {
     return relationshipCacheByIdentity;
   }
+
+  public ExoCache<IdentityFilterKey, SimpleCacheData<Integer>> getCountCacheByFilter() {
+    return countCacheByFilter;
+  }
+
+  public ExoCache<ActivityKey, ActivityData> getActivityCacheById() {
+    return activityCacheById;
+  }
+
+  public int numberBlocks(List l) {
+    return l.size() / BLOCK_SIZE;
+  }
+
 }

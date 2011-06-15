@@ -55,7 +55,7 @@ public class SynchronizedIdentityStorage extends IdentityStorage {
     boolean created = startSynchronization();
     try {
       super.saveIdentity(identity);
-      IdentityKey key = new IdentityKey(identity.getId());
+      IdentityKey key = new IdentityKey(identity);
       IdentityCompositeKey compositeKey = new IdentityCompositeKey(identity.getProviderId(), identity.getProviderId());
       identityCacheById.put(key, new IdentityData(identity));
       identityIndexCache.put(compositeKey, key);
@@ -84,7 +84,7 @@ public class SynchronizedIdentityStorage extends IdentityStorage {
   @Override
   public Identity findIdentityById(final String nodeId) throws IdentityStorageException {
 
-    IdentityKey key = new IdentityKey(nodeId);
+    IdentityKey key = new IdentityKey(new Identity(nodeId));
 
     IdentityData got = identityCacheById.get(key);
 
@@ -111,7 +111,7 @@ public class SynchronizedIdentityStorage extends IdentityStorage {
 
     boolean created = startSynchronization();
     try {
-      IdentityKey key = new IdentityKey(identity.getId());
+      IdentityKey key = new IdentityKey(identity);
       IdentityData data = identityCacheById.remove(key);
       if (data != null) {
         identityIndexCache.remove(new IdentityCompositeKey(data.getProviderId(), data.getRemoteId()));
@@ -128,7 +128,7 @@ public class SynchronizedIdentityStorage extends IdentityStorage {
   @Override
   public Profile loadProfile(Profile profile) throws IdentityStorageException {
 
-    IdentityKey key = new IdentityKey(profile.getIdentity().getId());
+    IdentityKey key = new IdentityKey(profile.getIdentity());
     ProfileData data = profileCacheById.get(key);
 
     if (data != null) {
@@ -170,7 +170,7 @@ public class SynchronizedIdentityStorage extends IdentityStorage {
 
       if (identity != null) {
 
-        IdentityKey key = new IdentityKey(identity.getId());
+        IdentityKey key = new IdentityKey(identity);
 
         identityCacheById.put(key, new IdentityData(identity));
         identityIndexCache.put(compositeKey, key);
@@ -191,7 +191,7 @@ public class SynchronizedIdentityStorage extends IdentityStorage {
     boolean created = startSynchronization();
     try {
       super.saveProfile(profile);
-      IdentityKey key = new IdentityKey(profile.getIdentity().getId());
+      IdentityKey key = new IdentityKey(profile.getIdentity());
       profileCacheById.remove(key);
     }
     finally {

@@ -17,6 +17,8 @@
 
 package org.exoplatform.social.core.storage.cache.model.key;
 
+import org.exoplatform.social.core.identity.model.Identity;
+
 import java.io.Serializable;
 
 /**
@@ -27,8 +29,8 @@ public class IdentityKey implements Serializable {
 
   private final String id;
 
-  public IdentityKey(final String id) {
-    this.id = id;
+  public IdentityKey(final Identity identity) {
+    this.id = identity.getId();
   }
 
   public String getId() {

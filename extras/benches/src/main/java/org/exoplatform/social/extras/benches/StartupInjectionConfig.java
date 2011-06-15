@@ -72,6 +72,7 @@ public class StartupInjectionConfig implements Startable {
   public StartupInjectionConfig(InitParams params,
                            DataInjector injector,
                            OrganizationService organizationService) {
+
     this.injector = injector;
     PropertiesParam props = params.getPropertiesParam("inject.conf");
     if (props != null) {
@@ -81,11 +82,11 @@ public class StartupInjectionConfig implements Startable {
         String name = property.getName();
         String value = property.getValue();
         Long longValue = longValue(name, value);
-        if ("people".equals(property)) {
+        if ("people".equals(name)) {
           people = longValue;
-        } else if ("relations".equals(property)) {
+        } else if ("relations".equals(name)) {
           relations = longValue;
-        } else if ("activities".equals(property)) {
+        } else if ("activities".equals(name)) {
           activities = longValue;
         } else if (name.contains(".activities")) {
           String user = name.substring(0, name.indexOf(".activities"));
@@ -128,11 +129,11 @@ public class StartupInjectionConfig implements Startable {
   private void inject() {
     LOG.info("starting...");
     boolean nothingWasDone = true;
-    //if (people > 0) {
+    if (people > 0) {
       nothingWasDone = false;
-      LOG.info("\t> about to inject " + 200 + " people.");
-      injector.generatePeople(200);
-    //}
+      LOG.info("\t> about to inject " + people + " people.");
+      injector.generatePeople(people);
+    }
     if (relations > 0) {
       nothingWasDone = false;
       LOG.info("\t> about to inject " + relations + " connections.");

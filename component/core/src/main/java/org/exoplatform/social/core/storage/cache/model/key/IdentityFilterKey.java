@@ -52,7 +52,7 @@ public class IdentityFilterKey implements Serializable {
 
     List<IdentityKey> keys = new ArrayList<IdentityKey>();
     for (Identity i : filter.getExcludedIdentityList()) {
-      keys.add(new IdentityKey(i.getId()));
+      keys.add(new IdentityKey(i));
     }
 
     this.excluded = Collections.unmodifiableList(keys);

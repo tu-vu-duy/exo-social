@@ -19,12 +19,18 @@ package org.exoplatform.social.core.storage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.exoplatform.social.core.activity.model.ExoSocialActivity;
 import org.exoplatform.social.core.activity.model.ExoSocialActivityImpl;
+import org.exoplatform.social.core.application.RelationshipPublisher.TitleId;
 import org.exoplatform.social.core.identity.model.Identity;
+import org.exoplatform.social.core.identity.provider.SpaceIdentityProvider;
+import org.exoplatform.social.core.space.impl.DefaultSpaceApplicationHandler;
+import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.test.AbstractCoreTest;
 
 /**
@@ -108,6 +114,31 @@ public class ActivityStorageNewTestCase extends AbstractCoreTest {
 
     //
     assertEquals(5, activityStorage.getActivitiesCount(rootIdentity));
+  }
+
+  /**
+   * Test {@link org.exoplatform.social.core.storage.ActivityStorage#getActivity(String)}
+   */
+  public void testUserPostActivityToSpace() throws ActivityStorageException {
+    // Create new Space and its Identity
+    Space space = getSpaceInstance();
+    SpaceIdentityProvider spaceIdentityProvider = (SpaceIdentityProvider) getContainer().getComponentInstanceOfType(SpaceIdentityProvider.class);
+    Identity spaceIdentity = spaceIdentityProvider.createIdentity(space);
+    identityStorage.saveIdentity(spaceIdentity);
+    
+    // john posted activity on created Space
+    ExoSocialActivity activity = new ExoSocialActivityImpl();
+    activity.setTitle("Space's Activity");
+    activity.setUserId(johnIdentity.getId());
+
+    activityStorage.saveActivity(spaceIdentity, activity);
+    
+    // Get posted Activity and check
+    ExoSocialActivity gotActivity = activityStorage.getActivity(activity.getId());
+    
+    assertEquals("userId must be " + johnIdentity.getId(), johnIdentity.getId(), gotActivity.getUserId());
+    
+    identityStorage.deleteIdentity(spaceIdentity);
   }
 
   public void testActivityOrder() throws Exception {
@@ -297,6 +328,82 @@ public class ActivityStorageNewTestCase extends AbstractCoreTest {
     assertFalse(gotComment.getPostedTime() == 0);
 
   }
+  
+  public void testRelationshipActivity() throws Exception {
+    ExoSocialActivity activity = new ExoSocialActivityImpl();
+    activity.setTitle("I am now connected with @receiverRemoteId");
+    activity.setType("exosocial:relationship");
+    //Shindig's Activity's fields
+    activity.setAppId("appId");
+    activity.setBody("body");
+    activity.setBodyId("bodyId");
+    activity.setTitleId(TitleId.CONNECTION_REQUESTED.toString());
+    activity.setExternalId("externalId");
+    //activity.setId("id");
+    activity.setUrl("http://www.exoplatform.org");
+    activity.setUserId(demoIdentity.getId());
+    
+    Map<String,String> params = new HashMap<String,String>();
+    params.put("SENDER", "senderRemoteId");
+    params.put("RECEIVER", "receiverRemoteId");
+    params.put("RELATIONSHIP_UUID", "relationship_id");
+    activity.setTemplateParams(params);
+    
+    activityStorage.saveActivity(rootIdentity, activity);
+    
+    List<ExoSocialActivity> activities = activityStorage.getActivities(rootIdentity);
+    assertNotNull(activities);
+    assertEquals(1, activities.size());
+    
+    for(ExoSocialActivity element : activities) {
+     
+      //title
+      assertNotNull(element.getTitle());
+      //type
+      assertNotNull(element.getType());
+      //appId
+      assertNotNull(element.getAppId());
+      //body
+      assertNotNull(element.getBody());
+      //bodyId
+      assertNotNull(element.getBodyId());
+      //titleId
+      assertEquals(TitleId.CONNECTION_REQUESTED.toString(), element.getTitleId());
+      //externalId
+      assertNotNull(element.getExternalId());
+      //id
+      //assertNotNull(element.getId());
+      //url
+      assertEquals("http://www.exoplatform.org", element.getUrl());
+      //id
+      assertNotNull(element.getUserId());
+      //templateParams
+      assertNotNull(element.getTemplateParams());
+      
+    }
+    
+    
+  }
 
+  
+  /**
+   * Gets an instance of Space.
+   *
+   * @return an instance of space
+   */
+  private Space getSpaceInstance() {
+    Space space = new Space();
+    space.setDisplayName("my space");
+    space.setRegistration(Space.OPEN);
+    space.setDescription("add new space");
+    space.setType(DefaultSpaceApplicationHandler.NAME);
+    space.setVisibility(Space.PUBLIC);
+    space.setPriority(Space.INTERMEDIATE_PRIORITY);
+    space.setGroupId("/space/space");
+    String[] managers = new String[] {"john", "demo"};
+    space.setManagers(managers);
+    return space;
+  }
+  
   // TODO : test many days
 }

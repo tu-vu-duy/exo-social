@@ -63,6 +63,14 @@ public class ActivityStorage extends AbstractStorage {
 
     IdentityEntity identityEntity = _findById(IdentityEntity.class, owner.getId());
 
+    IdentityEntity posterIdentityEntity;
+    if (activity.getUserId() != null) {
+      posterIdentityEntity = _findById(IdentityEntity.class, activity.getUserId());
+    }
+    else {
+      posterIdentityEntity = identityEntity;
+    }
+
     // Get ActivityList
     ActivityListEntity activityListEntity = identityEntity.getActivityList();
 
@@ -75,6 +83,7 @@ public class ActivityStorage extends AbstractStorage {
     activityEntity.setIdentity(identityEntity);
     activityEntity.setComment(Boolean.FALSE);
     activityEntity.setPostedTime(currentMillis);
+    activityEntity.setPosterIdentity(posterIdentityEntity);
 
     activity.setId(activityEntity.getId());
     activity.setStreamOwner(identityEntity.getRemoteId());
@@ -109,8 +118,14 @@ public class ActivityStorage extends AbstractStorage {
   private void fillActivityEntityFromActivity(ExoSocialActivity activity, ActivityEntity activityEntity) {
 
     activityEntity.setTitle(activity.getTitle());
+    activityEntity.setTitleId(activity.getTitleId());
     activityEntity.setBody(activity.getBody());
+    activityEntity.setBodyId(activity.getBodyId());
     activityEntity.setLikes(activity.getLikeIdentityIds());
+    activityEntity.setType(activity.getType());
+    activityEntity.setAppId(activity.getAppId());
+    activityEntity.setExternalId(activity.getExternalId());
+    activityEntity.setUrl(activity.getUrl());
 
     //
     Map<String, String> params = activity.getTemplateParams();
@@ -128,9 +143,15 @@ public class ActivityStorage extends AbstractStorage {
     //
     activity.setId(activityEntity.getId());
     activity.setTitle(activityEntity.getTitle());
+    activity.setTitleId(activityEntity.getTitleId());
     activity.setBody(activityEntity.getBody());
-    activity.setUserId(activityEntity.getIdentity().getId());
+    activity.setBodyId(activityEntity.getBodyId());
+    activity.setUserId(activityEntity.getPosterIdentity().getId());
     activity.setPostedTime(activityEntity.getPostedTime());
+    activity.setType(activityEntity.getType());
+    activity.setAppId(activityEntity.getAppId());
+    activity.setExternalId(activityEntity.getExternalId());
+    activity.setUrl(activityEntity.getUrl());
 
     //
     String computeCommentid = "";
@@ -316,7 +337,8 @@ public class ActivityStorage extends AbstractStorage {
       activityEntity.getComments().add(commentEntity);
       commentEntity.setTitle(comment.getTitle());
       commentEntity.setBody(comment.getBody());
-      commentEntity.setIdentity(_findById(IdentityEntity.class, comment.getUserId()));
+      commentEntity.setIdentity(activityEntity.getIdentity());
+      commentEntity.setPosterIdentity(_findById(IdentityEntity.class, comment.getUserId()));
       commentEntity.setComment(Boolean.TRUE);
       commentEntity.setPostedTime(currentMillis);
       comment.setId(commentEntity.getId());

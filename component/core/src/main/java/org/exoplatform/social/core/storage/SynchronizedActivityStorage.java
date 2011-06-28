@@ -17,7 +17,6 @@
 
 package org.exoplatform.social.core.storage;
 
-import com.ibm.icu.impl.SimpleCache;
 import org.exoplatform.services.cache.ExoCache;
 import org.exoplatform.social.core.activity.model.ExoSocialActivity;
 import org.exoplatform.social.core.identity.model.Identity;
@@ -37,13 +36,20 @@ public class SynchronizedActivityStorage extends ActivityStorage {
   private final ExoCache<ActivityKey, ActivityData> activityCacheById;
   private final ExoCache<IdentityKey, SimpleCacheData<Integer>> activityCountCacheByIdentity;
 
+  public SynchronizedActivityStorage(
+      final RelationshipStorage relationshipStorage,
+      final IdentityStorage identityStorage,
+      final SpaceStorage spaceStorage) {
 
-  public SynchronizedActivityStorage() {
-    super();
+    super(relationshipStorage, identityStorage, spaceStorage);
     activityCacheById = caches.getActivityCacheById();
     activityCountCacheByIdentity = caches.getActivityCountCacheByIdentity();
+
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public ExoSocialActivity getActivity(final String activityId) throws ActivityStorageException {
 
@@ -66,12 +72,16 @@ public class SynchronizedActivityStorage extends ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
-  public List<ExoSocialActivity> getActivities(final Identity owner) throws ActivityStorageException {
+  public List<ExoSocialActivity> getUserActivities(final Identity owner, final long offset, final long limit)
+      throws ActivityStorageException {
 
     boolean created = startSynchronization();
     try {
-      return super.getActivities(owner);
+      return super.getUserActivities(owner, offset, limit);
     }
     finally {
       stopSynchronization(created);
@@ -79,21 +89,12 @@ public class SynchronizedActivityStorage extends ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
-  public List<ExoSocialActivity> getActivities(final Identity owner, final long offset, final long limit) throws ActivityStorageException {
-
-    boolean created = startSynchronization();
-    try {
-      return super.getActivities(owner, offset, limit);
-    }
-    finally {
-      stopSynchronization(created);
-    }
-
-  }
-
-  @Override
-  public void saveComment(final ExoSocialActivity activity, final ExoSocialActivity comment) throws ActivityStorageException {
+  public void saveComment(final ExoSocialActivity activity, final ExoSocialActivity comment)
+      throws ActivityStorageException {
 
     ActivityKey key = new ActivityKey(activity.getId());
     activityCacheById.remove(key);
@@ -108,8 +109,12 @@ public class SynchronizedActivityStorage extends ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
-  public ExoSocialActivity saveActivity(final Identity owner, final ExoSocialActivity activity) throws ActivityStorageException {
+  public ExoSocialActivity saveActivity(final Identity owner, final ExoSocialActivity activity)
+      throws ActivityStorageException {
 
     activityCountCacheByIdentity.remove(new IdentityKey(owner));
 
@@ -123,13 +128,16 @@ public class SynchronizedActivityStorage extends ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void deleteActivity(final String activityId) throws ActivityStorageException {
 
     IdentityKey userKey = new IdentityKey(new Identity(getActivity(activityId).getUserId()));
     activityCountCacheByIdentity.remove(userKey);
     activityCacheById.remove(new ActivityKey(activityId));
-    
+
     boolean created = startSynchronization();
     try {
       super.deleteActivity(activityId);
@@ -140,6 +148,9 @@ public class SynchronizedActivityStorage extends ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void deleteComment(final String activityId, final String commentId) throws ActivityStorageException {
 
@@ -156,12 +167,16 @@ public class SynchronizedActivityStorage extends ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
-  public List<ExoSocialActivity> getActivitiesOfConnections(final List<Identity> connectionList, final long offset, final long limit) throws ActivityStorageException {
+  public List<ExoSocialActivity> getActivitiesOfIdentities(
+      final List<Identity> connectionList, final long offset, final long limit) throws ActivityStorageException {
 
     boolean created = startSynchronization();
     try {
-      return super.getActivitiesOfConnections(connectionList, offset, limit);
+      return super.getActivitiesOfIdentities(connectionList, offset, limit);
     }
     finally {
       stopSynchronization(created);
@@ -169,8 +184,11 @@ public class SynchronizedActivityStorage extends ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
-  public int getActivitiesCount(final Identity owner) throws ActivityStorageException {
+  public int getNumberOfUserActivities(final Identity owner) throws ActivityStorageException {
 
     IdentityKey key = new IdentityKey(owner);
 
@@ -182,9 +200,24 @@ public class SynchronizedActivityStorage extends ActivityStorage {
 
     boolean created = startSynchronization();
     try {
-      int got = super.getActivitiesCount(owner);
+      int got = super.getNumberOfUserActivities(owner);
       activityCountCacheByIdentity.put(key, new SimpleCacheData<Integer>(got));
       return got;
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public void updateActivity(final ExoSocialActivity existingActivity) throws ActivityStorageException {
+
+    activityCacheById.remove(new ActivityKey(existingActivity.getId()));
+
+    boolean created = startSynchronization();
+    try {
+      super.updateActivity(existingActivity);
     }
     finally {
       stopSynchronization(created);

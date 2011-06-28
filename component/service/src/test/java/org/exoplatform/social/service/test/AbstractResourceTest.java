@@ -18,6 +18,15 @@
  */
 package org.exoplatform.social.service.test;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.MultivaluedMap;
+
 import org.exoplatform.services.rest.ContainerResponseWriter;
 import org.exoplatform.services.rest.impl.ContainerRequest;
 import org.exoplatform.services.rest.impl.ContainerResponse;
@@ -26,14 +35,11 @@ import org.exoplatform.services.rest.impl.InputHeadersMap;
 import org.exoplatform.services.rest.impl.MultivaluedMapImpl;
 import org.exoplatform.services.rest.tools.DummyContainerResponseWriter;
 import org.exoplatform.services.test.mock.MockHttpServletRequest;
-
-import java.io.ByteArrayInputStream;
-import java.net.URI;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.MultivaluedMap;
+import org.exoplatform.ws.frameworks.json.impl.JsonDefaultHandler;
+import org.exoplatform.ws.frameworks.json.impl.JsonException;
+import org.exoplatform.ws.frameworks.json.impl.JsonGeneratorImpl;
+import org.exoplatform.ws.frameworks.json.impl.JsonParserImpl;
+import org.exoplatform.ws.frameworks.json.value.JsonValue;
 
 /**
  * AbstractResourceTest.java <br />
@@ -105,4 +111,83 @@ public abstract class AbstractResourceTest extends AbstractServiceTest {
                                    byte[] data) throws Exception {
     return service(method, requestURI, baseURI, headers, data, new DummyContainerResponseWriter());
   }
+
+  /**
+   * Asserts if the provided jsonString is equal to an entity object's string.
+   *
+   * @param jsonString the provided json string
+   * @param entity the provided entity object
+   */
+  public void assertJsonStringEqualsEntity(String jsonString, Object entity) throws JsonException {
+    JsonParserImpl jsonParser = new JsonParserImpl();
+    JsonDefaultHandler jsonDefaultHandler = new JsonDefaultHandler();
+    jsonParser.parse(new InputStreamReader(new ByteArrayInputStream(jsonString.getBytes())), jsonDefaultHandler);
+
+    JsonValue firstJsonValue = jsonDefaultHandler.getJsonObject();
+    assertNotNull("firstJsonValue must not be null", firstJsonValue);
+
+    JsonValue secondJsonValue = new JsonGeneratorImpl().createJsonObject(entity);
+    assertNotNull("secondJsonValue must not be null", secondJsonValue);
+
+    assertEquals(firstJsonValue.toString(), secondJsonValue.toString());
+  }
+
+  /**
+   * Asserts if the provided xmlString is equal to an entity object's string.
+   *
+   * @param xmlString the provided xml string
+   * @param entity the provided entity object
+   */
+  public void assertXmlStringEqualsEntity(String xmlString, Object entity) {
+    //TODO implement this
+  }
+
+
+  /**
+   * Tests: an anonymous user that accesses a resource requires authentication.
+   *
+   * @param method the http method string
+   * @param resourceUrl the resource url to access
+   * @param data the data if any
+   * @throws Exception
+   */
+  protected void testAccessResourceAsAnonymous(String method, String resourceUrl, byte[] data) throws Exception {
+    ContainerResponse containerResponse = service(method, resourceUrl, "", null, data);
+    assertEquals(401, containerResponse.getStatus());
+  }
+
+
+  /**
+   * Tests: an authenticated user that accesses a resource that is forbidden, has no permission.
+   *
+   * @param username the portal user name
+   * @param method the http method string
+   * @param resourceUrl the resource url to access
+   * @param data the data if any
+   * @throws Exception
+   */
+  protected void testAccessResourceWithoutPermission(String username, String method, String resourceUrl, byte[] data)
+                                                  throws Exception {
+    startSessionAs(username);
+    ContainerResponse containerResponse = service(method, resourceUrl, "", null, data);
+    assertEquals(403, containerResponse.getStatus());
+  }
+
+
+  /**
+   * Tests: an authenticated user that accesses a resource that is not found.
+   *
+   * @param username the portal user name
+   * @param method the http method string
+   * @param resourceUrl the resource url to access
+   * @param data the data if any
+   * @throws Exception
+   */
+  protected void testAccessNotFoundResourceWithAuthentication(String username, String method, String resourceUrl,
+                                                              byte[] data) throws Exception {
+    startSessionAs(username);
+    ContainerResponse containerResponse = service(method, resourceUrl, "", null, data);
+    assertEquals(404, containerResponse.getStatus());
+  }
+
 }

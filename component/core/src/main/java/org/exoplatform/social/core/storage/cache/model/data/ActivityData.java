@@ -35,7 +35,14 @@ public class ActivityData implements CacheData<ExoSocialActivity> {
   private final String[] likes;
   private final boolean isComment;
   private final Long postedTime;
-  private final String replyIds;
+  private final String[] replyIds;
+  private final String userId;
+  private final String streamId;
+  private final String streamOwner;
+  private final String streamFaviconUrl;
+  private final String streamSourceUrl;
+  private final String streamTitle;
+  private final String streamUrl;
 
   public ActivityData(final ExoSocialActivity activity) {
 
@@ -46,6 +53,13 @@ public class ActivityData implements CacheData<ExoSocialActivity> {
     this.isComment = activity.isComment();
     this.postedTime = activity.getPostedTime();
     this.replyIds = activity.getReplyToId();
+    this.userId = activity.getUserId();
+    this.streamId = activity.getStreamId();
+    this.streamOwner = activity.getStreamOwner();
+    this.streamFaviconUrl = activity.getStreamFaviconUrl();
+    this.streamSourceUrl = activity.getStreamSourceUrl();
+    this.streamTitle = activity.getStreamTitle();
+    this.streamUrl = activity.getStreamUrl();
 
   }
 
@@ -60,6 +74,13 @@ public class ActivityData implements CacheData<ExoSocialActivity> {
     activity.setReplyToId(replyIds);
     activity.isComment(isComment);
     activity.setPostedTime(postedTime);
+    activity.setUserId(userId);
+    activity.setStreamId(streamId);
+    activity.setStreamOwner(streamOwner);
+    activity.setStreamFaviconUrl(streamFaviconUrl);
+    activity.setStreamSourceUrl(streamSourceUrl);
+    activity.setStreamTitle(streamTitle);
+    activity.setStreamUrl(streamUrl);
 
     return activity;
 

@@ -40,7 +40,7 @@ import org.exoplatform.social.core.storage.query.PropertyLiteralExpression;
  * @version $Revision$
  */
 @PrimaryType(name = "soc:activity", orderable = true)
-public abstract class ActivityEntity {
+public abstract class ActivityEntity implements NamedEntity {
 
   @Id
   public abstract String getId();
@@ -48,6 +48,10 @@ public abstract class ActivityEntity {
   @Name
   public abstract String getName();
 
+  @ManyToOne
+  public abstract ActivityEntity getParentActivity();
+
+  @Owner
   @OneToMany
   public abstract List<ActivityEntity> getComments();
 
@@ -97,6 +101,10 @@ public abstract class ActivityEntity {
   @Property(name = "soc:url")
   public abstract String getUrl();
   public abstract void setUrl(String url);
+
+  @Property(name = "soc:priority")
+  public abstract Float getPriority();
+  public abstract void setPriority(Float priority);
 
   @Property(name = "soc:likes")
   public abstract String[] getLikes();

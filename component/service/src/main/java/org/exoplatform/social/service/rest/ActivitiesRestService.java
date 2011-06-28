@@ -40,6 +40,7 @@ import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
 import org.exoplatform.services.security.ConversationState;
 import org.exoplatform.social.core.activity.model.ExoSocialActivity;
+import org.exoplatform.social.core.activity.model.ExoSocialActivityImpl;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.model.Profile;
 import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
@@ -215,13 +216,17 @@ public class ActivitiesRestService implements ResourceContainer {
       throw new WebApplicationException(Response.Status.NOT_FOUND);
     }
     String[] identityIds = activity.getLikeIdentityIds();
-    if (identityIds == null) {
+    if (identityIds.length == 0) {
       throw new WebApplicationException(Response.Status.BAD_REQUEST);
     }
     boolean alreadyLiked = true;
     for (String id : identityIds) {
       if (id.equals(identityId)) {
         identityIds = removeItemFromArray(identityIds, identityId);
+        if (identityIds == null) {
+          identityIds = new String [] {};
+        }
+
         activity.setLikeIdentityIds(identityIds);
         try {
           Identity user = getIdentityManager().getIdentity(activity.getUserId());
@@ -329,12 +334,10 @@ public class ActivitiesRestService implements ResourceContainer {
       if (activity == null) {
         throw new WebApplicationException(Response.Status.NOT_FOUND);
       }
-      String rawCommentIds = activity.getReplyToId();
-      //rawCommentIds can be: null || ,a,b,c,d
-      if (rawCommentIds == null) {
+      String[] commentIds = activity.getReplyToId();
+      if (commentIds == null) {
         commentList.setComments(new ArrayList<ExoSocialActivity>());
       } else {
-        String[] commentIds = rawCommentIds.split(",");
         for (String commentId: commentIds) {
           if (commentId.length() > 0) {
             commentList.addComment(_activityManager.getActivity(commentId));
@@ -378,7 +381,7 @@ public class ActivitiesRestService implements ResourceContainer {
       userId = state.getIdentity().getUserId();
     } else {
       try {
-        userId = getRemoteId(uriInfo, portalName);
+        userId = Util.getViewerId(uriInfo);
       } catch (Exception e) {
         LOG.warn(e.getMessage(), e);
       }
@@ -389,13 +392,17 @@ public class ActivitiesRestService implements ResourceContainer {
     } catch (Exception e1) {
       LOG.warn(e1.getMessage(), e1);
     }
+    
+    if (identity == null) {
+      identity = getIdentityManager(portalName).getOrCreateIdentity(OrganizationIdentityProvider.NAME, Util.getViewerId(uriInfo), false);  
+    }
+    
      //TODO hoatle set current userId from authentication context instead of getting userId from comment
      if (comment.getUserId() == null) {
        throw new WebApplicationException(Response.Status.BAD_REQUEST);
     } else {
       comment.setUserId(identity.getId());
     }
-
 
     try {
       _activityManager.saveComment(activity, comment);
@@ -404,12 +411,6 @@ public class ActivitiesRestService implements ResourceContainer {
     }
     commentList.addComment(comment);
     return commentList;
-  }
-
-  private String getRemoteId(UriInfo uriInfo, String portalName) throws Exception {
-    String viewerId = Util.getViewerId(uriInfo);
-    Identity identity = getIdentityManager(portalName).getIdentity(viewerId);
-    return identity.getRemoteId();
   }
 
   /**
@@ -493,7 +494,7 @@ public class ActivitiesRestService implements ResourceContainer {
                                 @PathParam("portalName") String portalName,
                                 @PathParam("activityId") String activityId,
                                 @PathParam("format") String format,
-                                ExoSocialActivity comment) throws Exception {
+                                ExoSocialActivityImpl comment) throws Exception {
     MediaType mediaType = Util.getMediaType(format);
     portalName_ = portalName;
     CommentList commentList = null;

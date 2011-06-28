@@ -66,6 +66,16 @@
           <requiredPrimaryType>soc:relationship</requiredPrimaryType>
         </requiredPrimaryTypes>
       </childNodeDefinition>
+      <childNodeDefinition name="soc:ignored" defaultPrimaryType="soc:relationship" autoCreated="true" mandatory="true" onParentVersion="COPY" protected="false" sameNameSiblings="false">
+        <requiredPrimaryTypes>
+          <requiredPrimaryType>soc:relationship</requiredPrimaryType>
+        </requiredPrimaryTypes>
+      </childNodeDefinition>
+      <childNodeDefinition name="soc:ignore" defaultPrimaryType="soc:relationship" autoCreated="true" mandatory="true" onParentVersion="COPY" protected="false" sameNameSiblings="false">
+        <requiredPrimaryTypes>
+          <requiredPrimaryType>soc:relationship</requiredPrimaryType>
+        </requiredPrimaryTypes>
+      </childNodeDefinition>
       <childNodeDefinition name="soc:activities" defaultPrimaryType="soc:activitylist" autoCreated="true" mandatory="true" onParentVersion="COPY" protected="false" sameNameSiblings="false">
         <requiredPrimaryTypes>
           <requiredPrimaryType>soc:activitylist</requiredPrimaryType>
@@ -170,6 +180,9 @@
       <propertyDefinition name="soc:from" requiredType="Reference" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
         <valueConstraints/>
       </propertyDefinition>
+      <propertyDefinition name="soc:createdTime" requiredType="Long" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
+        <valueConstraints/>
+      </propertyDefinition>
     </propertyDefinitions>
     <childNodeDefinitions/>
   </nodeType>
@@ -202,6 +215,9 @@
         </defaultValues>
       </propertyDefinition>
       <propertyDefinition name="soc:likes" requiredType="String" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="true">
+        <valueConstraints/>
+      </propertyDefinition>
+      <propertyDefinition name="soc:priority" requiredType="Float" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
         <valueConstraints/>
       </propertyDefinition>
       <propertyDefinition name="soc:postedTime" requiredType="Long" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
@@ -383,6 +399,12 @@
       </propertyDefinition>
       <propertyDefinition name="soc:name" requiredType="String" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
         <valueConstraints/>
+      </propertyDefinition>
+      <propertyDefinition name="soc:hasAvatar" requiredType="Boolean" autoCreated="true" mandatory="true" onParentVersion="COPY" protected="false" multiple="false">
+        <valueConstraints/>
+        <defaultValues>
+          <defaultValue>FALSE</defaultValue>
+        </defaultValues>
       </propertyDefinition>
       <propertyDefinition name="soc:displayName" requiredType="String" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
         <valueConstraints/>

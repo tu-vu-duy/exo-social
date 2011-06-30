@@ -16,12 +16,12 @@ import org.exoplatform.social.core.test.AbstractCoreTest;
  * Time: 9:34:56 AM
  */
 public class IdentityStorageTest extends AbstractCoreTest {
-  private IdentityStorage identityStorage;
+  private CachedIdentityStorage identityStorage;
   private List<Identity> tearDownIdentityList;
 
   public void setUp() throws Exception {
     super.setUp();
-    identityStorage = (IdentityStorage) getContainer().getComponentInstanceOfType(IdentityStorage.class);
+    identityStorage = (CachedIdentityStorage) getContainer().getComponentInstanceOfType(CachedIdentityStorage.class);
     assertNotNull("identityStorage must not be null", identityStorage);
     tearDownIdentityList = new ArrayList<Identity>();
   }

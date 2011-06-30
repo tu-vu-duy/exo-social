@@ -53,9 +53,9 @@ public class SpaceStorage extends AbstractStorage {
   /** Logger */
   private static final Log LOG = ExoLogger.getLogger(SpaceStorage.class);
 
-  private final IdentityStorage identityStorage;
+  private final IdentityStorageImpl identityStorage;
 
-  public SpaceStorage(IdentityStorage identityStorage) {
+  public SpaceStorage(IdentityStorageImpl identityStorage) {
    this.identityStorage = identityStorage;
  }
 

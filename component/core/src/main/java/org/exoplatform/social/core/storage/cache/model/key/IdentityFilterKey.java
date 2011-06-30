@@ -20,7 +20,6 @@ package org.exoplatform.social.core.storage.cache.model.key;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.profile.ProfileFilter;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,7 +28,7 @@ import java.util.List;
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class IdentityFilterKey implements Serializable {
+public class IdentityFilterKey implements CacheKey {
 
   private final String providerId;
   private final String name;

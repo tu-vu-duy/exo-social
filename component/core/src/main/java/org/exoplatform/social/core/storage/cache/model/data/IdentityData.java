@@ -35,10 +35,18 @@ public class IdentityData implements CacheData<Identity> {
   private final boolean isDeleted;
 
   public IdentityData(final Identity identity) {
-    this.id = identity.getId();
-    this.providerId = identity.getProviderId();
-    this.remoteId = identity.getRemoteId();
-    this.isDeleted = identity.isDeleted();
+    if (identity != null) {
+      this.id = identity.getId();
+      this.providerId = identity.getProviderId();
+      this.remoteId = identity.getRemoteId();
+      this.isDeleted = identity.isDeleted();
+    }
+    else {
+      this.id = null;
+      this.providerId = null;
+      this.remoteId = null;
+      this.isDeleted = false;
+    }
   }
 
   public String getId() {
@@ -54,6 +62,11 @@ public class IdentityData implements CacheData<Identity> {
   }
 
   public Identity build() {
+
+    if (id == null) {
+      return null;
+    }
+
     Identity identity = new Identity(id);
     identity.setProviderId(providerId);
     identity.setRemoteId(remoteId);

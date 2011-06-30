@@ -31,19 +31,19 @@ import org.exoplatform.social.core.test.AbstractCoreTest;
  * @version $Revision$
  */
 public class RelationshipStorageNewTestCase extends AbstractCoreTest {
-  private RelationshipStorage storage;
+  private RelationshipStorageImpl storage;
 
-  private IdentityStorage identityStorage;
+  private IdentityStorageImpl identityStorage;
 
   private List<String> tearDownIdentityList;
 
   @Override
   protected void setUp() throws Exception {
 
-    storage = (RelationshipStorage) getContainer().getComponentInstanceOfType(RelationshipStorage.class);
+    storage = (RelationshipStorageImpl) getContainer().getComponentInstanceOfType(RelationshipStorageImpl.class);
     assertNotNull(storage);
 
-    identityStorage = (IdentityStorage) getContainer().getComponentInstanceOfType(IdentityStorage.class);
+    identityStorage = (IdentityStorageImpl) getContainer().getComponentInstanceOfType(IdentityStorageImpl.class);
     assertNotNull("identityManger must not be null", identityStorage);
 
     tearDownIdentityList = new ArrayList<String>();

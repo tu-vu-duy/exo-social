@@ -19,18 +19,14 @@ package org.exoplatform.social.core.manager;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.exoplatform.commons.utils.ListAccess;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.model.Profile;
 import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
-import org.exoplatform.social.core.image.ImageUtils;
 import org.exoplatform.social.core.model.AvatarAttachment;
 import org.exoplatform.social.core.relationship.model.Relationship;
 import org.exoplatform.social.core.relationship.model.Relationship.Type;
-import org.exoplatform.social.core.service.LinkProvider;
-import org.exoplatform.social.core.storage.IdentityStorage;
 import org.exoplatform.social.core.test.AbstractCoreTest;
 
 /**

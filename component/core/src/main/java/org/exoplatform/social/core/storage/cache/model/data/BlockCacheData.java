@@ -15,38 +15,44 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.core.storage.cache;
+package org.exoplatform.social.core.storage.cache.model.data;
 
+import org.exoplatform.social.core.storage.cache.CacheData;
+
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class CachedListData<T, K extends CacheKey<T>, D extends CacheData<T>> implements CacheData<List<T>> {
+public class BlockCacheData<T> implements CacheData<List<T>> {
 
-  private final List<D> list;
+  private final List<CacheData<T>> cachedData;
 
-  private final K next;
+  public BlockCacheData(final List<T> data, final Class<? extends CacheData<T>> clazz) {
+    this.cachedData = new ArrayList<CacheData<T>>();
 
-  public CachedListData(final K next, final List<D> list) {
-    this.list = Collections.unmodifiableList(list);
-    this.next = next;
+    try {
+      for (T d : data) {
+        CacheData<T> newData = clazz.getConstructor(d.getClass()).newInstance(d);
+        cachedData.add(newData);
+      }
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   public List<T> build() {
-    List<T> ts = new ArrayList<T>();
+    List<T> list = new ArrayList<T>();
 
-    for (D d : list) {
-      ts.add(d.build());
+    for (CacheData<T> currentData : cachedData) {
+      list.add(currentData.build());
     }
 
-    return ts;
+    return list;
   }
 
-  public K getNext() {
-    return next;
-  }
 }

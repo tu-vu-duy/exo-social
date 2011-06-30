@@ -40,10 +40,6 @@ public abstract class AbstractStorage {
   protected final PortalContainer container;
   protected final ChromatticManager manager;
   protected final SocialChromatticLifeCycle lifeCycle;
-  protected final SocialStorageCacheService caches;
-
-  //
-  protected String[] MONTH_NAME = new DateFormatSymbols(Locale.ENGLISH).getMonths();
 
   //
   protected static final String NS_JCR = "jcr:";
@@ -68,7 +64,6 @@ public abstract class AbstractStorage {
 
     this.container = PortalContainer.getInstance();
     this.manager = (ChromatticManager) container.getComponentInstanceOfType(ChromatticManager.class);
-    this.caches = (SocialStorageCacheService) container.getComponentInstanceOfType(SocialStorageCacheService.class);
     this.lifeCycle = (SocialChromatticLifeCycle) manager.getLifeCycle(SocialChromatticLifeCycle.SOCIAL_LIFECYCLE_NAME);
 
   }

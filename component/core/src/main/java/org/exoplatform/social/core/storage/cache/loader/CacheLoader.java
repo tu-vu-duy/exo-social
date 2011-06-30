@@ -15,21 +15,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.core.storage.cache.model.data;
+package org.exoplatform.social.core.storage.cache.loader;
 
-import org.exoplatform.social.core.relationship.model.Relationship;
-import org.exoplatform.social.core.storage.cache.CachedListData;
-import org.exoplatform.social.core.storage.cache.model.key.RelationshipKey;
-
-import java.util.List;
+import org.exoplatform.commons.cache.future.Loader;
+import org.exoplatform.social.core.storage.cache.model.key.CacheKey;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class RelationshipListData extends CachedListData<Relationship, RelationshipKey, RelationshipData> {
+public class CacheLoader<K extends CacheKey, V> implements Loader<K, V, ServiceContext<V>> {
 
-  public RelationshipListData(final RelationshipKey next, final List<RelationshipData> relationshipDatas) {
-    super(next, relationshipDatas);
+  public V retrieve(final ServiceContext<V> cacheContext, final K key) throws Exception {
+    return cacheContext.execute();
   }
+  
 }

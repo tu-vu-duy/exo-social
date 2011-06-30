@@ -54,10 +54,10 @@ import java.util.regex.Pattern;
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class IdentityStorage extends AbstractStorage {
+public class IdentityStorageImpl extends AbstractStorage implements IdentityStorage {
 
   /** Logger */
-  private static final Log LOG = ExoLogger.getLogger(IdentityStorage.class);
+  private static final Log LOG = ExoLogger.getLogger(IdentityStorageImpl.class);
 
   static enum PropNs {
 
@@ -384,7 +384,7 @@ public class IdentityStorage extends AbstractStorage {
     ));
   }
 
-  protected Identity _findIdentity(final String providerId, final String remoteId) throws NodeNotFoundException {
+  public Identity _findIdentity(final String providerId, final String remoteId) throws NodeNotFoundException {
 
     IdentityEntity identityEntity = _findIdentityEntity(providerId, remoteId);
 
@@ -409,7 +409,7 @@ public class IdentityStorage extends AbstractStorage {
     return identity;
   }
 
-  protected IdentityEntity _findIdentityEntity(final String providerId, final String remoteId)
+  public IdentityEntity _findIdentityEntity(final String providerId, final String remoteId)
       throws NodeNotFoundException {
 
     ProviderEntity providerEntity = getProviderRoot().getProviders().get(providerId);

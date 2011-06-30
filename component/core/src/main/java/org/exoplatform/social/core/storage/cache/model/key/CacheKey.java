@@ -15,45 +15,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.core.storage.cache;
+package org.exoplatform.social.core.storage.cache.model.key;
+
+import java.io.Serializable;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class CachedListKey {
-
-  protected final int offset;
-
-  public CachedListKey(final int offset) {
-    this.offset = offset;
-  }
-
-  public int getOffset() {
-    return offset;
-  }
-
-  @Override
-  public boolean equals(final Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof CachedListKey)) {
-      return false;
-    }
-
-    CachedListKey that = (CachedListKey) o;
-
-    if (offset != that.offset) {
-      return false;
-    }
-
-    return true;
-  }
-
-  @Override
-  public int hashCode() {
-    return offset;
-  }
-  
+public interface CacheKey extends Serializable {
 }

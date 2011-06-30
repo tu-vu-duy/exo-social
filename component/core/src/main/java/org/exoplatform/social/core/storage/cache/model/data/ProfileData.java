@@ -38,6 +38,8 @@ public class ProfileData implements CacheData<Profile> {
 
   private final String remoteId;
 
+  private final boolean hasChanged;
+
   private final Map<String, Object> data;
 
   public ProfileData(final Profile profile) {
@@ -45,6 +47,7 @@ public class ProfileData implements CacheData<Profile> {
     this.identityId = profile.getIdentity().getId();
     this.providerId = profile.getIdentity().getProviderId();
     this.remoteId = profile.getIdentity().getRemoteId();
+    this.hasChanged = profile.hasChanged();
     this.data = Collections.unmodifiableMap(profile.getProperties());
   }
 
@@ -80,6 +83,9 @@ public class ProfileData implements CacheData<Profile> {
     }
 
     identity.setProfile(profile);
+    if (!hasChanged) {
+      profile.clearHasChanged();
+    }
     return profile;
   }
 

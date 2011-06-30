@@ -35,7 +35,7 @@ public class SynchronizedSpaceStorage extends SpaceStorage {
    *
    * @param identityStorage the identity storage
    */
-  public SynchronizedSpaceStorage(final IdentityStorage identityStorage) {
+  public SynchronizedSpaceStorage(final IdentityStorageImpl identityStorage) {
     super(identityStorage);
   }
 

@@ -42,14 +42,14 @@ import java.util.Map;
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class RelationshipStorage extends AbstractStorage {
+public class RelationshipStorageImpl extends AbstractStorage implements RelationshipStorage {
 
   /** Logger */
   private static final Log LOG = ExoLogger.getLogger(RelationshipStorage.class);
 
   private final IdentityStorage identityStorage;
 
-  public RelationshipStorage(IdentityStorage identityStorage) {
+  public RelationshipStorageImpl(IdentityStorage identityStorage) {
    this.identityStorage = identityStorage;
  }
 

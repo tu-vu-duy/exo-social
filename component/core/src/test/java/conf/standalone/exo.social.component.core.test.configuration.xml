@@ -116,11 +116,21 @@
 
   <component>
     <key>org.exoplatform.social.core.storage.IdentityStorage</key>
+    <type>org.exoplatform.social.core.storage.CachedIdentityStorage</type>
+  </component>
+
+  <component>
+    <key>org.exoplatform.social.core.storage.IdentityStorageImpl</key>
     <type>org.exoplatform.social.core.storage.SynchronizedIdentityStorage</type>
   </component>
 
   <component>
     <key>org.exoplatform.social.core.storage.RelationshipStorage</key>
+    <type>org.exoplatform.social.core.storage.CachedRelationshipStorage</type>
+  </component>
+
+  <component>
+    <key>org.exoplatform.social.core.storage.RelationshipStorageImpl</key>
     <type>org.exoplatform.social.core.storage.SynchronizedRelationshipStorage</type>
   </component>
 

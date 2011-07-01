@@ -17,8 +17,11 @@
 
 package org.exoplatform.social.core.storage.cache;
 
+import org.exoplatform.commons.cache.future.FutureExoCache;
 import org.exoplatform.services.cache.CacheService;
 import org.exoplatform.services.cache.ExoCache;
+import org.exoplatform.social.core.storage.cache.loader.CacheLoader;
+import org.exoplatform.social.core.storage.cache.loader.ServiceContext;
 import org.exoplatform.social.core.storage.cache.model.data.ActivityData;
 import org.exoplatform.social.core.storage.cache.model.data.IdentityData;
 import org.exoplatform.social.core.storage.cache.model.data.ProfileData;
@@ -57,10 +60,10 @@ public class SocialStorageCacheService {
   private final ExoCache<IdentityKey, SimpleCacheData<Integer>> activityCountCacheByIdentity;
 
   public SocialStorageCacheService(CacheService cacheService) {
-    this.identityCacheById = cacheService.getCacheInstance("org.exoplatform.social.core.storage.IdentityCacheById");
-    this.identityIndexCache = cacheService.getCacheInstance("org.exoplatform.social.core.storage.IdentityIndexCache");
-    this.profileCacheById = cacheService.getCacheInstance("org.exoplatform.social.core.storage.ProfileCacheById");
-    this.countCacheByFilter = cacheService.getCacheInstance("org.exoplatform.social.core.storage.CountCacheByFilter");
+    this.identityCacheById = cacheService.getCacheInstance("IdentityCacheById");
+    this.identityIndexCache = cacheService.getCacheInstance("IdentityIndexCache");
+    this.profileCacheById = cacheService.getCacheInstance("ProfileCacheById");
+    this.countCacheByFilter = cacheService.getCacheInstance("CountCacheByFilter");
 
     this.relationshipCacheById = cacheService.getCacheInstance("org.exoplatform.social.core.storage.RelationshipCacheById");
     this.relationshipCacheByIdentity = cacheService.getCacheInstance("org.exoplatform.social.core.storage.RelationshipCacheByIdentity");
@@ -70,16 +73,44 @@ public class SocialStorageCacheService {
     this.activityCountCacheByIdentity = cacheService.getCacheInstance("org.exoplatform.social.core.storage.ActivityCountCacheByIdentity");
   }
 
+  public FutureExoCache<IdentityKey, IdentityData, ServiceContext<IdentityData>> createIdentityCacheById() {
+    return new FutureExoCache<IdentityKey, IdentityData, ServiceContext<IdentityData>>(
+        new CacheLoader<IdentityKey, IdentityData>(),
+        getIdentityCacheById()
+    );
+  }
+
   public ExoCache<IdentityKey, IdentityData> getIdentityCacheById() {
     return identityCacheById;
+  }
+
+  public FutureExoCache<IdentityCompositeKey, IdentityKey, ServiceContext<IdentityKey>> createIdentityCacheByCompositeId() {
+    return new FutureExoCache<IdentityCompositeKey, IdentityKey, ServiceContext<IdentityKey>>(
+        new CacheLoader<IdentityCompositeKey, IdentityKey>(),
+        getIdentityIndexCache()
+    );
   }
 
   public ExoCache<IdentityCompositeKey, IdentityKey> getIdentityIndexCache() {
     return identityIndexCache;
   }
 
+  public FutureExoCache<IdentityKey, ProfileData, ServiceContext<ProfileData>> createProfileCacheById() {
+    return new FutureExoCache<IdentityKey, ProfileData, ServiceContext<ProfileData>>(
+        new CacheLoader<IdentityKey, ProfileData>(),
+        getProfileCacheById()
+    );
+  }
+
   public ExoCache<IdentityKey, ProfileData> getProfileCacheById() {
     return profileCacheById;
+  }
+
+  public FutureExoCache<IdentityFilterKey, SimpleCacheData<Integer>, ServiceContext<SimpleCacheData<Integer>>> createCountCacheById() {
+    return new FutureExoCache<IdentityFilterKey, SimpleCacheData<Integer>, ServiceContext<SimpleCacheData<Integer>>>(
+        new CacheLoader<IdentityFilterKey, SimpleCacheData<Integer>>(),
+        getCountCacheByFilter()
+    );
   }
 
   public ExoCache<IdentityFilterKey, SimpleCacheData<Integer>> getCountCacheByFilter() {

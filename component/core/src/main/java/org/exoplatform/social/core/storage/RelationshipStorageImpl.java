@@ -28,6 +28,8 @@ import org.exoplatform.social.core.chromattic.entity.RelationshipListEntity;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.model.Profile;
 import org.exoplatform.social.core.relationship.model.Relationship;
+import org.exoplatform.social.core.storage.api.IdentityStorage;
+import org.exoplatform.social.core.storage.api.RelationshipStorage;
 import org.exoplatform.social.core.storage.exception.NodeNotFoundException;
 import org.exoplatform.social.core.storage.query.JCRProperties;
 import org.exoplatform.social.core.storage.query.Order;
@@ -146,9 +148,7 @@ public class RelationshipStorageImpl extends AbstractStorage implements Relation
 
   private Identity createIdentityFromEntity(IdentityEntity entity) {
 
-    Identity identity = new Identity(entity.getId());
-    identity.setProviderId(entity.getProviderId());
-    identity.setRemoteId(entity.getRemoteId());
+    Identity identity = identityStorage.findIdentityById(entity.getId());
     loadProfile(identity);
 
     return identity;

@@ -19,6 +19,7 @@ package org.exoplatform.social.core.storage;
 
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.relationship.model.Relationship;
+import org.exoplatform.social.core.storage.api.RelationshipStorage;
 
 import java.util.List;
 

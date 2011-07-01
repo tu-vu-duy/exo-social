@@ -118,12 +118,12 @@
   </component>
 
   <component>
-    <key>org.exoplatform.social.core.storage.IdentityStorage</key>
+    <key>org.exoplatform.social.core.storage.api.IdentityStorage</key>
     <type>org.exoplatform.social.core.storage.SynchronizedIdentityStorage</type>
   </component>
 
   <component>
-    <key>org.exoplatform.social.core.storage.RelationshipStorage</key>
+    <key>org.exoplatform.social.core.storage.api.RelationshipStorage</key>
     <type>org.exoplatform.social.core.storage.SynchronizedRelationshipStorage</type>
   </component>
 

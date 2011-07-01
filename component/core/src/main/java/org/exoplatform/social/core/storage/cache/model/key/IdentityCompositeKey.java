@@ -23,7 +23,7 @@ import java.io.Serializable;
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class IdentityCompositeKey implements Serializable {
+public class IdentityCompositeKey implements CacheKey {
 
   private final String providerId;
 

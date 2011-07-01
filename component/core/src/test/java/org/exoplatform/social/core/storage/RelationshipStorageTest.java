@@ -28,6 +28,8 @@ import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvide
 import org.exoplatform.social.core.model.AvatarAttachment;
 import org.exoplatform.social.core.relationship.model.Relationship;
 import org.exoplatform.social.core.relationship.model.Relationship.Type;
+import org.exoplatform.social.core.storage.api.IdentityStorage;
+import org.exoplatform.social.core.storage.api.RelationshipStorage;
 import org.exoplatform.social.core.test.AbstractCoreTest;
 
 /**
@@ -85,7 +87,7 @@ public class RelationshipStorageTest extends AbstractCoreTest {
   }
 
   /**
-   * Test for {@link RelationshipStorage#saveRelationship(Relationship)}
+   * Test for {@link org.exoplatform.social.core.storage.api.RelationshipStorage#saveRelationship(Relationship)}
    * 
    * @throws RelationshipStorageException 
    */
@@ -97,7 +99,7 @@ public class RelationshipStorageTest extends AbstractCoreTest {
   }
 
   /**
-   * Test for {@link RelationshipStorage#removeRelationship(Relationship)}
+   * Test for {@link org.exoplatform.social.core.storage.api.RelationshipStorage#removeRelationship(Relationship)}
    */
   public void testRemoveRelationship() {
     Relationship rootToJohnRelationship = new Relationship(rootIdentity, johnIdentity, Type.PENDING);
@@ -114,7 +116,7 @@ public class RelationshipStorageTest extends AbstractCoreTest {
   }
 
   /**
-   * Test for {@link RelationshipStorage#getRelationship(String)}
+   * Test for {@link org.exoplatform.social.core.storage.api.RelationshipStorage#getRelationship(String)}
    * @throws RelationshipStorageException
    */
   public void testGetRelationship() throws RelationshipStorageException {
@@ -127,7 +129,7 @@ public class RelationshipStorageTest extends AbstractCoreTest {
   }
 
   /**
-   * Test {@link RelationshipStorage#getConnections(Identity, long, long)}
+   * Test {@link org.exoplatform.social.core.storage.api.RelationshipStorage#getConnections(Identity, long, long)}
    *
    * @throws Exception
    * @since 1.2.0-Beta3
@@ -178,7 +180,7 @@ public class RelationshipStorageTest extends AbstractCoreTest {
   }
   
   /**
-   * Test {@link RelationshipStorage#getConnectionsCount(Identity)}
+   * Test {@link org.exoplatform.social.core.storage.api.RelationshipStorage#getConnectionsCount(Identity)}
    * 
    * @throws Exception
    * @since 1.2.0-Beta3
@@ -209,7 +211,7 @@ public class RelationshipStorageTest extends AbstractCoreTest {
   }
   
   /**
-   * Test {@link RelationshipStorage#getRelationships(Identity, Type, List)}
+   * Test {@link org.exoplatform.social.core.storage.api.RelationshipStorage#getRelationships(Identity, Type, List)}
    * 
    * @throws Exception
    * @since 1.2.0-Beta3
@@ -259,7 +261,7 @@ public class RelationshipStorageTest extends AbstractCoreTest {
   }
   
   /**
-   * Test {@link RelationshipStorage#getSenderRelationships(Identity, Type, List)}
+   * Test {@link org.exoplatform.social.core.storage.api.RelationshipStorage#getSenderRelationships(Identity, Type, List)}
    * 
    * @throws RelationshipStorageException 
    */
@@ -290,7 +292,7 @@ public class RelationshipStorageTest extends AbstractCoreTest {
   }
 
   /**
-   * Test {@link RelationshipStorage#getSenderRelationships(String, Type, List)}
+   * Test {@link org.exoplatform.social.core.storage.api.RelationshipStorage#getSenderRelationships(String, Type, List)}
    * 
    * @throws Exception
    * @since 1.2.0-Beta3
@@ -324,7 +326,7 @@ public class RelationshipStorageTest extends AbstractCoreTest {
   }
 
   /**
-   * Test {@link RelationshipStorage#getRelationships(Identity, long, long)}
+   * Test {@link org.exoplatform.social.core.storage.api.RelationshipStorage#getRelationships(Identity, long, long)}
    * 
    * @throws Exception
    * @since 1.2.0-Beta3
@@ -352,7 +354,7 @@ public class RelationshipStorageTest extends AbstractCoreTest {
   }
 
   /**
-   * Test {@link RelationshipStorage#getRelationshipsCount(Identity)}
+   * Test {@link org.exoplatform.social.core.storage.api.RelationshipStorage#getRelationshipsCount(Identity)}
    * 
    * @throws Exception
    * @since 1.2.0-Beta3
@@ -379,7 +381,7 @@ public class RelationshipStorageTest extends AbstractCoreTest {
   }
   
   /**
-   * Test {@link RelationshipStorage#getIncomingRelationships(Identity, long, long)}
+   * Test {@link org.exoplatform.social.core.storage.api.RelationshipStorage#getIncomingRelationships(Identity, long, long)}
    * 
    * @throws Exception
    * @since 1.2.0-Beta3
@@ -431,7 +433,7 @@ public class RelationshipStorageTest extends AbstractCoreTest {
   }
   
   /**
-   * Test {@link RelationshipStorage#getIncomingRelationshipsCount(Identity)}
+   * Test {@link org.exoplatform.social.core.storage.api.RelationshipStorage#getIncomingRelationshipsCount(Identity)}
    * 
    * @throws Exception
    * @since 1.2.0-Beta3
@@ -462,7 +464,7 @@ public class RelationshipStorageTest extends AbstractCoreTest {
   }
   
   /**
-   * Test {@link RelationshipStorage#getOutgoingRelationships(Identity, long, long)}
+   * Test {@link org.exoplatform.social.core.storage.api.RelationshipStorage#getOutgoingRelationships(Identity, long, long)}
    * 
    * @throws Exception
    * @since 1.2.0-Beta3
@@ -519,7 +521,7 @@ public class RelationshipStorageTest extends AbstractCoreTest {
   }
   
   /**
-   * Test {@link RelationshipStorage#getOutgoingRelationshipsCount(Identity)}
+   * Test {@link org.exoplatform.social.core.storage.api.RelationshipStorage#getOutgoingRelationshipsCount(Identity)}
    * 
    * @throws Exception
    * @since 1.2.0-Beta3

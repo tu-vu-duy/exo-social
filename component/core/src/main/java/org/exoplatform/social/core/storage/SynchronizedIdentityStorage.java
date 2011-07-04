@@ -22,16 +22,13 @@ import java.util.List;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.model.Profile;
 import org.exoplatform.social.core.profile.ProfileFilter;
+import org.exoplatform.social.core.storage.api.IdentityStorage;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
 public class SynchronizedIdentityStorage extends IdentityStorageImpl {
-
-  public SynchronizedIdentityStorage() {
-    super();
-  }
 
   @Override
   public void saveIdentity(final Identity identity) throws IdentityStorageException {

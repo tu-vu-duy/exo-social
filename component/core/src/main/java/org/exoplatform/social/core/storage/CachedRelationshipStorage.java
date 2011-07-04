@@ -28,6 +28,7 @@ import org.exoplatform.social.core.storage.cache.model.data.IntegerData;
 import org.exoplatform.social.core.storage.cache.model.data.RelationshipData;
 import org.exoplatform.social.core.storage.cache.model.data.SimpleCacheData;
 import org.exoplatform.social.core.storage.cache.model.key.IdentityKey;
+import org.exoplatform.social.core.storage.cache.model.key.RelationshipCountKey;
 import org.exoplatform.social.core.storage.cache.model.key.RelationshipIdentityKey;
 import org.exoplatform.social.core.storage.cache.model.key.RelationshipKey;
 
@@ -42,11 +43,11 @@ public class CachedRelationshipStorage implements RelationshipStorage {
 
   private final ExoCache<RelationshipKey, RelationshipData> eXoCacheRelationshipId;
   private final ExoCache<RelationshipIdentityKey, RelationshipKey> eXoCacheRelationshipIdentity;
-  private final ExoCache<IdentityKey, IntegerData> eXoCacheRelationshipConnectionCount;
+  private final ExoCache<RelationshipCountKey, IntegerData> eXoCacheRelationshipConnectionCount;
 
   private final FutureExoCache<RelationshipKey, RelationshipData, ServiceContext<RelationshipData>> relationshipCache;
   private final FutureExoCache<RelationshipIdentityKey, RelationshipKey, ServiceContext<RelationshipKey>> relationshipCacheIdentity;
-  private final FutureExoCache<IdentityKey, IntegerData, ServiceContext<IntegerData>> relationshipConnectionCount;
+  private final FutureExoCache<RelationshipCountKey, IntegerData, ServiceContext<IntegerData>> relationshipConnectionCount;
 
   private final RelationshipStorageImpl storage;
 
@@ -161,7 +162,12 @@ public class CachedRelationshipStorage implements RelationshipStorage {
     );
 
     //
-    return getRelationship(gotKey.getId());
+    if (gotKey != null && !gotKey.equals(RELATIONSHIP_NOT_FOUND)) {
+      return getRelationship(gotKey.getId());
+    }
+    else {
+      return null;
+    }
 
   }
 
@@ -182,20 +188,64 @@ public class CachedRelationshipStorage implements RelationshipStorage {
   }
 
   public int getIncomingRelationshipsCount(final Identity receiver) throws RelationshipStorageException {
-    return storage.getIncomingRelationshipsCount(receiver);
+
+    //
+    IdentityKey iKey = new IdentityKey(receiver);
+    RelationshipCountKey key = new RelationshipCountKey(iKey, RelationshipCountKey.CountType.INCOMMING);
+
+    //
+    return relationshipConnectionCount.get(
+        new ServiceContext<IntegerData>() {
+          public IntegerData execute() {
+            return new IntegerData(storage.getIncomingRelationshipsCount(receiver));
+          }
+        },
+        key)
+        .build();
+
   }
 
   public List<Identity> getOutgoingRelationships(final Identity sender, final long offset, final long limit)
       throws RelationshipStorageException {
+
     return storage.getOutgoingRelationships(sender, offset, limit);
+
   }
 
   public int getOutgoingRelationshipsCount(final Identity sender) throws RelationshipStorageException {
-    return storage.getOutgoingRelationshipsCount(sender);
+
+    //
+    IdentityKey iKey = new IdentityKey(sender);
+    RelationshipCountKey key = new RelationshipCountKey(iKey, RelationshipCountKey.CountType.OUTGOING);
+
+    //
+    return relationshipConnectionCount.get(
+        new ServiceContext<IntegerData>() {
+          public IntegerData execute() {
+            return new IntegerData(storage.getOutgoingRelationshipsCount(sender));
+          }
+        },
+        key)
+        .build();
+
   }
 
   public int getRelationshipsCount(final Identity identity) throws RelationshipStorageException {
-    return storage.getRelationshipsCount(identity);
+
+    //
+    IdentityKey iKey = new IdentityKey(identity);
+    RelationshipCountKey key = new RelationshipCountKey(iKey, RelationshipCountKey.CountType.RELATIONSHIP);
+
+    //
+    return relationshipConnectionCount.get(
+        new ServiceContext<IntegerData>() {
+          public IntegerData execute() {
+            return new IntegerData(storage.getRelationshipsCount(identity));
+          }
+        },
+        key)
+        .build();
+
   }
 
   public List<Identity> getConnections(final Identity identity, final long offset, final long limit)
@@ -210,7 +260,8 @@ public class CachedRelationshipStorage implements RelationshipStorage {
   public int getConnectionsCount(final Identity identity) throws RelationshipStorageException {
 
     //
-    IdentityKey key = new IdentityKey(identity);
+    IdentityKey iKey = new IdentityKey(identity);
+    RelationshipCountKey key = new RelationshipCountKey(iKey, RelationshipCountKey.CountType.CONNECTION);
 
     //
     return relationshipConnectionCount.get(

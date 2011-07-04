@@ -60,6 +60,8 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
   /** Logger */
   private static final Log LOG = ExoLogger.getLogger(IdentityStorageImpl.class);
 
+  private IdentityStorage identityStorage;
+
   static enum PropNs {
 
     VOID("void"),
@@ -138,6 +140,10 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
   private void putParam(ProfileEntity profileEntity, Object value, String key) {
     Map<String, List<String>> params = createEntityParamMap(value);
     profileEntity.setProperty(key, new ArrayList<String>(params.keySet()));
+  }
+
+  private IdentityStorage getStorage() {
+    return (identityStorage != null ? identityStorage : this);
   }
 
   /*
@@ -515,13 +521,8 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
   private Identity createIdentityFromEntity(final IdentityEntity identityEntity) {
 
     //
-    Identity identity = new Identity(identityEntity.getId());
-    identity.setDeleted(identityEntity.isDeleted());
-    identity.setRemoteId(identityEntity.getRemoteId());
-    identity.setProviderId(identityEntity.getProviderId());
-
-    //
-    return identity;
+    return getStorage().findIdentityById(identityEntity.getId());
+    
   }
 
   private void populateProfile(final Profile profile, final ProfileEntity profileEntity) {
@@ -809,7 +810,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
 
       Identity identity = createIdentityFromEntity(profileEntity.getIdentity());
 
-      Profile profile = loadProfile(new Profile(identity));
+      Profile profile = getStorage().loadProfile(new Profile(identity));
       identity.setProfile(profile);
 
       listIdentity.add(identity);
@@ -920,7 +921,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
 
       Identity identity = createIdentityFromEntity(profileEntity.getIdentity());
 
-      Profile profile = loadProfile(new Profile(identity));
+      Profile profile = getStorage().loadProfile(new Profile(identity));
       identity.setProfile(profile);
 
       listIdentity.add(identity);
@@ -980,5 +981,9 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
           IdentityStorageException.Type.FAIL_TO_ADD_OR_MODIFY_PROPERTIES,
           e.getMessage(), e);
     }
+  }
+
+  public void setStorage(IdentityStorage storage) {
+    this.identityStorage = storage;
   }
 }

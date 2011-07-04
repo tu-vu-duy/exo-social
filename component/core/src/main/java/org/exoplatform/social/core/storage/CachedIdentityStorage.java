@@ -54,7 +54,9 @@ public class CachedIdentityStorage implements IdentityStorage {
 
   public CachedIdentityStorage(final IdentityStorageImpl storage, final SocialStorageCacheService cacheService) {
 
+    //
     this.storage = storage;
+    this.storage.setStorage(this);
 
     //
     this.exoCacheIdentity = cacheService.getIdentityCacheById();
@@ -105,7 +107,6 @@ public class CachedIdentityStorage implements IdentityStorage {
         .build();
 
     //
-
     if (i != null) {
       i.setProfile(loadProfile(i.getProfile()));
     }
@@ -163,6 +164,7 @@ public class CachedIdentityStorage implements IdentityStorage {
           }
         },
         key);
+    
     //
     if (k != null) {
       return findIdentityById(k.getId());
@@ -232,7 +234,7 @@ public class CachedIdentityStorage implements IdentityStorage {
     //
     IdentityFilterKey key = new IdentityFilterKey(providerId, profileFilter);
 
-
+    //
     return filterNumberCache.get(
         new ServiceContext<IntegerData>() {
 

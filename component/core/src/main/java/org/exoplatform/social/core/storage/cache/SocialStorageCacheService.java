@@ -32,6 +32,7 @@ import org.exoplatform.social.core.storage.cache.model.key.ActivityKey;
 import org.exoplatform.social.core.storage.cache.model.key.IdentityCompositeKey;
 import org.exoplatform.social.core.storage.cache.model.key.IdentityFilterKey;
 import org.exoplatform.social.core.storage.cache.model.key.IdentityKey;
+import org.exoplatform.social.core.storage.cache.model.key.RelationshipCountKey;
 import org.exoplatform.social.core.storage.cache.model.key.RelationshipIdentityKey;
 import org.exoplatform.social.core.storage.cache.model.key.RelationshipKey;
 
@@ -54,7 +55,7 @@ public class SocialStorageCacheService {
   // RelationshipStorage
   private final ExoCache<RelationshipKey, RelationshipData> relationshipCacheById;
   private final ExoCache<RelationshipIdentityKey, RelationshipKey> relationshipCacheByIdentity;
-  private final ExoCache<IdentityKey, IntegerData> relationshipCountConnection;
+  private final ExoCache<RelationshipCountKey, IntegerData> relationshipCountConnection;
 
   // ActivityStorage
   private final ExoCache<ActivityKey, ActivityData> activityCacheById;
@@ -140,14 +141,14 @@ public class SocialStorageCacheService {
     return relationshipCacheByIdentity;
   }
 
-  public FutureExoCache<IdentityKey, IntegerData, ServiceContext<IntegerData>> createRelationshipCacheCountConnection() {
-    return new FutureExoCache<IdentityKey, IntegerData, ServiceContext<IntegerData>>(
-        new CacheLoader<IdentityKey, IntegerData>(),
+  public FutureExoCache<RelationshipCountKey, IntegerData, ServiceContext<IntegerData>> createRelationshipCacheCountConnection() {
+    return new FutureExoCache<RelationshipCountKey, IntegerData, ServiceContext<IntegerData>>(
+        new CacheLoader<RelationshipCountKey, IntegerData>(),
         getRelationshipCountConnection()
     );
   }
 
-  public ExoCache<IdentityKey, IntegerData> getRelationshipCountConnection() {
+  public ExoCache<RelationshipCountKey, IntegerData> getRelationshipCountConnection() {
     return relationshipCountConnection;
   }
 

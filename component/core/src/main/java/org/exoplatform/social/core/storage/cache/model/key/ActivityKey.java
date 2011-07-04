@@ -17,14 +17,11 @@
 
 package org.exoplatform.social.core.storage.cache.model.key;
 
-import org.exoplatform.social.core.activity.model.ExoSocialActivity;
-import org.exoplatform.social.core.storage.cache.CacheKey;
-
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class ActivityKey implements CacheKey<ExoSocialActivity> {
+public class ActivityKey implements CacheKey {
 
   private final String id;
 

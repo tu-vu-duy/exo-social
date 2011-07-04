@@ -17,16 +17,11 @@
 
 package org.exoplatform.social.core.storage.cache.model.key;
 
-import org.exoplatform.social.core.relationship.model.Relationship;
-import org.exoplatform.social.core.storage.cache.CacheKey;
-
-import java.io.Serializable;
-
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class RelationshipKey implements CacheKey<Relationship>, Serializable {
+public class RelationshipKey implements CacheKey {
 
   private final String id;
 

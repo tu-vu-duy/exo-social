@@ -15,13 +15,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.core.storage.cache;
-
-import java.io.Serializable;
+package org.exoplatform.social.core.storage.cache.model.data;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public interface CacheKey<T> extends Serializable {
+public class IntegerData extends SimpleCacheData<Integer> {
+
+  public IntegerData(final Integer integer) {
+    super(integer);
+  }
+
 }

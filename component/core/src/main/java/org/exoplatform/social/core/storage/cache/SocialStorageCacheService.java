@@ -24,6 +24,7 @@ import org.exoplatform.social.core.storage.cache.loader.CacheLoader;
 import org.exoplatform.social.core.storage.cache.loader.ServiceContext;
 import org.exoplatform.social.core.storage.cache.model.data.ActivityData;
 import org.exoplatform.social.core.storage.cache.model.data.IdentityData;
+import org.exoplatform.social.core.storage.cache.model.data.IntegerData;
 import org.exoplatform.social.core.storage.cache.model.data.ProfileData;
 import org.exoplatform.social.core.storage.cache.model.data.RelationshipData;
 import org.exoplatform.social.core.storage.cache.model.data.SimpleCacheData;
@@ -48,12 +49,12 @@ public class SocialStorageCacheService {
   private final ExoCache<IdentityKey, IdentityData> identityCacheById;
   private final ExoCache<IdentityCompositeKey, IdentityKey> identityIndexCache;
   private final ExoCache<IdentityKey, ProfileData> profileCacheById;
-  private final ExoCache<IdentityFilterKey, SimpleCacheData<Integer>> countCacheByFilter;
+  private final ExoCache<IdentityFilterKey, IntegerData> countCacheByFilter;
   
   // RelationshipStorage
   private final ExoCache<RelationshipKey, RelationshipData> relationshipCacheById;
   private final ExoCache<RelationshipIdentityKey, RelationshipKey> relationshipCacheByIdentity;
-  private final ExoCache<IdentityKey, SimpleCacheData<Integer>> relationshipCountConnection;
+  private final ExoCache<IdentityKey, IntegerData> relationshipCountConnection;
 
   // ActivityStorage
   private final ExoCache<ActivityKey, ActivityData> activityCacheById;
@@ -65,9 +66,9 @@ public class SocialStorageCacheService {
     this.profileCacheById = cacheService.getCacheInstance("ProfileCacheById");
     this.countCacheByFilter = cacheService.getCacheInstance("CountCacheByFilter");
 
-    this.relationshipCacheById = cacheService.getCacheInstance("org.exoplatform.social.core.storage.RelationshipCacheById");
-    this.relationshipCacheByIdentity = cacheService.getCacheInstance("org.exoplatform.social.core.storage.RelationshipCacheByIdentity");
-    this.relationshipCountConnection = cacheService.getCacheInstance("org.exoplatform.social.core.storage.RelationshipCountConnection");
+    this.relationshipCacheById = cacheService.getCacheInstance("RelationshipCacheById");
+    this.relationshipCacheByIdentity = cacheService.getCacheInstance("RelationshipCacheByIdentity");
+    this.relationshipCountConnection = cacheService.getCacheInstance("RelationshipCountConnection");
     
     this.activityCacheById = cacheService.getCacheInstance("org.exoplatform.social.core.storage.ActivityCacheById");
     this.activityCountCacheByIdentity = cacheService.getCacheInstance("org.exoplatform.social.core.storage.ActivityCountCacheByIdentity");
@@ -106,26 +107,47 @@ public class SocialStorageCacheService {
     return profileCacheById;
   }
 
-  public FutureExoCache<IdentityFilterKey, SimpleCacheData<Integer>, ServiceContext<SimpleCacheData<Integer>>> createCountCacheById() {
-    return new FutureExoCache<IdentityFilterKey, SimpleCacheData<Integer>, ServiceContext<SimpleCacheData<Integer>>>(
-        new CacheLoader<IdentityFilterKey, SimpleCacheData<Integer>>(),
+  public FutureExoCache<IdentityFilterKey, IntegerData, ServiceContext<IntegerData>> createCountCacheById() {
+    return new FutureExoCache<IdentityFilterKey, IntegerData, ServiceContext<IntegerData>>(
+        new CacheLoader<IdentityFilterKey, IntegerData>(),
         getCountCacheByFilter()
     );
   }
 
-  public ExoCache<IdentityFilterKey, SimpleCacheData<Integer>> getCountCacheByFilter() {
+  public ExoCache<IdentityFilterKey, IntegerData> getCountCacheByFilter() {
     return countCacheByFilter;
+  }
+
+  public FutureExoCache<RelationshipKey, RelationshipData, ServiceContext<RelationshipData>> createRelationshipCacheById() {
+    return new FutureExoCache<RelationshipKey, RelationshipData, ServiceContext<RelationshipData>>(
+        new CacheLoader<RelationshipKey, RelationshipData>(),
+        getRelationshipCacheById()
+    );
   }
 
   public ExoCache<RelationshipKey, RelationshipData> getRelationshipCacheById() {
     return relationshipCacheById;
   }
 
+  public FutureExoCache<RelationshipIdentityKey, RelationshipKey, ServiceContext<RelationshipKey>> createRelationshipCacheByIdentity() {
+    return new FutureExoCache<RelationshipIdentityKey, RelationshipKey, ServiceContext<RelationshipKey>>(
+        new CacheLoader<RelationshipIdentityKey, RelationshipKey>(),
+        getRelationshipCacheByIdentity()
+    );
+  }
+
   public ExoCache<RelationshipIdentityKey, RelationshipKey> getRelationshipCacheByIdentity() {
     return relationshipCacheByIdentity;
   }
 
-  public ExoCache<IdentityKey, SimpleCacheData<Integer>> getRelationshipCountConnection() {
+  public FutureExoCache<IdentityKey, IntegerData, ServiceContext<IntegerData>> createRelationshipCacheCountConnection() {
+    return new FutureExoCache<IdentityKey, IntegerData, ServiceContext<IntegerData>>(
+        new CacheLoader<IdentityKey, IntegerData>(),
+        getRelationshipCountConnection()
+    );
+  }
+
+  public ExoCache<IdentityKey, IntegerData> getRelationshipCountConnection() {
     return relationshipCountConnection;
   }
 

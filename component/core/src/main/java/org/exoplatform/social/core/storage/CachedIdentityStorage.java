@@ -26,8 +26,8 @@ import org.exoplatform.social.core.storage.api.IdentityStorage;
 import org.exoplatform.social.core.storage.cache.SocialStorageCacheService;
 import org.exoplatform.social.core.storage.cache.loader.ServiceContext;
 import org.exoplatform.social.core.storage.cache.model.data.IdentityData;
+import org.exoplatform.social.core.storage.cache.model.data.IntegerData;
 import org.exoplatform.social.core.storage.cache.model.data.ProfileData;
-import org.exoplatform.social.core.storage.cache.model.data.SimpleCacheData;
 import org.exoplatform.social.core.storage.cache.model.key.IdentityCompositeKey;
 import org.exoplatform.social.core.storage.cache.model.key.IdentityFilterKey;
 import org.exoplatform.social.core.storage.cache.model.key.IdentityKey;
@@ -43,12 +43,12 @@ public class CachedIdentityStorage implements IdentityStorage {
   private final ExoCache<IdentityKey, IdentityData> exoCacheIdentity;
   private final ExoCache<IdentityCompositeKey, IdentityKey> exoCacheCompositeIdentity;
   private final ExoCache<IdentityKey, ProfileData> exoCacheProfile;
-  private final ExoCache<IdentityFilterKey, SimpleCacheData<Integer>> exoCacheFilterNumber;
+  private final ExoCache<IdentityFilterKey, IntegerData> exoCacheFilterNumber;
 
   private final FutureExoCache<IdentityKey, IdentityData, ServiceContext<IdentityData>> identityCache;
   private final FutureExoCache<IdentityCompositeKey, IdentityKey, ServiceContext<IdentityKey>> identityIndexCache;
   private final FutureExoCache<IdentityKey, ProfileData, ServiceContext<ProfileData>> profileCache;
-  private final FutureExoCache<IdentityFilterKey, SimpleCacheData<Integer>, ServiceContext<SimpleCacheData<Integer>>> filterNumberCache;
+  private final FutureExoCache<IdentityFilterKey, IntegerData, ServiceContext<IntegerData>> filterNumberCache;
 
   private final IdentityStorageImpl storage;
 
@@ -109,10 +109,6 @@ public class CachedIdentityStorage implements IdentityStorage {
     if (i != null) {
       i.setProfile(loadProfile(i.getProfile()));
     }
-    /*ProfileData profile = exoCacheProfile.get(key);
-    if (profile != null) {
-      i.setProfile(profile.build());
-    }*/
 
     //
     return i;
@@ -219,10 +215,10 @@ public class CachedIdentityStorage implements IdentityStorage {
 
     //
     return filterNumberCache.get(
-        new ServiceContext<SimpleCacheData<Integer>>() {
+        new ServiceContext<IntegerData>() {
 
-          public SimpleCacheData<Integer> execute() {
-            return new SimpleCacheData<Integer>(storage.getIdentitiesByProfileFilterCount(providerId, profileFilter));
+          public IntegerData execute() {
+            return new IntegerData(storage.getIdentitiesByProfileFilterCount(providerId, profileFilter));
           }
         },
         key)
@@ -238,11 +234,10 @@ public class CachedIdentityStorage implements IdentityStorage {
 
 
     return filterNumberCache.get(
-        new ServiceContext<SimpleCacheData<Integer>>() {
+        new ServiceContext<IntegerData>() {
 
-          public SimpleCacheData<Integer> execute() {
-            return new SimpleCacheData<Integer>(
-                storage.getIdentitiesByFirstCharacterOfNameCount(providerId, profileFilter));
+          public IntegerData execute() {
+            return new IntegerData(storage.getIdentitiesByFirstCharacterOfNameCount(providerId, profileFilter));
           }
         },
         key)

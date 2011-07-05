@@ -31,6 +31,7 @@ import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.provider.SpaceIdentityProvider;
 import org.exoplatform.social.core.space.impl.DefaultSpaceApplicationHandler;
 import org.exoplatform.social.core.space.model.Space;
+import org.exoplatform.social.core.storage.api.ActivityStorage;
 import org.exoplatform.social.core.storage.api.IdentityStorage;
 import org.exoplatform.social.core.storage.api.RelationshipStorage;
 import org.exoplatform.social.core.test.AbstractCoreTest;
@@ -41,7 +42,7 @@ import org.exoplatform.social.core.test.AbstractCoreTest;
  */
 public class ActivityStorageNewTestCase extends AbstractCoreTest {
   private IdentityStorage identityStorage;
-  private ActivityStorage activityStorage;
+  private ActivityStorageImpl activityStorage;
   private RelationshipStorage relationshipStorage;
   private List<ExoSocialActivity> tearDownActivityList;
 
@@ -55,7 +56,7 @@ public class ActivityStorageNewTestCase extends AbstractCoreTest {
     super.setUp();
 
     identityStorage = (IdentityStorage) getContainer().getComponentInstanceOfType(IdentityStorage.class);
-    activityStorage = (ActivityStorage) getContainer().getComponentInstanceOfType(ActivityStorage.class);
+    activityStorage = (ActivityStorageImpl) getContainer().getComponentInstanceOfType(ActivityStorageImpl.class);
     relationshipStorage = (RelationshipStorage) getContainer().getComponentInstanceOfType(RelationshipStorage.class);
 
     assertNotNull(identityStorage);

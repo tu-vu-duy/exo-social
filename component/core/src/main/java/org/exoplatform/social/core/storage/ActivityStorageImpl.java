@@ -39,6 +39,7 @@ import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.provider.SpaceIdentityProvider;
 import org.exoplatform.social.core.service.LinkProvider;
 import org.exoplatform.social.core.space.model.Space;
+import org.exoplatform.social.core.storage.api.ActivityStorage;
 import org.exoplatform.social.core.storage.api.IdentityStorage;
 import org.exoplatform.social.core.storage.api.RelationshipStorage;
 import org.exoplatform.social.core.storage.exception.NodeNotFoundException;
@@ -60,10 +61,10 @@ import java.util.TreeSet;
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class ActivityStorage extends AbstractStorage {
+public class ActivityStorageImpl extends AbstractStorage implements ActivityStorage {
 
   /** Logger */
-  private static final Log LOG = ExoLogger.getLogger(ActivityStorage.class);
+  private static final Log LOG = ExoLogger.getLogger(ActivityStorageImpl.class);
 
   private final SortedSet<ActivityProcessor> activityProcessors;
 
@@ -71,7 +72,7 @@ public class ActivityStorage extends AbstractStorage {
   private final IdentityStorage identityStorage;
   private final SpaceStorage spaceStorage;
 
-  public ActivityStorage(
+  public ActivityStorageImpl(
       final RelationshipStorage relationshipStorage,
       final IdentityStorage identityStorage,
       final SpaceStorage spaceStorage) {
@@ -81,21 +82,6 @@ public class ActivityStorage extends AbstractStorage {
     this.spaceStorage = spaceStorage;
     this.activityProcessors = new TreeSet<ActivityProcessor>(processorComparator());
 
-  }
-
-  private enum TimestampType {
-    NEWER, OLDER;
-
-    private Long number;
-
-    public TimestampType from(Long number) {
-      this.number = number;
-      return this;
-    }
-
-    public Long get() {
-      return number;
-    }
   }
 
   /*

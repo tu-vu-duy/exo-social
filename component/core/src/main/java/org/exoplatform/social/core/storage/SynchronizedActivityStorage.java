@@ -17,21 +17,21 @@
 
 package org.exoplatform.social.core.storage;
 
+import org.exoplatform.social.core.ActivityProcessor;
 import org.exoplatform.social.core.activity.model.ExoSocialActivity;
 import org.exoplatform.social.core.identity.model.Identity;
+import org.exoplatform.social.core.storage.api.ActivityStorage;
 import org.exoplatform.social.core.storage.api.IdentityStorage;
 import org.exoplatform.social.core.storage.api.RelationshipStorage;
 
 import java.util.List;
+import java.util.SortedSet;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class SynchronizedActivityStorage extends ActivityStorage {
-
-  /*private final ExoCache<ActivityKey, ActivityData> activityCacheById;
-  private final ExoCache<IdentityKey, SimpleCacheData<Integer>> activityCountCacheByIdentity;*/
+public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   public SynchronizedActivityStorage(
       final RelationshipStorage relationshipStorage,
@@ -39,29 +39,14 @@ public class SynchronizedActivityStorage extends ActivityStorage {
       final SpaceStorage spaceStorage) {
 
     super(relationshipStorage, identityStorage, spaceStorage);
-    /*activityCacheById = caches.getActivityCacheById();
-    activityCountCacheByIdentity = caches.getActivityCountCacheByIdentity();*/
 
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public ExoSocialActivity getActivity(final String activityId) throws ActivityStorageException {
 
-    /*ActivityKey key = new ActivityKey(activityId);
-
-    ActivityData got = activityCacheById.get(key);
-    if (got != null) {
-      return got.build();
-    }*/
-
     boolean created = startSynchronization();
     try {
-      /*ExoSocialActivity activity = super.getActivity(activityId);
-      activityCacheById.put(key, new ActivityData(activity));
-      return activity;*/
       return super.getActivity(activityId);
     }
     finally {
@@ -70,12 +55,21 @@ public class SynchronizedActivityStorage extends ActivityStorage {
 
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
-  public List<ExoSocialActivity> getUserActivities(final Identity owner, final long offset, final long limit)
-      throws ActivityStorageException {
+  public List<ExoSocialActivity> getUserActivities(final Identity owner) throws ActivityStorageException {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getUserActivities(owner);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public List<ExoSocialActivity> getUserActivities(final Identity owner, final long offset, final long limit) throws ActivityStorageException {
 
     boolean created = startSynchronization();
     try {
@@ -87,15 +81,8 @@ public class SynchronizedActivityStorage extends ActivityStorage {
 
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
-  public void saveComment(final ExoSocialActivity activity, final ExoSocialActivity comment)
-      throws ActivityStorageException {
-
-    /*ActivityKey key = new ActivityKey(activity.getId());
-    activityCacheById.remove(key);*/
+  public void saveComment(final ExoSocialActivity activity, final ExoSocialActivity comment) throws ActivityStorageException {
 
     boolean created = startSynchronization();
     try {
@@ -107,14 +94,8 @@ public class SynchronizedActivityStorage extends ActivityStorage {
 
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
-  public ExoSocialActivity saveActivity(final Identity owner, final ExoSocialActivity activity)
-      throws ActivityStorageException {
-
-    //activityCountCacheByIdentity.remove(new IdentityKey(owner));
+  public ExoSocialActivity saveActivity(final Identity owner, final ExoSocialActivity activity) throws ActivityStorageException {
 
     boolean created = startSynchronization();
     try {
@@ -126,15 +107,21 @@ public class SynchronizedActivityStorage extends ActivityStorage {
 
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  @Override
+  public ExoSocialActivity getParentActivity(final ExoSocialActivity comment) throws ActivityStorageException {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getParentActivity(comment);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
   @Override
   public void deleteActivity(final String activityId) throws ActivityStorageException {
-
-    /*IdentityKey userKey = new IdentityKey(new Identity(getActivity(activityId).getUserId()));
-    activityCountCacheByIdentity.remove(userKey);
-    activityCacheById.remove(new ActivityKey(activityId));*/
 
     boolean created = startSynchronization();
     try {
@@ -146,14 +133,8 @@ public class SynchronizedActivityStorage extends ActivityStorage {
 
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public void deleteComment(final String activityId, final String commentId) throws ActivityStorageException {
-
-    /*ActivityKey key = new ActivityKey(activityId);
-    activityCacheById.remove(key);*/
 
     boolean created = startSynchronization();
     try {
@@ -165,12 +146,8 @@ public class SynchronizedActivityStorage extends ActivityStorage {
 
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
-  public List<ExoSocialActivity> getActivitiesOfIdentities(
-      final List<Identity> connectionList, final long offset, final long limit) throws ActivityStorageException {
+  public List<ExoSocialActivity> getActivitiesOfIdentities(final List<Identity> connectionList, final long offset, final long limit) throws ActivityStorageException {
 
     boolean created = startSynchronization();
     try {
@@ -182,25 +159,24 @@ public class SynchronizedActivityStorage extends ActivityStorage {
 
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
-  public int getNumberOfUserActivities(final Identity owner) throws ActivityStorageException {
-
-    /*IdentityKey key = new IdentityKey(owner);
-
-    SimpleCacheData<Integer> data = activityCountCacheByIdentity.get(key);
-
-    if (data != null) {
-      return data.build();
-    }*/
+  public List<ExoSocialActivity> getActivitiesOfIdentities(final List<Identity> connectionList, final TimestampType type, final long offset, final long limit) throws ActivityStorageException {
 
     boolean created = startSynchronization();
     try {
-      /*int got = super.getNumberOfUserActivities(owner);
-      activityCountCacheByIdentity.put(key, new SimpleCacheData<Integer>(got));
-      return got;*/
+      return super.getActivitiesOfIdentities(connectionList, type, offset, limit);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public int getNumberOfUserActivities(final Identity owner) throws ActivityStorageException {
+
+    boolean created = startSynchronization();
+    try {
       return super.getNumberOfUserActivities(owner);
     }
     finally {
@@ -210,9 +186,397 @@ public class SynchronizedActivityStorage extends ActivityStorage {
   }
 
   @Override
-  public void updateActivity(final ExoSocialActivity existingActivity) throws ActivityStorageException {
+  public int getNumberOfNewerOnUserActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
 
-    //activityCacheById.remove(new ActivityKey(existingActivity.getId()));
+    boolean created = startSynchronization();
+    try {
+      return super.getNumberOfNewerOnUserActivities(ownerIdentity, baseActivity);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public List<ExoSocialActivity> getNewerOnUserActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final int limit) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getNewerOnUserActivities(ownerIdentity, baseActivity, limit);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public int getNumberOfOlderOnUserActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getNumberOfOlderOnUserActivities(ownerIdentity, baseActivity);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public List<ExoSocialActivity> getOlderOnUserActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final int limit) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getOlderOnUserActivities(ownerIdentity, baseActivity, limit);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public List<ExoSocialActivity> getActivityFeed(final Identity ownerIdentity, final int offset, final int limit) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getActivityFeed(ownerIdentity, offset, limit);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public int getNumberOfActivitesOnActivityFeed(final Identity ownerIdentity) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getNumberOfActivitesOnActivityFeed(ownerIdentity);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public int getNumberOfNewerOnActivityFeed(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getNumberOfNewerOnActivityFeed(ownerIdentity, baseActivity);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public List<ExoSocialActivity> getNewerOnActivityFeed(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final int limit) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getNewerOnActivityFeed(ownerIdentity, baseActivity, limit);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public int getNumberOfOlderOnActivityFeed(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getNumberOfOlderOnActivityFeed(ownerIdentity, baseActivity);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public List<ExoSocialActivity> getOlderOnActivityFeed(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final int limit) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getOlderOnActivityFeed(ownerIdentity, baseActivity, limit);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public List<ExoSocialActivity> getActivitiesOfConnections(final Identity ownerIdentity, final int offset, final int limit) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getActivitiesOfConnections(ownerIdentity, offset, limit);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public int getNumberOfActivitiesOfConnections(final Identity ownerIdentity) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getNumberOfActivitiesOfConnections(ownerIdentity);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public List<ExoSocialActivity> getActivitiesOfIdentity(final Identity ownerIdentity, final long offset, final long limit) throws ActivityStorageException {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getActivitiesOfIdentity(ownerIdentity, offset, limit);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public int getNumberOfNewerOnActivitiesOfConnections(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getNumberOfNewerOnActivitiesOfConnections(ownerIdentity, baseActivity);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public List<ExoSocialActivity> getNewerOnActivitiesOfConnections(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final long limit) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getNewerOnActivitiesOfConnections(ownerIdentity, baseActivity, limit);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public int getNumberOfOlderOnActivitiesOfConnections(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getNumberOfOlderOnActivitiesOfConnections(ownerIdentity, baseActivity);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public List<ExoSocialActivity> getOlderOnActivitiesOfConnections(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final int limit) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getOlderOnActivitiesOfConnections(ownerIdentity, baseActivity, limit);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public List<ExoSocialActivity> getUserSpacesActivities(final Identity ownerIdentity, final int offset, final int limit) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getUserSpacesActivities(ownerIdentity, offset, limit);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public int getNumberOfUserSpacesActivities(final Identity ownerIdentity) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getNumberOfUserSpacesActivities(ownerIdentity);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public int getNumberOfNewerOnUserSpacesActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getNumberOfNewerOnUserSpacesActivities(ownerIdentity, baseActivity);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public List<ExoSocialActivity> getNewerOnUserSpacesActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final int limit) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getNewerOnUserSpacesActivities(ownerIdentity, baseActivity, limit);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public int getNumberOfOlderOnUserSpacesActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getNumberOfOlderOnUserSpacesActivities(ownerIdentity, baseActivity);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public List<ExoSocialActivity> getOlderOnUserSpacesActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final int limit) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getOlderOnUserSpacesActivities(ownerIdentity, baseActivity, limit);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public List<ExoSocialActivity> getComments(final ExoSocialActivity existingActivity, final int offset, final int limit) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getComments(existingActivity, offset, limit);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public int getNumberOfComments(final ExoSocialActivity existingActivity) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getNumberOfComments(existingActivity);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public int getNumberOfNewerComments(final ExoSocialActivity existingActivity, final ExoSocialActivity baseComment) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getNumberOfNewerComments(existingActivity, baseComment);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public List<ExoSocialActivity> getNewerComments(final ExoSocialActivity existingActivity, final ExoSocialActivity baseComment, final int limit) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getNewerComments(existingActivity, baseComment, limit);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public int getNumberOfOlderComments(final ExoSocialActivity existingActivity, final ExoSocialActivity baseComment) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getNumberOfOlderComments(existingActivity, baseComment);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public List<ExoSocialActivity> getOlderComments(final ExoSocialActivity existingActivity, final ExoSocialActivity baseComment, final int limit) {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getOlderComments(existingActivity, baseComment, limit);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public SortedSet<ActivityProcessor> getActivityProcessors() {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getActivityProcessors();
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  @Override
+  public void updateActivity(final ExoSocialActivity existingActivity) throws ActivityStorageException {
 
     boolean created = startSynchronization();
     try {

@@ -26,7 +26,6 @@ import org.exoplatform.social.core.storage.cache.SocialStorageCacheService;
 import org.exoplatform.social.core.storage.cache.loader.ServiceContext;
 import org.exoplatform.social.core.storage.cache.model.data.IntegerData;
 import org.exoplatform.social.core.storage.cache.model.data.RelationshipData;
-import org.exoplatform.social.core.storage.cache.model.data.SimpleCacheData;
 import org.exoplatform.social.core.storage.cache.model.key.IdentityKey;
 import org.exoplatform.social.core.storage.cache.model.key.RelationshipCountKey;
 import org.exoplatform.social.core.storage.cache.model.key.RelationshipIdentityKey;
@@ -43,11 +42,11 @@ public class CachedRelationshipStorage implements RelationshipStorage {
 
   private final ExoCache<RelationshipKey, RelationshipData> eXoCacheRelationshipId;
   private final ExoCache<RelationshipIdentityKey, RelationshipKey> eXoCacheRelationshipIdentity;
-  private final ExoCache<RelationshipCountKey, IntegerData> eXoCacheRelationshipConnectionCount;
+  private final ExoCache<RelationshipCountKey, IntegerData> eXoCacheRelationshipCount;
 
   private final FutureExoCache<RelationshipKey, RelationshipData, ServiceContext<RelationshipData>> relationshipCache;
   private final FutureExoCache<RelationshipIdentityKey, RelationshipKey, ServiceContext<RelationshipKey>> relationshipCacheIdentity;
-  private final FutureExoCache<RelationshipCountKey, IntegerData, ServiceContext<IntegerData>> relationshipConnectionCount;
+  private final FutureExoCache<RelationshipCountKey, IntegerData, ServiceContext<IntegerData>> relationshipCount;
 
   private final RelationshipStorageImpl storage;
 
@@ -59,11 +58,11 @@ public class CachedRelationshipStorage implements RelationshipStorage {
 
     eXoCacheRelationshipId = cacheService.getRelationshipCacheById();
     eXoCacheRelationshipIdentity = cacheService.getRelationshipCacheByIdentity();
-    eXoCacheRelationshipConnectionCount = cacheService.getRelationshipCountConnection();
+    eXoCacheRelationshipCount = cacheService.getRelationshipCount();
 
     relationshipCache = cacheService.createRelationshipCacheById();
     relationshipCacheIdentity = cacheService.createRelationshipCacheByIdentity();
-    relationshipConnectionCount = cacheService.createRelationshipCacheCountConnection();
+    relationshipCount = cacheService.createRelationshipCacheCount();
 
   }
 
@@ -194,7 +193,7 @@ public class CachedRelationshipStorage implements RelationshipStorage {
     RelationshipCountKey key = new RelationshipCountKey(iKey, RelationshipCountKey.CountType.INCOMMING);
 
     //
-    return relationshipConnectionCount.get(
+    return relationshipCount.get(
         new ServiceContext<IntegerData>() {
           public IntegerData execute() {
             return new IntegerData(storage.getIncomingRelationshipsCount(receiver));
@@ -219,7 +218,7 @@ public class CachedRelationshipStorage implements RelationshipStorage {
     RelationshipCountKey key = new RelationshipCountKey(iKey, RelationshipCountKey.CountType.OUTGOING);
 
     //
-    return relationshipConnectionCount.get(
+    return relationshipCount.get(
         new ServiceContext<IntegerData>() {
           public IntegerData execute() {
             return new IntegerData(storage.getOutgoingRelationshipsCount(sender));
@@ -237,7 +236,7 @@ public class CachedRelationshipStorage implements RelationshipStorage {
     RelationshipCountKey key = new RelationshipCountKey(iKey, RelationshipCountKey.CountType.RELATIONSHIP);
 
     //
-    return relationshipConnectionCount.get(
+    return relationshipCount.get(
         new ServiceContext<IntegerData>() {
           public IntegerData execute() {
             return new IntegerData(storage.getRelationshipsCount(identity));
@@ -264,7 +263,7 @@ public class CachedRelationshipStorage implements RelationshipStorage {
     RelationshipCountKey key = new RelationshipCountKey(iKey, RelationshipCountKey.CountType.CONNECTION);
 
     //
-    return relationshipConnectionCount.get(
+    return relationshipCount.get(
         new ServiceContext<IntegerData>() {
           public IntegerData execute() {
             return new IntegerData(storage.getConnectionsCount(identity));

@@ -37,6 +37,9 @@ public class ActivityData implements CacheData<ExoSocialActivity> {
   private final Long postedTime;
   private final String[] replyIds;
   private final String userId;
+  private final String appId;
+  private final String titleId;
+  private final String type;
   private final String streamId;
   private final String streamOwner;
   private final String streamFaviconUrl;
@@ -54,6 +57,9 @@ public class ActivityData implements CacheData<ExoSocialActivity> {
     this.postedTime = activity.getPostedTime();
     this.replyIds = activity.getReplyToId();
     this.userId = activity.getUserId();
+    this.appId = activity.getAppId();
+    this.titleId = activity.getTitleId();
+    this.type = activity.getType();
     this.streamId = activity.getStreamId();
     this.streamOwner = activity.getStreamOwner();
     this.streamFaviconUrl = activity.getStreamFaviconUrl();
@@ -75,12 +81,14 @@ public class ActivityData implements CacheData<ExoSocialActivity> {
     activity.isComment(isComment);
     activity.setPostedTime(postedTime);
     activity.setUserId(userId);
-    activity.setStreamId(streamId);
-    activity.setStreamOwner(streamOwner);
-    activity.setStreamFaviconUrl(streamFaviconUrl);
-    activity.setStreamSourceUrl(streamSourceUrl);
-    activity.setStreamTitle(streamTitle);
-    activity.setStreamUrl(streamUrl);
+    activity.setAppId(appId);
+    activity.setTitleId(titleId);
+    activity.setType(type);
+    activity.getActivityStream().setId(streamId);
+    activity.getActivityStream().setPrettyId(streamOwner);
+    activity.getActivityStream().setFaviconUrl(streamFaviconUrl);
+    activity.getActivityStream().setPermaLink(streamSourceUrl);
+    activity.getActivityStream().setTitle(streamTitle);
 
     return activity;
 

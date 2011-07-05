@@ -68,7 +68,7 @@ public class CachedIdentityStorage implements IdentityStorage {
     this.identityCache = cacheService.createIdentityCacheById();
     this.identityIndexCache = cacheService.createIdentityCacheByCompositeId();
     this.profileCache = cacheService.createProfileCacheById();
-    this.filterNumberCache = cacheService.createCountCacheById();
+    this.filterNumberCache = cacheService.createRelationshipCountCacheById();
 
   }
 

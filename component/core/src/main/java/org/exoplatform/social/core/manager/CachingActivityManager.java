@@ -16,22 +16,10 @@
  */
 package org.exoplatform.social.core.manager;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.Validate;
 import org.exoplatform.services.cache.CacheService;
-import org.exoplatform.services.cache.ExoCache;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.exoplatform.social.core.activity.model.ExoSocialActivity;
-import org.exoplatform.social.core.identity.model.Identity;
-import org.exoplatform.social.core.storage.ActivityStorage;
-import org.exoplatform.social.core.storage.ActivityStorageException;
+import org.exoplatform.social.core.storage.api.ActivityStorage;
 
 /**
  * Class CachingActivityManager extends ActivityManagerImpl with caching.

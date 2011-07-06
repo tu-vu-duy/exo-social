@@ -983,6 +983,10 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
     }
   }
 
+  /**
+   * Set the cached storage
+   * @param storage The cached storage
+   */
   public void setStorage(IdentityStorage storage) {
     this.identityStorage = storage;
   }

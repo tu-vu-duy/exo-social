@@ -28,12 +28,14 @@ import org.exoplatform.social.core.chromattic.entity.RelationshipListEntity;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.model.Profile;
 import org.exoplatform.social.core.relationship.model.Relationship;
+import org.exoplatform.social.core.storage.api.ActivityStorage;
 import org.exoplatform.social.core.storage.api.IdentityStorage;
 import org.exoplatform.social.core.storage.api.RelationshipStorage;
 import org.exoplatform.social.core.storage.exception.NodeNotFoundException;
 import org.exoplatform.social.core.storage.query.JCRProperties;
 import org.exoplatform.social.core.storage.query.Order;
 import org.exoplatform.social.core.storage.query.WhereExpression;
+import org.gatein.pc.portlet.container.PortletContainer;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -443,6 +445,9 @@ public class RelationshipStorageImpl extends AbstractStorage implements Relation
       else {
         _saveRelationship(relationship);
       }
+
+      getCachedActivityStorage().invalidate();
+
     }
     catch (NodeNotFoundException e) {
       throw new RelationshipStorageException(

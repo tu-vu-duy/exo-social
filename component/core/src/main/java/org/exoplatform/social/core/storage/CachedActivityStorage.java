@@ -41,7 +41,7 @@ import java.util.SortedSet;
  */
 public class CachedActivityStorage implements ActivityStorage {
 
-  private final ExoCache<ActivityKey, ActivityData> eXoCacheRelationshipId;
+  private final ExoCache<ActivityKey, ActivityData> eXoCacheActivityId;
   private final ExoCache<ActivityCountKey, IntegerData> eXoCacheActivityCount;
 
   private final FutureExoCache<ActivityKey, ActivityData, ServiceContext<ActivityData>> activityCache;
@@ -52,8 +52,9 @@ public class CachedActivityStorage implements ActivityStorage {
   public CachedActivityStorage(final ActivityStorageImpl storage, final SocialStorageCacheService cacheService) {
 
     this.storage = storage;
+    this.storage.setStorage(this);
 
-    eXoCacheRelationshipId = cacheService.getActivityCacheById();
+    eXoCacheActivityId = cacheService.getActivityCacheById();
     eXoCacheActivityCount = cacheService.getActivityCountCache();
 
     activityCache = cacheService.createActivityCacheById();
@@ -101,7 +102,13 @@ public class CachedActivityStorage implements ActivityStorage {
   }
 
   public void saveComment(final ExoSocialActivity activity, final ExoSocialActivity comment) throws ActivityStorageException {
+
+    //
     storage.saveComment(activity, comment);
+
+    //
+    eXoCacheActivityId.remove(new ActivityKey(activity.getId()));
+
   }
 
   public ExoSocialActivity saveActivity(final Identity owner, final ExoSocialActivity activity) throws ActivityStorageException {
@@ -111,7 +118,8 @@ public class CachedActivityStorage implements ActivityStorage {
 
     //
     ActivityKey key = new ActivityKey(a.getId());
-    eXoCacheRelationshipId.remove(key);
+    eXoCacheActivityId.remove(key);
+    invalidate();
 
     //
     return a;
@@ -122,6 +130,7 @@ public class CachedActivityStorage implements ActivityStorage {
     return storage.getParentActivity(comment);
   }
 
+
   public void deleteActivity(final String activityId) throws ActivityStorageException {
 
     //
@@ -129,7 +138,8 @@ public class CachedActivityStorage implements ActivityStorage {
 
     //
     ActivityKey key = new ActivityKey(activityId);
-    eXoCacheRelationshipId.remove(key);
+    eXoCacheActivityId.remove(key);
+    invalidate();
 
   }
 
@@ -139,8 +149,8 @@ public class CachedActivityStorage implements ActivityStorage {
     storage.deleteComment(activityId, commentId);
 
     //
-    ActivityKey key = new ActivityKey(commentId);
-    eXoCacheRelationshipId.remove(key);
+    eXoCacheActivityId.remove(new ActivityKey(commentId));
+    eXoCacheActivityId.remove(new ActivityKey(activityId));
 
   }
 
@@ -450,7 +460,12 @@ public class CachedActivityStorage implements ActivityStorage {
     
     //
     ActivityKey key = new ActivityKey(existingActivity.getId());
-    eXoCacheRelationshipId.remove(key);
+    eXoCacheActivityId.remove(key);
 
   }
+
+  public void invalidate() {
+    eXoCacheActivityCount.clearCache();
+  }
+  
 }

@@ -66,6 +66,8 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   /** Logger */
   private static final Log LOG = ExoLogger.getLogger(ActivityStorageImpl.class);
 
+  private ActivityStorage activityStorage;
+
   private final SortedSet<ActivityProcessor> activityProcessors;
 
   private final RelationshipStorage relationshipStorage;
@@ -257,6 +259,10 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
     }
   }
 
+  private ActivityStorage getStorage() {
+    return (activityStorage != null ? activityStorage : this);
+  }
+
   /*
    * Public
    */
@@ -329,7 +335,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
         ActivityEntity current = it.next();
 
         //
-        activities.add(getActivity(current.getId()));
+        activities.add(getStorage().getActivity(current.getId()));
 
         if (++nb == limit) {
           return activities;
@@ -463,7 +469,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
       ActivityEntity commentEntity = _findById(ActivityEntity.class, comment.getId());
       ActivityEntity parentActivityEntity = commentEntity.getParentActivity();
 
-      return getActivity(parentActivityEntity.getId());
+      return getStorage().getActivity(parentActivityEntity.getId());
       
     }
     catch (NodeNotFoundException e) {
@@ -573,7 +579,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
     List<ExoSocialActivity> activities =  new ArrayList<ExoSocialActivity>();
 
     while(results.hasNext()) {
-      activities.add(getActivity(results.next().getId()));
+      activities.add(getStorage().getActivity(results.next().getId()));
     }
 
     return activities;
@@ -721,7 +727,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
 
       for (ActivityEntity current : new ActivityList(identity.getActivityList())) {
 
-        ExoSocialActivity a = getActivity(current.getId());
+        ExoSocialActivity a = getStorage().getActivity(current.getId());
 
         if (targetTimestamp >= a.getPostedTime() || nb == limit) {
           return activities;
@@ -801,7 +807,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
 
       //
       while(it.hasNext()) {
-        activities.add(getActivity(it.next().getId()));
+        activities.add(getStorage().getActivity(it.next().getId()));
         ++nb;
 
         if (nb >= limit) {
@@ -1218,12 +1224,12 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
     List<ExoSocialActivity> activities = new ArrayList<ExoSocialActivity>();
 
     //
-    List<String> commentIds = Arrays.asList(getActivity(existingActivity.getId()).getReplyToId());
+    List<String> commentIds = Arrays.asList(getStorage().getActivity(existingActivity.getId()).getReplyToId());
 
     //
     limit = (limit > commentIds.size() ? commentIds.size() : limit);
     for(String commentId : commentIds.subList(offset, limit)) {
-      activities.add(getActivity(commentId));
+      activities.add(getStorage().getActivity(commentId));
     }
 
     //
@@ -1238,7 +1244,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
    * @since 1.2.0-Beta3
    */
   public int getNumberOfComments(ExoSocialActivity existingActivity) {
-    return getActivity(existingActivity.getId()).getReplyToId().length;
+    return getStorage().getActivity(existingActivity.getId()).getReplyToId().length;
   }
 
   /**
@@ -1251,7 +1257,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
    */
   public int getNumberOfNewerComments(ExoSocialActivity existingActivity, ExoSocialActivity baseComment) {
 
-    List<String> commentId = Arrays.asList(getActivity(existingActivity.getId()).getReplyToId());
+    List<String> commentId = Arrays.asList(getStorage().getActivity(existingActivity.getId()).getReplyToId());
     return commentId.indexOf(baseComment.getId());
 
   }
@@ -1270,7 +1276,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
     List<ExoSocialActivity> activities = new ArrayList<ExoSocialActivity>();
 
     //
-    List<String> commentIds = Arrays.asList(getActivity(existingActivity.getId()).getReplyToId());
+    List<String> commentIds = Arrays.asList(getStorage().getActivity(existingActivity.getId()).getReplyToId());
     int baseIndex = commentIds.indexOf(baseComment.getId());
     if (baseIndex > limit) {
       baseIndex = limit;
@@ -1278,7 +1284,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
 
     //
     for(String commentId : commentIds.subList(0, baseIndex)) {
-      activities.add(getActivity(commentId));
+      activities.add(getStorage().getActivity(commentId));
     }
 
     //
@@ -1296,7 +1302,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
    */
   public int getNumberOfOlderComments(ExoSocialActivity existingActivity, ExoSocialActivity baseComment) {
 
-    List<String> commentIds = Arrays.asList(getActivity(existingActivity.getId()).getReplyToId());
+    List<String> commentIds = Arrays.asList(getStorage().getActivity(existingActivity.getId()).getReplyToId());
     int index = commentIds.indexOf(baseComment.getId());
 
     return (commentIds.size() - index - 1);
@@ -1318,12 +1324,12 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
     List<ExoSocialActivity> activities = new ArrayList<ExoSocialActivity>();
 
     //
-    List<String> commentIds = Arrays.asList(getActivity(existingActivity.getId()).getReplyToId());
+    List<String> commentIds = Arrays.asList(getStorage().getActivity(existingActivity.getId()).getReplyToId());
     int baseIndex = commentIds.indexOf(baseComment.getId());
 
     //
     for(String commentId : commentIds.subList(baseIndex + 1, limit)) {
-      activities.add(getActivity(commentId));
+      activities.add(getStorage().getActivity(commentId));
     }
 
     //
@@ -1359,4 +1365,13 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
     }
 
   }
+
+  /**
+   * Set the cached storage
+   * @param storage The cached storage
+   */
+  public void setStorage(final ActivityStorage storage) {
+    this.activityStorage = storage;
+  }
+
 }

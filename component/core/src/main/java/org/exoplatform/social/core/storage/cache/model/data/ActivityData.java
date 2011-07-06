@@ -17,11 +17,14 @@
 
 package org.exoplatform.social.core.storage.cache.model.data;
 
+import org.exoplatform.social.core.activity.model.ActivityStream;
 import org.exoplatform.social.core.activity.model.ExoSocialActivity;
 import org.exoplatform.social.core.activity.model.ExoSocialActivityImpl;
 import org.exoplatform.social.core.storage.cache.CacheData;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
@@ -39,13 +42,18 @@ public class ActivityData implements CacheData<ExoSocialActivity> {
   private final String userId;
   private final String appId;
   private final String titleId;
+  private final String bodyId;
   private final String type;
+  private final Map templateParams;
+  private final String externalId;
+  private final String url;
   private final String streamId;
   private final String streamOwner;
   private final String streamFaviconUrl;
   private final String streamSourceUrl;
   private final String streamTitle;
   private final String streamUrl;
+  private final ActivityStream.Type streamType;
 
   public ActivityData(final ExoSocialActivity activity) {
 
@@ -59,13 +67,18 @@ public class ActivityData implements CacheData<ExoSocialActivity> {
     this.userId = activity.getUserId();
     this.appId = activity.getAppId();
     this.titleId = activity.getTitleId();
+    this.bodyId = activity.getBodyId();
     this.type = activity.getType();
+    this.templateParams = Collections.unmodifiableMap(activity.getTemplateParams());
+    this.externalId = activity.getExternalId();
+    this.url = activity.getUrl();
     this.streamId = activity.getStreamId();
     this.streamOwner = activity.getStreamOwner();
     this.streamFaviconUrl = activity.getStreamFaviconUrl();
     this.streamSourceUrl = activity.getStreamSourceUrl();
     this.streamTitle = activity.getStreamTitle();
     this.streamUrl = activity.getStreamUrl();
+    this.streamType = activity.getActivityStream().getType();
 
   }
 
@@ -83,12 +96,21 @@ public class ActivityData implements CacheData<ExoSocialActivity> {
     activity.setUserId(userId);
     activity.setAppId(appId);
     activity.setTitleId(titleId);
+    activity.setBodyId(bodyId);
     activity.setType(type);
-    activity.getActivityStream().setId(streamId);
-    activity.getActivityStream().setPrettyId(streamOwner);
-    activity.getActivityStream().setFaviconUrl(streamFaviconUrl);
-    activity.getActivityStream().setPermaLink(streamSourceUrl);
-    activity.getActivityStream().setTitle(streamTitle);
+    activity.setTemplateParams(new HashMap<String, String>(templateParams));
+    activity.setExternalId(externalId);
+    activity.setUrl(url);
+
+    ActivityStream activityStream = activity.getActivityStream();
+    activityStream.setId(streamId);
+    activityStream.setPrettyId(streamOwner);
+    activityStream.setFaviconUrl(streamFaviconUrl);
+    activityStream.setPermaLink(streamSourceUrl);
+    activityStream.setTitle(streamTitle);
+    activityStream.setType(streamType);
+
+    activity.setActivityStream(activityStream);
 
     return activity;
 

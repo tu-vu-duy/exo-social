@@ -34,6 +34,7 @@ import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvide
 import org.exoplatform.social.core.service.LinkProvider;
 import org.exoplatform.social.core.space.SpaceFilter;
 import org.exoplatform.social.core.space.model.Space;
+import org.exoplatform.social.core.storage.api.SpaceStorage;
 import org.exoplatform.social.core.storage.exception.NodeNotFoundException;
 import org.exoplatform.social.core.storage.query.QueryFunction;
 import org.exoplatform.social.core.storage.query.WhereExpression;
@@ -48,14 +49,14 @@ import java.util.List;
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class SpaceStorage extends AbstractStorage {
+public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
 
   /** Logger */
-  private static final Log LOG = ExoLogger.getLogger(SpaceStorage.class);
+  private static final Log LOG = ExoLogger.getLogger(SpaceStorageImpl.class);
 
   private final IdentityStorageImpl identityStorage;
 
-  public SpaceStorage(IdentityStorageImpl identityStorage) {
+  public SpaceStorageImpl(IdentityStorageImpl identityStorage) {
    this.identityStorage = identityStorage;
  }
 

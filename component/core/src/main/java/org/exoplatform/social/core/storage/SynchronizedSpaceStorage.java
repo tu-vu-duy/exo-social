@@ -23,12 +23,12 @@ import org.exoplatform.social.core.space.SpaceFilter;
 import org.exoplatform.social.core.space.model.Space;
 
 /**
- * {@link SynchronizedSpaceStorage} as a decorator to {@link SpaceStorage} for synchronization management.
+ * {@link SynchronizedSpaceStorage} as a decorator to {@link SpaceStorageImpl} for synchronization management.
  *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class SynchronizedSpaceStorage extends SpaceStorage {
+public class SynchronizedSpaceStorage extends SpaceStorageImpl {
 
   /**
    * Constructor.

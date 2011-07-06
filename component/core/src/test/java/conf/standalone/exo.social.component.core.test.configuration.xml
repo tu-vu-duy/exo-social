@@ -148,8 +148,16 @@
     <type>org.exoplatform.social.core.storage.SynchronizedRelationshipStorage</type>
   </component>
 
+  <!--
+    Space storage components.
+  -->
   <component>
-    <key>org.exoplatform.social.core.storage.SpaceStorage</key>
+    <key>org.exoplatform.social.core.storage.api.SpaceStorage</key>
+    <type>org.exoplatform.social.core.storage.CachedSpaceStorage</type>
+  </component>
+
+  <component>
+    <key>org.exoplatform.social.core.storage.SpaceStorageImpl</key>
     <type>org.exoplatform.social.core.storage.SynchronizedSpaceStorage</type>
   </component>
 

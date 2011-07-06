@@ -28,6 +28,7 @@ import org.exoplatform.social.core.storage.cache.model.data.IntegerData;
 import org.exoplatform.social.core.storage.cache.model.data.ProfileData;
 import org.exoplatform.social.core.storage.cache.model.data.RelationshipData;
 import org.exoplatform.social.core.storage.cache.model.data.SimpleCacheData;
+import org.exoplatform.social.core.storage.cache.model.data.SpaceData;
 import org.exoplatform.social.core.storage.cache.model.key.ActivityCountKey;
 import org.exoplatform.social.core.storage.cache.model.key.ActivityKey;
 import org.exoplatform.social.core.storage.cache.model.key.IdentityCompositeKey;
@@ -36,6 +37,8 @@ import org.exoplatform.social.core.storage.cache.model.key.IdentityKey;
 import org.exoplatform.social.core.storage.cache.model.key.RelationshipCountKey;
 import org.exoplatform.social.core.storage.cache.model.key.RelationshipIdentityKey;
 import org.exoplatform.social.core.storage.cache.model.key.RelationshipKey;
+import org.exoplatform.social.core.storage.cache.model.key.SpaceKey;
+import org.exoplatform.social.core.storage.cache.model.key.SpaceRefKey;
 
 import java.util.List;
 
@@ -62,6 +65,10 @@ public class SocialStorageCacheService {
   private final ExoCache<ActivityKey, ActivityData> activityCacheById;
   private final ExoCache<ActivityCountKey, IntegerData> activityCountCacheByIdentity;
 
+  // SpaceStorage
+  private final ExoCache<SpaceKey, SpaceData> spaceCacheById;
+  private final ExoCache<SpaceRefKey, SpaceKey> spaceRefCache;
+
   public SocialStorageCacheService(CacheService cacheService) {
     
     this.identityCacheById = cacheService.getCacheInstance("IdentityCacheById");
@@ -75,6 +82,9 @@ public class SocialStorageCacheService {
     
     this.activityCacheById = cacheService.getCacheInstance("ActivityCacheById");
     this.activityCountCacheByIdentity = cacheService.getCacheInstance("ActivityCountCache");
+
+    this.spaceCacheById = cacheService.getCacheInstance("SpaceCacheById");
+    this.spaceRefCache = cacheService.getCacheInstance("SpaceRefCache");
 
   }
 
@@ -175,6 +185,28 @@ public class SocialStorageCacheService {
 
   public ExoCache<ActivityCountKey, IntegerData> getActivityCountCache() {
     return activityCountCacheByIdentity;
+  }
+
+  public FutureExoCache<SpaceKey, SpaceData, ServiceContext<SpaceData>> createSpaceCacheById() {
+    return new FutureExoCache<SpaceKey, SpaceData, ServiceContext<SpaceData>>(
+        new CacheLoader<SpaceKey, SpaceData>(),
+        getSpaceCacheById()
+    );
+  }
+
+  public ExoCache<SpaceKey, SpaceData> getSpaceCacheById() {
+    return spaceCacheById;
+  }
+
+  public FutureExoCache<SpaceRefKey, SpaceKey, ServiceContext<SpaceKey>> createSpaceRefCache() {
+    return new FutureExoCache<SpaceRefKey, SpaceKey, ServiceContext<SpaceKey>>(
+        new CacheLoader<SpaceRefKey, SpaceKey>(),
+        getSpaceRefCache()
+    );
+  }
+
+  public ExoCache<SpaceRefKey, SpaceKey> getSpaceRefCache() {
+    return spaceRefCache;
   }
 
   public int numberBlocks(List l) {

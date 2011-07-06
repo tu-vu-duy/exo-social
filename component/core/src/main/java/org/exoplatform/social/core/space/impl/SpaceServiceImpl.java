@@ -55,7 +55,7 @@ import org.exoplatform.social.core.space.spi.SpaceApplicationHandler;
 import org.exoplatform.social.core.space.spi.SpaceLifeCycleListener;
 import org.exoplatform.social.core.space.spi.SpaceService;
 import org.exoplatform.social.core.storage.api.IdentityStorage;
-import org.exoplatform.social.core.storage.SpaceStorage;
+import org.exoplatform.social.core.storage.api.SpaceStorage;
 
 /**
  * {@link org.exoplatform.social.core.space.spi.SpaceService} implementation.

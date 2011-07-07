@@ -56,6 +56,13 @@ public class CachedSpaceStorage implements SpaceStorage {
 
   }
 
+  private void cleanRef(SpaceData removed) {
+    eXoCacheRefSpace.remove(new SpaceRefKey(removed.getDisplayName()));
+    eXoCacheRefSpace.remove(new SpaceRefKey(null, removed.getPrettyName()));
+    eXoCacheRefSpace.remove(new SpaceRefKey(null, null, removed.getGroupId()));
+    eXoCacheRefSpace.remove(new SpaceRefKey(null, null, null, removed.getUrl()));
+  }
+
   public Space getSpaceByDisplayName(final String spaceDisplayName) throws SpaceStorageException {
 
     //
@@ -94,7 +101,10 @@ public class CachedSpaceStorage implements SpaceStorage {
     storage.saveSpace(space, isNew);
 
     //
-    eXoCacheSpaceId.remove(new SpaceKey(space.getId()));
+    SpaceData removed = eXoCacheSpaceId.remove(new SpaceKey(space.getId()));
+    if (removed != null) {
+      cleanRef(removed);
+    }
 
   }
 
@@ -104,7 +114,10 @@ public class CachedSpaceStorage implements SpaceStorage {
     storage.deleteSpace(id);
 
     //
-    eXoCacheSpaceId.remove(new SpaceKey(id));
+    SpaceData removed = eXoCacheSpaceId.remove(new SpaceKey(id));
+    if (removed != null) {
+      cleanRef(removed);
+    }
 
   }
 
@@ -254,26 +267,122 @@ public class CachedSpaceStorage implements SpaceStorage {
     SpaceKey key = new SpaceKey(id);
 
     //
-    return spaceCache.get(
+    SpaceData data = spaceCache.get(
         new ServiceContext<SpaceData>() {
           public SpaceData execute() {
-            return new SpaceData(storage.getSpaceById(id));
+            Space space = storage.getSpaceById(id);
+            if (space != null) {
+              return new SpaceData(space);
+            }
+            else {
+              return null;
+            }
           }
         },
-        key)
-        .build();
+        key);
+
+    if (data != null) {
+      return data.build();
+    }
+    else {
+      return null;
+    }
     
   }
 
   public Space getSpaceByPrettyName(final String spacePrettyName) throws SpaceStorageException {
-    return storage.getSpaceByPrettyName(spacePrettyName);
+
+    //
+    SpaceRefKey refKey = new SpaceRefKey(null, spacePrettyName);
+
+    //
+    SpaceKey key = spaceRefCache.get(
+        new ServiceContext<SpaceKey>() {
+          public SpaceKey execute() {
+            Space space = storage.getSpaceByPrettyName(spacePrettyName);
+            if (space != null) {
+              SpaceKey key = new SpaceKey(space.getId());
+              eXoCacheSpaceId.put(key, new SpaceData(space));
+              return key;
+            }
+            else {
+              return null;
+            }
+          }
+        },
+        refKey);
+
+    //
+    if (key != null) {
+      return getSpaceById(key.getId());
+    }
+    else {
+      return null;
+    }
+
   }
 
   public Space getSpaceByGroupId(final String groupId) throws SpaceStorageException {
-    return storage.getSpaceByGroupId(groupId);
+
+    //
+    SpaceRefKey refKey = new SpaceRefKey(null, null, groupId);
+
+    //
+    SpaceKey key = spaceRefCache.get(
+        new ServiceContext<SpaceKey>() {
+          public SpaceKey execute() {
+            Space space = storage.getSpaceByGroupId(groupId);
+            if (space != null) {
+              SpaceKey key = new SpaceKey(space.getId());
+              eXoCacheSpaceId.put(key, new SpaceData(space));
+              return key;
+            }
+            else {
+              return null;
+            }
+          }
+        },
+        refKey);
+
+    //
+    if (key != null) {
+      return getSpaceById(key.getId());
+    }
+    else {
+      return null;
+    }
+
   }
 
   public Space getSpaceByUrl(final String url) throws SpaceStorageException {
-    return storage.getSpaceByUrl(url);
+
+    //
+    SpaceRefKey refKey = new SpaceRefKey(null, null, null, url);
+
+    //
+    SpaceKey key = spaceRefCache.get(
+        new ServiceContext<SpaceKey>() {
+          public SpaceKey execute() {
+            Space space = storage.getSpaceByUrl(url);
+            if (space != null) {
+              SpaceKey key = new SpaceKey(space.getId());
+              eXoCacheSpaceId.put(key, new SpaceData(space));
+              return key;
+            }
+            else {
+              return null;
+            }
+          }
+        },
+        refKey);
+
+    //
+    if (key != null) {
+      return getSpaceById(key.getId());
+    }
+    else {
+      return null;
+    }
+    
   }
 }

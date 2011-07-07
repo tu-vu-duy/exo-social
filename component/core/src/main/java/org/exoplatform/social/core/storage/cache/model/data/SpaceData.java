@@ -36,6 +36,7 @@ public class SpaceData implements CacheData<Space> {
   private final String priority;
   private final String avatarUrl;
   private final String groupId;
+  private final String url;
 
   private final String[] members;
   private final String[] managers;
@@ -54,6 +55,7 @@ public class SpaceData implements CacheData<Space> {
     priority = space.getPriority();
     avatarUrl = space.getAvatarUrl();
     groupId = space.getGroupId();
+    url = space.getUrl();
 
     members = space.getMembers();
     managers = space.getManagers();
@@ -76,6 +78,7 @@ public class SpaceData implements CacheData<Space> {
     space.setPriority(priority);
     space.setAvatarUrl(avatarUrl);
     space.setGroupId(groupId);
+    space.setUrl(url);
 
     space.setMembers(members);
     space.setManagers(managers);
@@ -86,4 +89,63 @@ public class SpaceData implements CacheData<Space> {
 
   }
 
+  public String getId() {
+    return id;
+  }
+
+  public String getPrettyName() {
+    return prettyName;
+  }
+
+  public String getDisplayName() {
+    return displayName;
+  }
+
+  public String getRegistration() {
+    return registration;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public String getVisibility() {
+    return visibility;
+  }
+
+  public String getPriority() {
+    return priority;
+  }
+
+  public String getAvatarUrl() {
+    return avatarUrl;
+  }
+
+  public String getGroupId() {
+    return groupId;
+  }
+
+  public String getUrl() {
+    return url;
+  }
+
+  public String[] getMembers() {
+    return members;
+  }
+
+  public String[] getManagers() {
+    return managers;
+  }
+
+  public String[] getPendingUser() {
+    return pendingUser;
+  }
+
+  public String[] getInvitedUser() {
+    return invitedUser;
+  }
 }

@@ -541,7 +541,7 @@ public class SpaceServiceTest extends AbstractCoreTest {
   public void testGetInvitedSpaces() throws Exception {
     tearDownSpaceList.add(populateData());
     assertEquals(0, spaceService.getInvitedSpaces("root").size());
-    Space space = spaceService.getSpaceByDisplayName("Space1");
+     Space space = spaceService.getSpaceByDisplayName("Space1");
     spaceService.inviteMember(space, "root");
     assertEquals(1, spaceService.getInvitedSpaces("root").size());
   }

@@ -15,7 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.core.storage;
+package org.exoplatform.social.core.storage.impl;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
@@ -30,13 +30,14 @@ import org.exoplatform.social.core.model.AvatarAttachment;
 import org.exoplatform.social.core.profile.ProfileFilter;
 import org.exoplatform.social.core.storage.exception.NodeAlreadyExistsException;
 import org.exoplatform.social.core.storage.exception.NodeNotFoundException;
+import org.exoplatform.social.core.storage.impl.IdentityStorageImpl;
 import org.exoplatform.social.core.test.AbstractCoreTest;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class IdentityStorageNewTestCase extends AbstractCoreTest {
+public class IdentityStorageImplTestCase extends AbstractCoreTest {
   private IdentityStorageImpl storage;
   private List<String> tearDownIdentityList;
 
@@ -608,6 +609,8 @@ public class IdentityStorageNewTestCase extends AbstractCoreTest {
 
     //
     storage._createIdentity(newIdentity);
+    tearDownIdentityList.add(newIdentity.getId());
+    
     String generatedId = newIdentity.getId();
     assertNotNull(generatedId);
     assertEquals("organization", newIdentity.getProviderId());

@@ -15,15 +15,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.core.storage;
+package org.exoplatform.social.core.storage.synchronization;
 
 import java.util.List;
 
 import org.exoplatform.social.core.space.SpaceFilter;
 import org.exoplatform.social.core.space.model.Space;
+import org.exoplatform.social.core.storage.impl.IdentityStorageImpl;
+import org.exoplatform.social.core.storage.SpaceStorageException;
+import org.exoplatform.social.core.storage.impl.SpaceStorageImpl;
 
 /**
- * {@link SynchronizedSpaceStorage} as a decorator to {@link SpaceStorageImpl} for synchronization management.
+ * {@link SynchronizedSpaceStorage} as a decorator to {@link org.exoplatform.social.core.storage.impl.SpaceStorageImpl} for synchronization management.
  *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$

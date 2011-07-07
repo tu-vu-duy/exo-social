@@ -15,7 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.core.storage.cache;
+package org.exoplatform.social.core.storage.cache.model.data;
 
 import java.util.List;
 

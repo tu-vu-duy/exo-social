@@ -19,7 +19,6 @@ package org.exoplatform.social.core.storage.cache.model.data;
 
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.model.Profile;
-import org.exoplatform.social.core.storage.cache.CacheData;
 
 import java.util.Collections;
 import java.util.Map;

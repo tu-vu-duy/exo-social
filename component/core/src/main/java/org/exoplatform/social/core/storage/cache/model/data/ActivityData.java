@@ -20,7 +20,6 @@ package org.exoplatform.social.core.storage.cache.model.data;
 import org.exoplatform.social.core.activity.model.ActivityStream;
 import org.exoplatform.social.core.activity.model.ExoSocialActivity;
 import org.exoplatform.social.core.activity.model.ExoSocialActivityImpl;
-import org.exoplatform.social.core.storage.cache.CacheData;
 
 import java.util.Collections;
 import java.util.HashMap;

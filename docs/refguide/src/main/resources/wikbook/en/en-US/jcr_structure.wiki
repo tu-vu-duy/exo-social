@@ -1,13 +1,14 @@
-h1. Overview {anchor:id=SOCref.Social_JCR_Structure.Overview}
-As any other eXo's products, eXo Social fully complies the JCR standard to store data (identity, profile, activity, space and relationship).
-The Social JCR structure is organized to conform the data storage for the individual purpose of eXo Social. With this structure, it is easy for us to manage and access the data properly.
+h1. Overview {anchor:ID=SOCref.Social_JCR_Structure.Overview}
+eXo Social fully complies the JCR standard to store data (identity, profile, activity, space and relationship). The JCR structure of eXo Social is organized to conform the data storage for the individual purpose of eXo Social. 
+With this structure, it will be easy for you to manage and access the data properly.
 
 See the Social JCR structure in the chart below:
+
 [image:social-jcr-structure.png]
 
 The root node of Social workspace is _{noformat}exo:applications{noformat}_ which includes child nodes, such as _{noformat}Social_Space/Space{noformat}_, _{noformat},Social_Activity{noformat}_, _{noformat}Social_Identity{noformat}_, _{noformat}Social_Profile{noformat}_, _{noformat}Social_Relationship{noformat}_.
 
-h1. {noformat}Social_Space/Space{noformat} {anchor:id=SOCref.Social_JCR_Structure.Social_Space}
+h1. {noformat}Social_Space/Space{noformat} {anchor:ID=SOCref.Social_JCR_Structure.Social_Space}
 _{noformat}Social_Space/Space{noformat}_ is used to store data of eXo Social spaces. It includes nodes of the _{noformat}exo:space{noformat}_ type. This node type is defined as follows:
 
 {code:xml}
@@ -78,26 +79,25 @@ The _{noformat}exo:space{noformat}_ node type has the following properties:
 
 ||Properties ||  requiredType||Description ||
 |exo:name| String| The space name.|
-|exo:groupId|String| The group associated with a corresponding space.|
-|exo:pendingUsers|String| The string contains a list of usernames which are pending for validation to join a space. |
-|exo:invitedUsers|String|The string contains a list of usernames which are invited to join a space. |
-|exo:app|String|The string contains a list of applications with portlet id, application name, and its state (installed, active, deactive). |
+|exo:groupId|String| The group associated with the corresponding space.|
+|exo:pendingUsers|String| The list of usernames which are pending for validation to join a space. |
+|exo:invitedUsers|String|The list of usernames which are invited to join a space. |
+|exo:app|String|The list of applications with portlet ID, application name, and its state (installed, actived, deactived). |
 |exo:parent|String|The parent group of a space. |
-|exo:description|String| The description of a space.|
-|exo:tag|String|The string contains a list of keywords to tag a space.|
-|exo:type|String|The type of space is used to run in the classic or webOS mode. |
+|exo:description|String| The description of a space. |
+|exo:tag|String|The list of keywords to tag a space. |
+|exo:type|String|The type of space which is used to run in the classic or webOS mode.|
 |exo:url|String|The link to access a space. |
-|exo:visibility|String|The string contains three values: public, private, and hidden. |
-|exo:registration|String| The string contains three values: open, validation, and close. |
-|exo:priority|String|The string is used to sort spaces in a spaces list. It contains three values: 1, 2 and 3. The smaller value has the higher priority.|
-|exo:prettyName|String| The pretty name of a space.|
-|exo:avatarUrl|String|The link to the avatar of a space. |
+|exo:visibility|String|The space visibility: public, private, and hidden.|
+|exo:registration|String| The space registration status: open, validation, and close.|
+|exo:priority|String|The space priority that is used to sort spaces in the spaces list. It contains three values: 1, 2 and 3. The smaller value has the higher priority.|
+|exo:prettyName|String|The pretty name of a space.|
+|exo:avatarUrl|String|The link to the avatar of a space.|
 
- 
-h1. {noformat}Social_Activity{noformat} {anchor:id=SOCref.Social_JCR_Structure.Social_Activity}
+h1. {noformat}Social_Activity{noformat} {anchor:ID=SOCref.Social_JCR_Structure.Social_Activity}
 
-_{noformat}Social_Activity{noformat}_ contains all the child nodes with the path name of the identity provider name. The identity provider name contains all the child nodes that have the path name of the remote id. The remote id path has one node with the path name as "published" that includes all the nodes of the _{noformat}exo:activity{noformat}_ type.
-This node type stores data about the activity associated with a remote id. It is defined as follows:
+_{noformat}Social_Activity{noformat}_ contains all the child nodes with the path name of the identity provider name. The identity provider name contains all the child nodes that have the path name of the remote ID. The remote ID path has one node with the path name as "published" that includes all the nodes of the _{noformat}exo:activity{noformat}_ type.
+This node type stores data about the activity associated with a remote ID. It is defined as follows:
 
 {code:xml}
 <nodeType name="exo:activity" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
@@ -170,24 +170,25 @@ This node type stores data about the activity associated with a remote id. It is
 {code}
 
 The _{noformat}exo:activity{noformat}_ node type has the following properties:
-||Properties || requiredType|| Description ||
-|exo:body|String|The string specifies the body template message ID in the gadget spec. The body is an optional extended version of an activity.|
-|exo:bodyTemplate|String| The body template is used to replace the parameters in the body.|
-|exo:externalId|String|An optional string ID is generated by the posting application. |
-|exo:title|String|The string specifies the primary text of an activity.|
-|exo:titleTemplate|String|The template for the activity title.|
-|exo:updatedTime|Long|The string specifies the time at which this activity is updated in milliseconds since the epoch.|
-|exo:postedTime|Long|The string specifies the time at which this activity took place in milliseconds since the epoch.|
-|exo:priority|Long|A number between 0 and 1 represents the relative priority of this activity in relation to other activities from the same source.|
-|exo:url|String|The string specifies the stream's URL.|
-|exo:userId|String|The string ID of the user who this activity is for.|
-|exo:type|String|The application id which creates an activity.|
-|exo:replyToId|String|The string contains the identity id which the activity uses.|
-|exo:hidden|Boolen|The boolen denotes the activity display. If "true", the activity is not displayed.|
-|exo:like|String| The list of identity ids who like the activity.|
-|exo:params|String|A map of custom key/value pairs is associated with this activity. |
 
-h1. {noformat}Social_Identity{noformat} {anchor:id=SOCref.Social_JCR_Structure.Social_Identity}
+||Properties || requiredType|| Description ||
+|exo:body|String|The string which specifies the body template message ID in the gadget spec. The body is an optional extended version of an activity.|
+|exo:bodyTemplate|String| The body template which is used to replace the parameters in the body.|
+|exo:externalId|String|An optional string ID which is generated by the posting application.|
+|exo:title|String|The string which specifies the primary text of an activity.|
+|exo:titleTemplate|String|The template which is used for the activity title.|
+|exo:updatedTime|Long|The string which specifies the time at which this activity is updated in milliseconds since the epoch.|
+|exo:postedTime|Long|The string which specifies the time at which this activity took place in milliseconds since the epoch.|
+|exo:priority|Long|A number between '0' and '1' represents the relative priority of this activity in relation to other activities from the same source.|
+|exo:url|String|The string which specifies the stream's URL.|
+|exo:userId|String|The string ID of the user who this activity is for.|
+|exo:type|String|The application ID which creates an activity.|
+|exo:replyToId|String|The string which contains the identity ID which the activity uses.|
+|exo:hidden|Boolean|The boolean which denotes the activity display. If "true", the activity is not displayed.|
+|exo:like|String|The list of identity ids who like the activity.|
+|exo:params|String|A map of custom key/value pairs is associated with this activity.|
+
+h1. {noformat}Social_Identity{noformat} {anchor:ID=SOCref.Social_JCR_Structure.Social_Identity}
 
 _{noformat}Social_Identity{noformat}_ includes nodes of the _{noformat}exo:identity{noformat}_ type. This node type stores data about any identities with removeId and providerId. This node type is defined as follows:
 {code:xml}
@@ -209,14 +210,15 @@ _{noformat}Social_Identity{noformat}_ includes nodes of the _{noformat}exo:ident
 {code}
 
 The _{noformat}exo:identity{noformat}_ node type has the following properties:
+
 ||Properties || requiredType || Description||
-|exo:remoteId|String|The local id from a providerId. |
+|exo:remoteId|String|The local ID from a providerId. |
 |exo:providerId|String|The providerId is considered as a namespace for remoteId. |
 
 
-h1. {noformat}Social_Profile{noformat} {anchor:id=SOCref.Social_JCR_Structure.Social_Profile}
+h1. {noformat}Social_Profile{noformat} {anchor:ID=SOCref.Social_JCR_Structure.Social_Profile}
 
-The _{noformat}Social_Profile{noformat}_includes nodes of the _{noformat}exo:profile{noformat}_ type. This node type stores data about identities. Each identiy has its own profile that stores information of this identity. This node type is defined as follows:
+The _{noformat}Social_Profile{noformat} includes nodes of the _{noformat}exo:profile{noformat}_ type. This node type stores data about identities. Each identiy has its own profile that stores information of this identity. This node type is defined as follows:
 {code:xml}
   <nodeType name="exo:profile" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
     <supertypes>
@@ -238,11 +240,13 @@ The _{noformat}Social_Profile{noformat}_includes nodes of the _{noformat}exo:pro
     </childNodeDefinitions>
   </nodeType>
 {code}
+
 The node type has the following properties:
+
 ||Properties||requiredType||Description ||
 |exo:identity|REFERENCE| The reference to the exo:identity node. |
 
-h1. {noformat}Social_Relationship{noformat} {anchor:id=SOCref.Social_JCR_Structure.Social_Relatationship}
+h1. {noformat}Social_Relationship{noformat} {anchor:ID=SOCref.Social_JCR_Structure.Social_Relatationship}
 The _{noformat}Social_Relationship{noformat}_includes nodes of the _{noformat}exo:relationship{noformat}_ type. This node type stores information about the connection type between identities. It is defined as follows:
 
 {code:xml}
@@ -272,9 +276,9 @@ The _{noformat}Social_Relationship{noformat}_includes nodes of the _{noformat}ex
 {code}
 
 This node type has the following properties:
-||Properties || requiredType|| Description ||
-|exo:sender|REFERENCE| The sender identity. Its value is exo:identiy |
-|exo:receiver|REFERENCE| The receiver identity. Its value is exo:identity|
-|exo:status|String| The string has three values: PENDING, CONFIRMED, and IGNORED.|
-|exo:isSymetric|boolean| Denotes if the connection is one way or two way. |
 
+||Properties || requiredType|| Description ||
+|exo:sender|REFERENCE| The sender identity. Its value is {{exo:identiy}}.|
+|exo:receiver|REFERENCE| The receiver identity. Its value is exo:identity.|
+|exo:status|String| The string has three values: PENDING, CONFIRMED, and IGNORED.|
+|exo:isSymetric|boolean| Denotes if the relationship is one way or two way.|

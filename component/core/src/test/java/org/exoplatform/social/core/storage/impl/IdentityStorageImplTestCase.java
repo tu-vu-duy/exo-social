@@ -641,7 +641,6 @@ public class IdentityStorageImplTestCase extends AbstractCoreTest {
         loadedProfile.getAvatarUrl()
     );
 
-    
   }
 
   private Identity addIdentity(String provider, String name, String gender, String position) throws Exception {

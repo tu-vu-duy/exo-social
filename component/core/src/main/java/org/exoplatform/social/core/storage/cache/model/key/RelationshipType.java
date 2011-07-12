@@ -21,42 +21,6 @@ package org.exoplatform.social.core.storage.cache.model.key;
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class RelationshipCountKey implements CacheKey {
-
-  private final IdentityKey key;
-
-  private final RelationshipType type;
-
-  public RelationshipCountKey(final IdentityKey key, final RelationshipType type) {
-    this.key = key;
-    this.type = type;
-  }
-
-  @Override
-  public boolean equals(final Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof RelationshipCountKey)) {
-      return false;
-    }
-
-    RelationshipCountKey that = (RelationshipCountKey) o;
-
-    if (key != null ? !key.equals(that.key) : that.key != null) {
-      return false;
-    }
-    if (type != that.type) {
-      return false;
-    }
-
-    return true;
-  }
-
-  @Override
-  public int hashCode() {
-    int result = key != null ? key.hashCode() : 0;
-    result = 31 * result + (type != null ? type.hashCode() : 0);
-    return result;
-  }
+public enum RelationshipType {
+  CONNECTION, INCOMMING, OUTGOING, RELATIONSHIP
 }

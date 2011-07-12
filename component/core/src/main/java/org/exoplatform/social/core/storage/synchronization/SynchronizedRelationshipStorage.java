@@ -34,10 +34,6 @@ import java.util.List;
  */
 public class SynchronizedRelationshipStorage extends RelationshipStorageImpl {
 
-  /*
-  private final ExoCache<IdentityKey, SimpleCacheData<Integer>> relationshipCountConnection;*/
-
-
   /**
    * {@inheritDoc}
    */

@@ -15,13 +15,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.core.storage.cache.model.key;
+package org.exoplatform.social.core.storage.cache.model.data;
 
-import java.io.Serializable;
+import org.exoplatform.social.core.storage.cache.model.key.IdentityKey;
+import org.exoplatform.social.core.storage.cache.model.key.RelationshipKey;
+
+import java.util.List;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public interface CacheKey<T> extends Serializable {
+public class ListRelationshipsData extends AbstractListData<RelationshipKey> {
+
+  public ListRelationshipsData(final List<RelationshipKey> ids) {
+    super(ids);
+  }
+
 }

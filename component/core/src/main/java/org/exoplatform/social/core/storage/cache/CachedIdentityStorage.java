@@ -72,11 +72,11 @@ public class CachedIdentityStorage implements IdentityStorage {
     this.exoIdentities = cacheService.getIdentitiesCache();
 
     //
-    this.identityCache = SocialStorageCacheService.CacheType.IDENTITY.createFutureCache(exoCacheIdentity);
-    this.identityIndexCache = SocialStorageCacheService.CacheType.IDENTITY_INDEX.createFutureCache(exoCacheCompositeIdentity);
-    this.profileCache = SocialStorageCacheService.CacheType.PROFILE.createFutureCache(exoCacheProfile);
-    this.filterNumberCache = SocialStorageCacheService.CacheType.IDENTITIES_COUNT.createFutureCache(exoCacheFilterNumber);
-    this.identitiesCache = SocialStorageCacheService.CacheType.IDENTITIES.createFutureCache(exoIdentities);
+    this.identityCache = CacheType.IDENTITY.createFutureCache(exoCacheIdentity);
+    this.identityIndexCache = CacheType.IDENTITY_INDEX.createFutureCache(exoCacheCompositeIdentity);
+    this.profileCache = CacheType.PROFILE.createFutureCache(exoCacheProfile);
+    this.filterNumberCache = CacheType.IDENTITIES_COUNT.createFutureCache(exoCacheFilterNumber);
+    this.identitiesCache = CacheType.IDENTITIES.createFutureCache(exoIdentities);
 
   }
 

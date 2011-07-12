@@ -31,19 +31,17 @@ import org.exoplatform.social.core.storage.cache.model.data.RelationshipData;
 import org.exoplatform.social.core.storage.cache.model.data.SpaceData;
 import org.exoplatform.social.core.storage.cache.model.key.ActivityCountKey;
 import org.exoplatform.social.core.storage.cache.model.key.ActivityKey;
-import org.exoplatform.social.core.storage.cache.model.key.CacheKey;
 import org.exoplatform.social.core.storage.cache.model.key.IdentityCompositeKey;
 import org.exoplatform.social.core.storage.cache.model.key.IdentityFilterKey;
 import org.exoplatform.social.core.storage.cache.model.key.IdentityKey;
 import org.exoplatform.social.core.storage.cache.model.key.ListIdentitiesKey;
+import org.exoplatform.social.core.storage.cache.model.key.ListRelationshipsKey;
 import org.exoplatform.social.core.storage.cache.model.key.RelationshipCountKey;
 import org.exoplatform.social.core.storage.cache.model.key.RelationshipIdentityKey;
 import org.exoplatform.social.core.storage.cache.model.key.RelationshipKey;
 import org.exoplatform.social.core.storage.cache.model.key.SpaceFilterKey;
 import org.exoplatform.social.core.storage.cache.model.key.SpaceKey;
 import org.exoplatform.social.core.storage.cache.model.key.SpaceRefKey;
-
-import java.io.Serializable;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
@@ -61,7 +59,8 @@ public class SocialStorageCacheService {
   // RelationshipStorage
   private final ExoCache<RelationshipKey, RelationshipData> relationshipCacheById;
   private final ExoCache<RelationshipIdentityKey, RelationshipKey> relationshipCacheByIdentity;
-  private final ExoCache<RelationshipCountKey, IntegerData> relationshipCountConnection;
+  private final ExoCache<RelationshipCountKey, IntegerData> relationshipsCount;
+  private final ExoCache<ListRelationshipsKey, ListIdentitiesData> relationshipsCache;
 
   // ActivityStorage
   private final ExoCache<ActivityKey, ActivityData> activityCacheById;
@@ -80,10 +79,11 @@ public class SocialStorageCacheService {
     this.countCacheByFilter = CacheType.IDENTITIES_COUNT.getFromService(cacheService);
     this.identitiesCache = CacheType.IDENTITIES.getFromService(cacheService);
 
-    this.relationshipCacheById = cacheService.getCacheInstance("RelationshipCacheById");
-    this.relationshipCacheByIdentity = cacheService.getCacheInstance("RelationshipCacheByIdentity");
-    this.relationshipCountConnection = cacheService.getCacheInstance("RelationshipCount");
-    
+    this.relationshipCacheById = CacheType.RELATIONSHIP.getFromService(cacheService);
+    this.relationshipCacheByIdentity = CacheType.RELATIONSHIP_FROM_IDENTITY.getFromService(cacheService);
+    this.relationshipsCount = CacheType.RELATIONSHIPS_COUNT.getFromService(cacheService);
+    this.relationshipsCache = CacheType.RELATIONSHIPS.getFromService(cacheService);
+
     this.activityCacheById = cacheService.getCacheInstance("ActivityCacheById");
     this.activityCountCacheByIdentity = cacheService.getCacheInstance("ActivityCountCache");
 
@@ -113,37 +113,20 @@ public class SocialStorageCacheService {
     return identitiesCache;
   }
 
-  public FutureExoCache<RelationshipKey, RelationshipData, ServiceContext<RelationshipData>> createRelationshipCacheById() {
-    return new FutureExoCache<RelationshipKey, RelationshipData, ServiceContext<RelationshipData>>(
-        new CacheLoader<RelationshipKey, RelationshipData>(),
-        getRelationshipCacheById()
-    );
-  }
-
   public ExoCache<RelationshipKey, RelationshipData> getRelationshipCacheById() {
     return relationshipCacheById;
-  }
-
-  public FutureExoCache<RelationshipIdentityKey, RelationshipKey, ServiceContext<RelationshipKey>> createRelationshipCacheByIdentity() {
-    return new FutureExoCache<RelationshipIdentityKey, RelationshipKey, ServiceContext<RelationshipKey>>(
-        new CacheLoader<RelationshipIdentityKey, RelationshipKey>(),
-        getRelationshipCacheByIdentity()
-    );
   }
 
   public ExoCache<RelationshipIdentityKey, RelationshipKey> getRelationshipCacheByIdentity() {
     return relationshipCacheByIdentity;
   }
 
-  public FutureExoCache<RelationshipCountKey, IntegerData, ServiceContext<IntegerData>> createRelationshipCacheCount() {
-    return new FutureExoCache<RelationshipCountKey, IntegerData, ServiceContext<IntegerData>>(
-        new CacheLoader<RelationshipCountKey, IntegerData>(),
-        getRelationshipCount()
-    );
+  public ExoCache<RelationshipCountKey, IntegerData> getRelationshipCount() {
+    return relationshipsCount;
   }
 
-  public ExoCache<RelationshipCountKey, IntegerData> getRelationshipCount() {
-    return relationshipCountConnection;
+  public ExoCache<ListRelationshipsKey, ListIdentitiesData> getRelationshipsCache() {
+    return relationshipsCache;
   }
 
   public FutureExoCache<ActivityKey, ActivityData, ServiceContext<ActivityData>> createActivityCacheById() {
@@ -201,30 +184,4 @@ public class SocialStorageCacheService {
     return spaceCountCache;
   }
 
-  enum CacheType {
-
-    IDENTITY("IdentityCache"),
-    IDENTITY_INDEX("IdentityIndexCache"),
-    PROFILE("ProfileCache"),
-    IDENTITIES_COUNT("IdentitiesCountCache"),
-    IDENTITIES("IdentitiesCache");
-
-    private final String name;
-
-    private CacheType(final String name) {
-      this.name = name;
-    }
-
-    public <K extends CacheKey, V extends Serializable> ExoCache<K, V> getFromService(CacheService service) {
-      return service.getCacheInstance(name);
-    }
-
-    public <K extends CacheKey, V extends Serializable> FutureExoCache<K, V, ServiceContext<V>> createFutureCache(
-        ExoCache<K, V> cache) {
-
-      return new FutureExoCache<K, V, ServiceContext<V>>(new CacheLoader<K, V>(), cache);
-
-    }
-
-  }
 }

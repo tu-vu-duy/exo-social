@@ -25,12 +25,10 @@ import org.apache.poi.hssf.record.formula.functions.Offset;
  */
 public class ListCacheKey implements CacheKey {
 
-  private final CacheKey key;
   private final long offset;
   private final long limit;
 
-  public ListCacheKey(final CacheKey key, final long offset, final long limit) {
-    this.key = key;
+  public ListCacheKey(final long offset, final long limit) {
     this.offset = offset;
     this.limit = limit;
   }
@@ -52,17 +50,13 @@ public class ListCacheKey implements CacheKey {
     if (offset != that.offset) {
       return false;
     }
-    if (key != null ? !key.equals(that.key) : that.key != null) {
-      return false;
-    }
 
     return true;
   }
 
   @Override
   public int hashCode() {
-    int result = key != null ? key.hashCode() : 0;
-    result = 31 * result + (int) (offset ^ (offset >>> 32));
+    int result = (int) (offset ^ (offset >>> 32));
     result = 31 * result + (int) (limit ^ (limit >>> 32));
     return result;
   }

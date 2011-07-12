@@ -17,19 +17,22 @@
 
 package org.exoplatform.social.core.storage.cache.model.key;
 
+import org.exoplatform.social.core.identity.model.Identity;
+import org.exoplatform.social.core.relationship.model.Relationship;
+
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class RelationshipCountKey implements CacheKey {
+public class ListRelationshipsKey extends ListCacheKey {
 
   private final IdentityKey key;
-
   private final RelationshipType type;
 
-  public RelationshipCountKey(final IdentityKey key, final RelationshipType type) {
-    this.key = key;
+  public ListRelationshipsKey(final IdentityKey key, final RelationshipType type, final long offset, final long limit) {
+    super(offset, limit);
     this.type = type;
+    this.key = key;
   }
 
   @Override
@@ -37,11 +40,14 @@ public class RelationshipCountKey implements CacheKey {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof RelationshipCountKey)) {
+    if (!(o instanceof ListRelationshipsKey)) {
+      return false;
+    }
+    if (!super.equals(o)) {
       return false;
     }
 
-    RelationshipCountKey that = (RelationshipCountKey) o;
+    ListRelationshipsKey that = (ListRelationshipsKey) o;
 
     if (key != null ? !key.equals(that.key) : that.key != null) {
       return false;
@@ -55,8 +61,10 @@ public class RelationshipCountKey implements CacheKey {
 
   @Override
   public int hashCode() {
-    int result = key != null ? key.hashCode() : 0;
+    int result = super.hashCode();
+    result = 31 * result + (key != null ? key.hashCode() : 0);
     result = 31 * result + (type != null ? type.hashCode() : 0);
     return result;
   }
+
 }

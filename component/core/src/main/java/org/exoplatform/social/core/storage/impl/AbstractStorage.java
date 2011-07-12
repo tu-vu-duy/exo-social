@@ -81,11 +81,17 @@ public abstract class AbstractStorage {
   }
 
   protected ProviderRootEntity getProviderRoot() {
-    return getRoot(NODETYPE_PROVIDERS, ProviderRootEntity.class);
+    if (lifeCycle.getProviderRoot().get() == null) {
+      lifeCycle.getProviderRoot().set(getRoot(NODETYPE_PROVIDERS, ProviderRootEntity.class));
+    }
+    return (ProviderRootEntity) lifeCycle.getProviderRoot().get();
   }
 
   protected SpaceRootEntity getSpaceRoot() {
-    return getRoot(NODETYPE_SPACES, SpaceRootEntity.class);
+    if (lifeCycle.getSpaceRoot().get() == null) {
+      lifeCycle.getSpaceRoot().set(getRoot(NODETYPE_SPACES, SpaceRootEntity.class));
+    }
+    return (SpaceRootEntity) lifeCycle.getSpaceRoot().get();
   }
 
   protected <T> T _findById(final Class<T> clazz, final String nodeId) throws NodeNotFoundException {
@@ -131,7 +137,7 @@ public abstract class AbstractStorage {
 
   protected void _skip(Iterator<?> it, long offset) {
 
-    // TODO : user JCR skip
+    // TODO : use JCR skip
 
     while (it.hasNext()) {
       if (offset == 0) {

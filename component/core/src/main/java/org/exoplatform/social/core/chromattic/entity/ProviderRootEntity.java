@@ -34,6 +34,8 @@ import java.util.Map;
 @NamingPrefix("soc")
 public abstract class ProviderRootEntity {
 
+  public abstract String getSession();
+
   @OneToMany
   public abstract Map<String, ProviderEntity> getProviders();
 

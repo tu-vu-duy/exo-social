@@ -25,14 +25,17 @@ import org.exoplatform.social.core.storage.cache.loader.ServiceContext;
 import org.exoplatform.social.core.storage.cache.model.data.ActivityData;
 import org.exoplatform.social.core.storage.cache.model.data.IdentityData;
 import org.exoplatform.social.core.storage.cache.model.data.IntegerData;
+import org.exoplatform.social.core.storage.cache.model.data.ListIdentitiesData;
 import org.exoplatform.social.core.storage.cache.model.data.ProfileData;
 import org.exoplatform.social.core.storage.cache.model.data.RelationshipData;
 import org.exoplatform.social.core.storage.cache.model.data.SpaceData;
 import org.exoplatform.social.core.storage.cache.model.key.ActivityCountKey;
 import org.exoplatform.social.core.storage.cache.model.key.ActivityKey;
+import org.exoplatform.social.core.storage.cache.model.key.CacheKey;
 import org.exoplatform.social.core.storage.cache.model.key.IdentityCompositeKey;
 import org.exoplatform.social.core.storage.cache.model.key.IdentityFilterKey;
 import org.exoplatform.social.core.storage.cache.model.key.IdentityKey;
+import org.exoplatform.social.core.storage.cache.model.key.ListIdentitiesKey;
 import org.exoplatform.social.core.storage.cache.model.key.RelationshipCountKey;
 import org.exoplatform.social.core.storage.cache.model.key.RelationshipIdentityKey;
 import org.exoplatform.social.core.storage.cache.model.key.RelationshipKey;
@@ -40,7 +43,7 @@ import org.exoplatform.social.core.storage.cache.model.key.SpaceFilterKey;
 import org.exoplatform.social.core.storage.cache.model.key.SpaceKey;
 import org.exoplatform.social.core.storage.cache.model.key.SpaceRefKey;
 
-import java.util.List;
+import java.io.Serializable;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
@@ -48,13 +51,12 @@ import java.util.List;
  */
 public class SocialStorageCacheService {
 
-  public final static int BLOCK_SIZE = 10;
-
   // IdentityStorage
   private final ExoCache<IdentityKey, IdentityData> identityCacheById;
   private final ExoCache<IdentityCompositeKey, IdentityKey> identityIndexCache;
   private final ExoCache<IdentityKey, ProfileData> profileCacheById;
   private final ExoCache<IdentityFilterKey, IntegerData> countCacheByFilter;
+  private final ExoCache<ListIdentitiesKey, ListIdentitiesData> identitiesCache;
 
   // RelationshipStorage
   private final ExoCache<RelationshipKey, RelationshipData> relationshipCacheById;
@@ -72,10 +74,11 @@ public class SocialStorageCacheService {
 
   public SocialStorageCacheService(CacheService cacheService) {
     
-    this.identityCacheById = cacheService.getCacheInstance("IdentityCacheById");
-    this.identityIndexCache = cacheService.getCacheInstance("IdentityIndexCache");
-    this.profileCacheById = cacheService.getCacheInstance("ProfileCacheById");
-    this.countCacheByFilter = cacheService.getCacheInstance("CountCacheByFilter");
+    this.identityCacheById = CacheType.IDENTITY.getFromService(cacheService);
+    this.identityIndexCache = CacheType.IDENTITY_INDEX.getFromService(cacheService);
+    this.profileCacheById = CacheType.PROFILE.getFromService(cacheService);
+    this.countCacheByFilter = CacheType.IDENTITIES_COUNT.getFromService(cacheService);
+    this.identitiesCache = CacheType.IDENTITIES.getFromService(cacheService);
 
     this.relationshipCacheById = cacheService.getCacheInstance("RelationshipCacheById");
     this.relationshipCacheByIdentity = cacheService.getCacheInstance("RelationshipCacheByIdentity");
@@ -90,60 +93,25 @@ public class SocialStorageCacheService {
 
   }
 
-  public FutureExoCache<IdentityKey, IdentityData, ServiceContext<IdentityData>> createIdentityCacheById() {
-    return new FutureExoCache<IdentityKey, IdentityData, ServiceContext<IdentityData>>(
-        new CacheLoader<IdentityKey, IdentityData>(),
-        getIdentityCacheById()
-    );
-  }
-
   public ExoCache<IdentityKey, IdentityData> getIdentityCacheById() {
     return identityCacheById;
-  }
-
-  public FutureExoCache<IdentityCompositeKey, IdentityKey, ServiceContext<IdentityKey>> createIdentityCacheByCompositeId() {
-    return new FutureExoCache<IdentityCompositeKey, IdentityKey, ServiceContext<IdentityKey>>(
-        new CacheLoader<IdentityCompositeKey, IdentityKey>(),
-        getIdentityIndexCache()
-    );
   }
 
   public ExoCache<IdentityCompositeKey, IdentityKey> getIdentityIndexCache() {
     return identityIndexCache;
   }
 
-  public FutureExoCache<IdentityKey, ProfileData, ServiceContext<ProfileData>> createProfileCacheById() {
-    return new FutureExoCache<IdentityKey, ProfileData, ServiceContext<ProfileData>>(
-        new CacheLoader<IdentityKey, ProfileData>(),
-        getProfileCacheById()
-    );
-  }
-
   public ExoCache<IdentityKey, ProfileData> getProfileCacheById() {
     return profileCacheById;
-  }
-
-  public FutureExoCache<IdentityFilterKey, IntegerData, ServiceContext<IntegerData>> createRelationshipCountCacheById() {
-    return new FutureExoCache<IdentityFilterKey, IntegerData, ServiceContext<IntegerData>>(
-        new CacheLoader<IdentityFilterKey, IntegerData>(),
-        getCountCacheByFilter()
-    );
   }
 
   public ExoCache<IdentityFilterKey, IntegerData> getCountCacheByFilter() {
     return countCacheByFilter;
   }
 
-  /*public FutureExoCache<IdentitiesFilterKey, IdentitiesKey, ServiceContext<IdentitiesKey>> createIdentityCacheByFilter() {
-    return new FutureExoCache<IdentitiesFilterKey, IdentitiesKey, ServiceContext<IdentitiesKey>>(
-        new CacheLoader<IdentitiesFilterKey, IdentitiesKey>(),
-        getIdentityCacheByFilter()
-    );
+  public ExoCache<ListIdentitiesKey, ListIdentitiesData> getIdentitiesCache() {
+    return identitiesCache;
   }
-
-  public ExoCache<IdentitiesFilterKey, IdentitiesKey> getIdentityCacheByFilter() {
-    return identityCacheByFilter;
-  }*/
 
   public FutureExoCache<RelationshipKey, RelationshipData, ServiceContext<RelationshipData>> createRelationshipCacheById() {
     return new FutureExoCache<RelationshipKey, RelationshipData, ServiceContext<RelationshipData>>(
@@ -233,5 +201,30 @@ public class SocialStorageCacheService {
     return spaceCountCache;
   }
 
+  enum CacheType {
 
+    IDENTITY("IdentityCache"),
+    IDENTITY_INDEX("IdentityIndexCache"),
+    PROFILE("ProfileCache"),
+    IDENTITIES_COUNT("IdentitiesCountCache"),
+    IDENTITIES("IdentitiesCache");
+
+    private final String name;
+
+    private CacheType(final String name) {
+      this.name = name;
+    }
+
+    public <K extends CacheKey, V extends Serializable> ExoCache<K, V> getFromService(CacheService service) {
+      return service.getCacheInstance(name);
+    }
+
+    public <K extends CacheKey, V extends Serializable> FutureExoCache<K, V, ServiceContext<V>> createFutureCache(
+        ExoCache<K, V> cache) {
+
+      return new FutureExoCache<K, V, ServiceContext<V>>(new CacheLoader<K, V>(), cache);
+
+    }
+
+  }
 }

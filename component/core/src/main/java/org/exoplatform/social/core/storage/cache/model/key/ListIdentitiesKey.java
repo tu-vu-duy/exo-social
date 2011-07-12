@@ -15,17 +15,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.core.storage.cache.model.data;
-
-import java.io.Serializable;
-import java.util.List;
+package org.exoplatform.social.core.storage.cache.model.key;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public interface CacheData<T> extends Serializable {
+public class ListIdentitiesKey extends ListCacheKey {
 
-  public T build();
-
+  public ListIdentitiesKey(final CacheKey key, final long offset, final long limit) {
+    super(key, offset, limit);
+  }
+  
 }

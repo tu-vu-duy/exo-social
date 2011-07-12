@@ -23,6 +23,8 @@ import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.model.Profile;
 import org.exoplatform.social.core.profile.ProfileFilter;
 import org.exoplatform.social.core.storage.IdentityStorageException;
+import org.exoplatform.social.core.storage.cache.model.data.ListIdentitiesData;
+import org.exoplatform.social.core.storage.cache.model.key.ListIdentitiesKey;
 import org.exoplatform.social.core.storage.impl.IdentityStorageImpl;
 import org.exoplatform.social.core.storage.api.IdentityStorage;
 import org.exoplatform.social.core.storage.cache.loader.ServiceContext;
@@ -33,6 +35,7 @@ import org.exoplatform.social.core.storage.cache.model.key.IdentityCompositeKey;
 import org.exoplatform.social.core.storage.cache.model.key.IdentityFilterKey;
 import org.exoplatform.social.core.storage.cache.model.key.IdentityKey;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,11 +48,13 @@ public class CachedIdentityStorage implements IdentityStorage {
   private final ExoCache<IdentityCompositeKey, IdentityKey> exoCacheCompositeIdentity;
   private final ExoCache<IdentityKey, ProfileData> exoCacheProfile;
   private final ExoCache<IdentityFilterKey, IntegerData> exoCacheFilterNumber;
+  private final ExoCache<ListIdentitiesKey, ListIdentitiesData> exoIdentities;
 
   private final FutureExoCache<IdentityKey, IdentityData, ServiceContext<IdentityData>> identityCache;
   private final FutureExoCache<IdentityCompositeKey, IdentityKey, ServiceContext<IdentityKey>> identityIndexCache;
   private final FutureExoCache<IdentityKey, ProfileData, ServiceContext<ProfileData>> profileCache;
   private final FutureExoCache<IdentityFilterKey, IntegerData, ServiceContext<IntegerData>> filterNumberCache;
+  private final FutureExoCache<ListIdentitiesKey, ListIdentitiesData, ServiceContext<ListIdentitiesData>> identitiesCache;
 
   private final IdentityStorageImpl storage;
 
@@ -64,12 +69,14 @@ public class CachedIdentityStorage implements IdentityStorage {
     this.exoCacheCompositeIdentity = cacheService.getIdentityIndexCache();
     this.exoCacheProfile = cacheService.getProfileCacheById();
     this.exoCacheFilterNumber = cacheService.getCountCacheByFilter();
+    this.exoIdentities = cacheService.getIdentitiesCache();
 
     //
-    this.identityCache = cacheService.createIdentityCacheById();
-    this.identityIndexCache = cacheService.createIdentityCacheByCompositeId();
-    this.profileCache = cacheService.createProfileCacheById();
-    this.filterNumberCache = cacheService.createRelationshipCountCacheById();
+    this.identityCache = SocialStorageCacheService.CacheType.IDENTITY.createFutureCache(exoCacheIdentity);
+    this.identityIndexCache = SocialStorageCacheService.CacheType.IDENTITY_INDEX.createFutureCache(exoCacheCompositeIdentity);
+    this.profileCache = SocialStorageCacheService.CacheType.PROFILE.createFutureCache(exoCacheProfile);
+    this.filterNumberCache = SocialStorageCacheService.CacheType.IDENTITIES_COUNT.createFutureCache(exoCacheFilterNumber);
+    this.identitiesCache = SocialStorageCacheService.CacheType.IDENTITIES.createFutureCache(exoIdentities);
 
   }
 
@@ -206,8 +213,38 @@ public class CachedIdentityStorage implements IdentityStorage {
   public List<Identity> getIdentitiesByProfileFilter(final String providerId, final ProfileFilter profileFilter,
       final long offset, final long limit, final boolean forceLoadOrReloadProfile) throws IdentityStorageException {
 
-    return storage.getIdentitiesByProfileFilter(providerId, profileFilter, offset, limit, forceLoadOrReloadProfile);
+    //
+    IdentityFilterKey key = new IdentityFilterKey(providerId, profileFilter);
+    ListIdentitiesKey listKey = new ListIdentitiesKey(key, offset, limit);
 
+    ListIdentitiesData keys = identitiesCache.get(
+        new ServiceContext<ListIdentitiesData>() {
+          public ListIdentitiesData execute() {
+            List<Identity> got =
+                storage.getIdentitiesByProfileFilter(providerId, profileFilter, offset, limit, forceLoadOrReloadProfile);
+
+            List<IdentityKey> data = new ArrayList<IdentityKey>();
+            for (Identity i : got) {
+              IdentityKey k = new IdentityKey(i);
+              exoCacheIdentity.put(k, new IdentityData(i));
+              exoCacheProfile.put(k, new ProfileData(i.getProfile()));
+              data.add(new IdentityKey(i));
+            }
+            return new ListIdentitiesData(data);
+          }
+        },
+        listKey);
+
+    List<Identity> identities = new ArrayList<Identity>();
+
+    for (IdentityKey k : keys.getIds()) {
+      Identity gotIdentity = findIdentityById(k.getId());
+      gotIdentity.setProfile(loadProfile(gotIdentity.getProfile()));
+      identities.add(gotIdentity);
+    }
+
+    return identities;
+    
   }
 
   public int getIdentitiesByProfileFilterCount(final String providerId, final ProfileFilter profileFilter)
@@ -251,8 +288,37 @@ public class CachedIdentityStorage implements IdentityStorage {
   public List<Identity> getIdentitiesByFirstCharacterOfName(final String providerId, final ProfileFilter profileFilter,
       final long offset, final long limit, final boolean forceLoadOrReloadProfile) throws IdentityStorageException {
 
-    return storage.getIdentitiesByFirstCharacterOfName(providerId, profileFilter, offset, limit,
-        forceLoadOrReloadProfile);
+    //
+    IdentityFilterKey key = new IdentityFilterKey(providerId, profileFilter);
+    ListIdentitiesKey listKey = new ListIdentitiesKey(key, offset, limit);
+
+    ListIdentitiesData keys = identitiesCache.get(
+        new ServiceContext<ListIdentitiesData>() {
+          public ListIdentitiesData execute() {
+            List<Identity> got =
+                storage.getIdentitiesByFirstCharacterOfName(providerId, profileFilter, offset, limit, forceLoadOrReloadProfile);
+
+            List<IdentityKey> data = new ArrayList<IdentityKey>();
+            for (Identity i : got) {
+              IdentityKey k = new IdentityKey(i);
+              exoCacheIdentity.put(k, new IdentityData(i));
+              exoCacheProfile.put(k, new ProfileData(i.getProfile()));
+              data.add(new IdentityKey(i));
+            }
+            return new ListIdentitiesData(data);
+          }
+        },
+        listKey);
+
+    List<Identity> identities = new ArrayList<Identity>();
+
+    for (IdentityKey k : keys.getIds()) {
+      Identity gotIdentity = findIdentityById(k.getId());
+      gotIdentity.setProfile(loadProfile(gotIdentity.getProfile()));
+      identities.add(gotIdentity);
+    }
+
+    return identities;
 
   }
 

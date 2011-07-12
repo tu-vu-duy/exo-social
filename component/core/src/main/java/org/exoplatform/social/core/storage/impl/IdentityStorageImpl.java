@@ -975,13 +975,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
    * @throws IdentityStorageException
    */
   public void addOrModifyProfileProperties(final Profile profile) throws IdentityStorageException {
-    try {
-      _saveProfile(profile);
-    } catch (NodeNotFoundException e) {
-      throw new IdentityStorageException(
-          IdentityStorageException.Type.FAIL_TO_ADD_OR_MODIFY_PROPERTIES,
-          e.getMessage(), e);
-    }
+    getStorage().updateProfile(profile);
   }
 
   /**

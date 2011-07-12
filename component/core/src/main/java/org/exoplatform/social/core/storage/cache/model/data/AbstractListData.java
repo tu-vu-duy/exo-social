@@ -17,6 +17,9 @@
 
 package org.exoplatform.social.core.storage.cache.model.data;
 
+
+import org.exoplatform.social.core.storage.cache.model.key.IdentityKey;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -24,8 +27,15 @@ import java.util.List;
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public interface CacheData<T> extends Serializable {
+public class AbstractListData<T> implements Serializable {
 
-  public T build();
+  private final List<T> ids;
 
+  public AbstractListData(final List<T> ids) {
+    this.ids = ids;
+  }
+
+  public List<T> getIds() {
+    return ids;
+  }
 }

@@ -17,15 +17,30 @@
 
 package org.exoplatform.social.core.storage.cache.model.data;
 
-import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public interface CacheData<T> extends Serializable {
+public class ListCacheData<T> {
 
-  public T build();
+  List<CacheData<T>> data;
 
+  public ListCacheData(final List<CacheData<T>> data) {
+    this.data = data;
+  }
+
+  public List<T> build() {
+
+    List<T> list = new ArrayList<T>();
+
+    for (CacheData<T> t : data) {
+      list.add(t.build());
+    }
+
+    return list;
+
+  }
 }

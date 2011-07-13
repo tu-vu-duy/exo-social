@@ -1236,6 +1236,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
 
     //
     return activities;
+    
   }
 
   /**

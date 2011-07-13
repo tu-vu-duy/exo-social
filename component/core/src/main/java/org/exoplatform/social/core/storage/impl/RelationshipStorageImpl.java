@@ -445,8 +445,6 @@ public class RelationshipStorageImpl extends AbstractStorage implements Relation
         _saveRelationship(relationship);
       }
 
-      getCachedActivityStorage().invalidate();
-
     }
     catch (NodeNotFoundException e) {
       throw new RelationshipStorageException(

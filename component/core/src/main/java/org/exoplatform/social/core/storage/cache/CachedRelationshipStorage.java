@@ -18,6 +18,7 @@
 package org.exoplatform.social.core.storage.cache;
 
 import org.exoplatform.commons.cache.future.FutureExoCache;
+import org.exoplatform.container.PortalContainer;
 import org.exoplatform.services.cache.ExoCache;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.relationship.model.Relationship;
@@ -64,9 +65,18 @@ public class CachedRelationshipStorage implements RelationshipStorage {
   //
   private final RelationshipStorageImpl storage;
   private final IdentityStorage identityStorage;
+  private CachedActivityStorage cachedActivityStorage;
 
   //
   private static final RelationshipKey RELATIONSHIP_NOT_FOUND = new RelationshipKey(null);
+
+  public CachedActivityStorage getCachedActivityStorage() {
+    if (cachedActivityStorage == null) {
+      cachedActivityStorage = (CachedActivityStorage)
+          PortalContainer.getInstance().getComponentInstanceOfType(CachedActivityStorage.class);
+    }
+    return cachedActivityStorage;
+  }
 
   public CachedRelationshipStorage(final RelationshipStorageImpl storage, final IdentityStorage identityStorage, final SocialStorageCacheService cacheService) {
 
@@ -103,6 +113,7 @@ public class CachedRelationshipStorage implements RelationshipStorage {
     exoCacheRelationshipIdentity.put(identityKey1, key);
     exoCacheRelationshipIdentity.put(identityKey2, key);
     exoCacheRelationships.clearCache();
+    getCachedActivityStorage().invalidate();
 
     return r;
 

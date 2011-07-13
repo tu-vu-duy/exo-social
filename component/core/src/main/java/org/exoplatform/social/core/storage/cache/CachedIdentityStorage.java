@@ -18,6 +18,7 @@
 package org.exoplatform.social.core.storage.cache;
 
 import org.exoplatform.commons.cache.future.FutureExoCache;
+import org.exoplatform.container.PortalContainer;
 import org.exoplatform.services.cache.ExoCache;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.model.Profile;
@@ -57,6 +58,15 @@ public class CachedIdentityStorage implements IdentityStorage {
   private final FutureExoCache<ListIdentitiesKey, ListIdentitiesData, ServiceContext<ListIdentitiesData>> identitiesCache;
 
   private final IdentityStorageImpl storage;
+  private CachedActivityStorage cachedActivityStorage;
+
+  public CachedActivityStorage getCachedActivityStorage() {
+    if (cachedActivityStorage == null) {
+      cachedActivityStorage = (CachedActivityStorage)
+          PortalContainer.getInstance().getComponentInstanceOfType(CachedActivityStorage.class);
+    }
+    return cachedActivityStorage;
+  }
 
   public CachedIdentityStorage(final IdentityStorageImpl storage, final SocialStorageCacheService cacheService) {
 
@@ -137,6 +147,8 @@ public class CachedIdentityStorage implements IdentityStorage {
     }
     exoCacheProfile.remove(key);
     exoCacheFilterNumber.clearCache();
+    //getCachedActivityStorage().invalidate();
+
   }
 
   public Profile loadProfile(final Profile profile) throws IdentityStorageException {

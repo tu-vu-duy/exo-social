@@ -21,38 +21,9 @@ package org.exoplatform.social.core.storage.cache.model.key;
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class ActivityKey implements CacheKey {
-
-  private final String id;
-
-  public ActivityKey(final String id) {
-    this.id = id;
+public enum ActivityType {
+    USER, NEWER_USER, OLDER_USER,
+    FEED, NEWER_FEED, OLDER_FEED,
+    CONNECTION, NEWER_CONNECTION, OLDER_CONNECTION,
+    SPACE, NEWER_SPACE, OLDER_SPACE
   }
-
-  public String getId() {
-    return id;
-  }
-
-  @Override
-  public boolean equals(final Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof ActivityKey)) {
-      return false;
-    }
-
-    ActivityKey that = (ActivityKey) o;
-
-    if (id != null ? !id.equals(that.id) : that.id != null) {
-      return false;
-    }
-
-    return true;
-  }
-
-  @Override
-  public int hashCode() {
-    return id != null ? id.hashCode() : 0;
-  }
-}

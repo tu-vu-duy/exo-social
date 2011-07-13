@@ -15,44 +15,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.core.storage.cache.model.key;
+package org.exoplatform.social.core.storage.cache.model.data;
+
+import org.exoplatform.social.core.storage.cache.model.key.ActivityKey;
+
+import java.util.List;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class ActivityKey implements CacheKey {
+public class ListActivitiesData extends AbstractListData<ActivityKey> {
 
-  private final String id;
-
-  public ActivityKey(final String id) {
-    this.id = id;
+  public ListActivitiesData(final List<ActivityKey> ids) {
+    super(ids);
   }
-
-  public String getId() {
-    return id;
-  }
-
-  @Override
-  public boolean equals(final Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof ActivityKey)) {
-      return false;
-    }
-
-    ActivityKey that = (ActivityKey) o;
-
-    if (id != null ? !id.equals(that.id) : that.id != null) {
-      return false;
-    }
-
-    return true;
-  }
-
-  @Override
-  public int hashCode() {
-    return id != null ? id.hashCode() : 0;
-  }
+  
 }

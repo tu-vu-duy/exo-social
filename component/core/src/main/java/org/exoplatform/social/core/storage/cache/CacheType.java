@@ -43,7 +43,14 @@ public enum CacheType {
   RELATIONSHIP("RelationshipCache"),
   RELATIONSHIP_FROM_IDENTITY("RelationshipFromIdentityCache"),
   RELATIONSHIPS_COUNT("RelationshipsCountCache"),
-  RELATIONSHIPS("RelationshipsCache");
+  RELATIONSHIPS("RelationshipsCache"),
+
+  //
+  ACTIVITY("ActivityCache"),
+  ACTIVITIES_COUNT("ActivitiesCountCache"),
+  ACTIVITIES("ActivitiesCache"),
+
+  ;
 
   private final String name;
 

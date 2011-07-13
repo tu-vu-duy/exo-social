@@ -17,20 +17,27 @@
 
 package org.exoplatform.social.core.storage.cache.model.key;
 
+import org.exoplatform.social.core.storage.cache.model.data.ListIdentitiesData;
+
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class ActivityKey implements CacheKey {
+public class ListActivitiesKey extends ListCacheKey {
 
-  private final String id;
+  private final ActivityCountKey key;
+  private final ListIdentitiesData identities;
 
-  public ActivityKey(final String id) {
-    this.id = id;
+  public ListActivitiesKey(final ActivityCountKey key, final long offset, final long limit) {
+    super(offset, limit);
+    this.key = key;
+    this.identities = null;
   }
 
-  public String getId() {
-    return id;
+  public ListActivitiesKey(final ListIdentitiesData identities, final long offset, final long limit) {
+    super(offset, limit);
+    this.key = null;
+    this.identities = identities;
   }
 
   @Override
@@ -38,13 +45,19 @@ public class ActivityKey implements CacheKey {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof ActivityKey)) {
+    if (!(o instanceof ListActivitiesKey)) {
+      return false;
+    }
+    if (!super.equals(o)) {
       return false;
     }
 
-    ActivityKey that = (ActivityKey) o;
+    ListActivitiesKey that = (ListActivitiesKey) o;
 
-    if (id != null ? !id.equals(that.id) : that.id != null) {
+    if (identities != null ? !identities.equals(that.identities) : that.identities != null) {
+      return false;
+    }
+    if (key != null ? !key.equals(that.key) : that.key != null) {
       return false;
     }
 
@@ -53,6 +66,10 @@ public class ActivityKey implements CacheKey {
 
   @Override
   public int hashCode() {
-    return id != null ? id.hashCode() : 0;
+    int result = super.hashCode();
+    result = 31 * result + (key != null ? key.hashCode() : 0);
+    result = 31 * result + (identities != null ? identities.hashCode() : 0);
+    return result;
   }
+  
 }

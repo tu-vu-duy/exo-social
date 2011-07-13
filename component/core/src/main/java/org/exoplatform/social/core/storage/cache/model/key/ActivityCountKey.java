@@ -23,25 +23,18 @@ package org.exoplatform.social.core.storage.cache.model.key;
  */
 public class ActivityCountKey implements CacheKey {
 
-  public static enum CountType {
-    USER, NEWER_USER, OLDER_USER,
-    FEED, NEWER_FEED, OLDER_FEED,
-    CONNECTION, NEWER_CONNECTION, OLDER_CONNECTION,
-    SPACE, NEWER_SPACE, OLDER_SPACE
-  }
-
   private IdentityKey key;
 
   private String baseId;
 
-  private CountType type;
+  private ActivityType type;
 
-  public ActivityCountKey(final IdentityKey key, final CountType type) {
+  public ActivityCountKey(final IdentityKey key, final ActivityType type) {
     this.key = key;
     this.type = type;
   }
 
-  public ActivityCountKey(final IdentityKey key, final String baseId, final CountType type) {
+  public ActivityCountKey(final IdentityKey key, final String baseId, final ActivityType type) {
     this.key = key;
     this.baseId = baseId;
     this.type = type;

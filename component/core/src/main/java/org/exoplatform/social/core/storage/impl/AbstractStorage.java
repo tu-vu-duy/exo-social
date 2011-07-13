@@ -164,11 +164,4 @@ public abstract class AbstractStorage {
     }
   }
 
-  public CachedActivityStorage getCachedActivityStorage() {
-    if (cachedActivityStorage == null) {
-      cachedActivityStorage = (CachedActivityStorage) container.getComponentInstanceOfType(CachedActivityStorage.class);
-    }
-    return cachedActivityStorage;
-  }
-
 }

@@ -1,19 +1,19 @@
 /*
-* Copyright (C) 2003-2010 eXo Platform SAS.
-*
-* This program is free software; you can redistribute it and/or
-* modify it under the terms of the GNU Affero General Public License
-* as published by the Free Software Foundation; either version 3
-* of the License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, see<http://www.gnu.org/licenses/>.
-*/
+ * Copyright (C) 2003-2011 eXo Platform SAS.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.exoplatform.social.core.storage;
 
 import java.util.ArrayList;
@@ -56,6 +56,14 @@ public class ActivityStorageTest extends AbstractCoreTest {
   private Identity johnIdentity;
   private Identity maryIdentity;
   private Identity demoIdentity;
+  private Identity tomIdentity;
+  private Identity raulIdentity;
+  private Identity ghostIdentity;
+  private Identity dragonIdentity;
+  private Identity register1Identity;
+  private Identity jameIdentity;
+  private Identity paulIdentity;
+  private Identity hackerIdentity;
 
   @Override
   protected void setUp() throws Exception {
@@ -64,21 +72,30 @@ public class ActivityStorageTest extends AbstractCoreTest {
     activityStorage = (ActivityStorage) getContainer().getComponentInstanceOfType(ActivityStorage.class);
     identityManager = (IdentityManager) getContainer().getComponentInstanceOfType(IdentityManager.class);
     relationshipManager = (RelationshipManager) getContainer().getComponentInstanceOfType(RelationshipManager.class);
-    assertNotNull("identityManager must not be null", identityStorage);
-    assertNotNull("activityStorage must not be null", activityStorage);
     rootIdentity = new Identity(OrganizationIdentityProvider.NAME, "root");
     johnIdentity = new Identity(OrganizationIdentityProvider.NAME, "john");
     maryIdentity = new Identity(OrganizationIdentityProvider.NAME, "mary");
     demoIdentity = new Identity(OrganizationIdentityProvider.NAME, "demo");
+    tomIdentity = new Identity(OrganizationIdentityProvider.NAME, "tom");
+    raulIdentity = new Identity(OrganizationIdentityProvider.NAME, "raul");
+    ghostIdentity = new Identity(OrganizationIdentityProvider.NAME, "ghost");
+    dragonIdentity = new Identity(OrganizationIdentityProvider.NAME, "dragon");
+    register1Identity = new Identity(OrganizationIdentityProvider.NAME, "register1");
+    jameIdentity = new Identity(OrganizationIdentityProvider.NAME, "jame");
+    paulIdentity = new Identity(OrganizationIdentityProvider.NAME, "paul");
+    hackerIdentity = new Identity(OrganizationIdentityProvider.NAME, "hacker");
     identityStorage.saveIdentity(rootIdentity);
     identityStorage.saveIdentity(johnIdentity);
     identityStorage.saveIdentity(maryIdentity);
     identityStorage.saveIdentity(demoIdentity);
-
-    assertNotNull("rootIdentity.getId() must not be null", rootIdentity.getId());
-    assertNotNull("johnIdentity.getId() must not be null", johnIdentity.getId());
-    assertNotNull("maryIdentity.getId() must not be null", maryIdentity.getId());
-    assertNotNull("demoIdentity.getId() must not be null", demoIdentity.getId());
+    identityStorage.saveIdentity(tomIdentity);
+    identityStorage.saveIdentity(raulIdentity);
+    identityStorage.saveIdentity(ghostIdentity);
+    identityStorage.saveIdentity(dragonIdentity);
+    identityStorage.saveIdentity(register1Identity);
+    identityStorage.saveIdentity(jameIdentity);
+    identityStorage.saveIdentity(paulIdentity);
+    identityStorage.saveIdentity(hackerIdentity);
 
     tearDownActivityList = new ArrayList<ExoSocialActivity>();
   }
@@ -92,14 +109,15 @@ public class ActivityStorageTest extends AbstractCoreTest {
     identityStorage.deleteIdentity(johnIdentity);
     identityStorage.deleteIdentity(maryIdentity);
     identityStorage.deleteIdentity(demoIdentity);
-    /*assertEquals("assertEquals(activityStorage.getActivities(rootIdentity).size() must be 0",
-           0, activityStorage.getActivities(rootIdentity).size());
-    assertEquals("assertEquals(activityStorage.getActivities(johnIdentity).size() must be 0",
-           0, activityStorage.getActivities(johnIdentity).size());
-    assertEquals("assertEquals(activityStorage.getActivities(maryIdentity).size() must be 0",
-           0, activityStorage.getActivities(maryIdentity).size());
-    assertEquals("assertEquals(activityStorage.getActivities(demoIdentity).size() must be 0",
-           0, activityStorage.getActivities(demoIdentity).size());*/
+    identityStorage.deleteIdentity(tomIdentity);
+    identityStorage.deleteIdentity(raulIdentity);
+    identityStorage.deleteIdentity(ghostIdentity);
+    identityStorage.deleteIdentity(dragonIdentity);
+    identityStorage.deleteIdentity(register1Identity);
+    identityStorage.deleteIdentity(jameIdentity);
+    identityStorage.deleteIdentity(paulIdentity);
+    identityStorage.deleteIdentity(hackerIdentity);
+
     super.tearDown();
   }
 

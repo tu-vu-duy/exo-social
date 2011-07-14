@@ -62,7 +62,7 @@
     <commons-digester.version>1.7</commons-digester.version>
     <commons-lang.version>2.6</commons-lang.version>
     <commons-collections.version>3.2.1</commons-collections.version>
-    <commons-dbcp.version>1.2.2</commons-dbcp.version>
+    <commons-dbcp.version>1.4</commons-dbcp.version>
     <commons-pool.version>1.5.5</commons-pool.version>
     <findbugs.version>1.0.0</findbugs.version>
     <html-parser.version>1.6</html-parser.version>

@@ -31,6 +31,7 @@ import org.exoplatform.social.core.profile.ProfileFilter;
 import org.exoplatform.social.core.storage.exception.NodeAlreadyExistsException;
 import org.exoplatform.social.core.storage.exception.NodeNotFoundException;
 import org.exoplatform.social.core.test.AbstractCoreTest;
+import org.exoplatform.social.core.test.Util;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
@@ -633,11 +634,17 @@ public class IdentityStorageNewTestCase extends AbstractCoreTest {
     //
     Profile loadedProfile = new Profile(newIdentity);
     storage._loadProfile(loadedProfile);
+    String avatarRandomURL = loadedProfile.getAvatarUrl();
+    int indexOfRandomVar = avatarRandomURL.indexOf("/?upd=");
+    String avatarURL = null;
+    if(indexOfRandomVar != -1){
+      avatarURL = avatarRandomURL.substring(0,indexOfRandomVar);
+    } else {
+      avatarURL = avatarRandomURL;
+    }
     assertEquals(
-        "/rest/jcr/repository/social/production/soc:providers/soc:organization/soc:remoteid/soc:profile/soc:avatar",
-        loadedProfile.getAvatarUrl()
-    );
-
+        Util.escapeJCRSpecialCharacters("/rest/jcr/repository/portal-test/production/soc:providers/soc:organization/soc:remoteid/soc:profile/soc:avatar"),
+        avatarURL);
     
   }
 
@@ -858,5 +865,4 @@ public class IdentityStorageNewTestCase extends AbstractCoreTest {
 
     tearDownIdentityList.add(newIdentity.getId());
   }
-
 }

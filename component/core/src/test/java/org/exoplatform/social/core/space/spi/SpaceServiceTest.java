@@ -44,6 +44,7 @@ import org.exoplatform.social.core.space.impl.DefaultSpaceApplicationHandler;
 import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.storage.IdentityStorage;
 import org.exoplatform.social.core.test.AbstractCoreTest;
+import org.exoplatform.social.core.test.Util;
 
 public class SpaceServiceTest extends AbstractCoreTest {
   private SpaceService spaceService;
@@ -1414,7 +1415,21 @@ public class SpaceServiceTest extends AbstractCoreTest {
 
     Space savedSpace = spaceService.getSpaceById(space.getId());
     assertFalse(savedSpace.getAvatarUrl() == null);
-    assertEquals(LinkProvider.buildAvatarImageUri(space.getPrettyName()), savedSpace.getAvatarUrl());
+    String avatarRandomURL = savedSpace.getAvatarUrl();
+    int indexOfRandomVar = avatarRandomURL.indexOf("/?upd=");
+
+    String avatarURL = null;
+    if(indexOfRandomVar != -1){
+      avatarURL = avatarRandomURL.substring(0,indexOfRandomVar);
+    } else {
+      avatarURL = avatarRandomURL;
+    }
+    assertEquals(Util.escapeJCRSpecialCharacters(
+            String.format(
+              "/rest/jcr/repository/portal-test/production/soc:providers/soc:space/soc:%s/soc:profile/soc:avatar",
+              space.getPrettyName())
+            ),avatarURL);
+
   }
 
   /**

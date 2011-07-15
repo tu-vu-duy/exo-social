@@ -18,7 +18,6 @@
 package org.exoplatform.social.core.storage.cache;
 
 import org.exoplatform.commons.cache.future.FutureExoCache;
-import org.exoplatform.container.PortalContainer;
 import org.exoplatform.services.cache.ExoCache;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.model.Profile;
@@ -40,33 +39,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Cache support for IdentityStorage.
+ *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
 public class CachedIdentityStorage implements IdentityStorage {
 
-  private final ExoCache<IdentityKey, IdentityData> exoCacheIdentity;
-  private final ExoCache<IdentityCompositeKey, IdentityKey> exoCacheCompositeIdentity;
-  private final ExoCache<IdentityKey, ProfileData> exoCacheProfile;
-  private final ExoCache<IdentityFilterKey, IntegerData> exoCacheFilterNumber;
-  private final ExoCache<ListIdentitiesKey, ListIdentitiesData> exoIdentities;
+  private final ExoCache<IdentityKey, IdentityData> exoIdentityCache;
+  private final ExoCache<IdentityCompositeKey, IdentityKey> exoIdentityIndexCache;
+  private final ExoCache<IdentityKey, ProfileData> exoProfileCache;
+  private final ExoCache<IdentityFilterKey, IntegerData> exoIdentitiesCountCache;
+  private final ExoCache<ListIdentitiesKey, ListIdentitiesData> exoIdentitiesCache;
 
   private final FutureExoCache<IdentityKey, IdentityData, ServiceContext<IdentityData>> identityCache;
   private final FutureExoCache<IdentityCompositeKey, IdentityKey, ServiceContext<IdentityKey>> identityIndexCache;
   private final FutureExoCache<IdentityKey, ProfileData, ServiceContext<ProfileData>> profileCache;
-  private final FutureExoCache<IdentityFilterKey, IntegerData, ServiceContext<IntegerData>> filterNumberCache;
+  private final FutureExoCache<IdentityFilterKey, IntegerData, ServiceContext<IntegerData>> identitiesCountCache;
   private final FutureExoCache<ListIdentitiesKey, ListIdentitiesData, ServiceContext<ListIdentitiesData>> identitiesCache;
 
   private final IdentityStorageImpl storage;
-  private CachedActivityStorage cachedActivityStorage;
-
-  public CachedActivityStorage getCachedActivityStorage() {
-    if (cachedActivityStorage == null) {
-      cachedActivityStorage = (CachedActivityStorage)
-          PortalContainer.getInstance().getComponentInstanceOfType(CachedActivityStorage.class);
-    }
-    return cachedActivityStorage;
-  }
 
   public CachedIdentityStorage(final IdentityStorageImpl storage, final SocialStorageCacheService cacheService) {
 
@@ -75,21 +67,24 @@ public class CachedIdentityStorage implements IdentityStorage {
     this.storage.setStorage(this);
 
     //
-    this.exoCacheIdentity = cacheService.getIdentityCacheById();
-    this.exoCacheCompositeIdentity = cacheService.getIdentityIndexCache();
-    this.exoCacheProfile = cacheService.getProfileCacheById();
-    this.exoCacheFilterNumber = cacheService.getCountCacheByFilter();
-    this.exoIdentities = cacheService.getIdentitiesCache();
+    this.exoIdentityCache = cacheService.getIdentityCache();
+    this.exoIdentityIndexCache = cacheService.getIdentityIndexCache();
+    this.exoProfileCache = cacheService.getProfileCache();
+    this.exoIdentitiesCountCache = cacheService.getCountIdentitiesCache();
+    this.exoIdentitiesCache = cacheService.getIdentitiesCache();
 
     //
-    this.identityCache = CacheType.IDENTITY.createFutureCache(exoCacheIdentity);
-    this.identityIndexCache = CacheType.IDENTITY_INDEX.createFutureCache(exoCacheCompositeIdentity);
-    this.profileCache = CacheType.PROFILE.createFutureCache(exoCacheProfile);
-    this.filterNumberCache = CacheType.IDENTITIES_COUNT.createFutureCache(exoCacheFilterNumber);
-    this.identitiesCache = CacheType.IDENTITIES.createFutureCache(exoIdentities);
+    this.identityCache = CacheType.IDENTITY.createFutureCache(exoIdentityCache);
+    this.identityIndexCache = CacheType.IDENTITY_INDEX.createFutureCache(exoIdentityIndexCache);
+    this.profileCache = CacheType.PROFILE.createFutureCache(exoProfileCache);
+    this.identitiesCountCache = CacheType.IDENTITIES_COUNT.createFutureCache(exoIdentitiesCountCache);
+    this.identitiesCache = CacheType.IDENTITIES.createFutureCache(exoIdentitiesCache);
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public void saveIdentity(final Identity identity) throws IdentityStorageException {
 
     //
@@ -97,20 +92,26 @@ public class CachedIdentityStorage implements IdentityStorage {
 
     //
     IdentityKey key = new IdentityKey(new Identity(identity.getId()));
-    exoCacheIdentity.put(key, new IdentityData(identity));
-    exoCacheFilterNumber.clearCache();
+    exoIdentityCache.put(key, new IdentityData(identity));
+    exoIdentitiesCountCache.clearCache();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public Identity updateIdentity(final Identity identity) throws IdentityStorageException {
 
     //
     IdentityKey key = new IdentityKey(new Identity(identity.getId()));
-    exoCacheIdentity.remove(key);
+    exoIdentityCache.remove(key);
 
     //
     return storage.updateIdentity(identity);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public Identity findIdentityById(final String nodeId) throws IdentityStorageException {
 
     IdentityKey key = new IdentityKey(new Identity(nodeId));
@@ -134,6 +135,9 @@ public class CachedIdentityStorage implements IdentityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public void deleteIdentity(final Identity identity) throws IdentityStorageException {
 
     //
@@ -141,16 +145,18 @@ public class CachedIdentityStorage implements IdentityStorage {
 
     //
     IdentityKey key = new IdentityKey(new Identity(identity.getId()));
-    IdentityData data = exoCacheIdentity.remove(key);
+    IdentityData data = exoIdentityCache.remove(key);
     if (data != null) {
-      exoCacheCompositeIdentity.remove(new IdentityCompositeKey(data.getProviderId(), data.getRemoteId()));
+      exoIdentityIndexCache.remove(new IdentityCompositeKey(data.getProviderId(), data.getRemoteId()));
     }
-    exoCacheProfile.remove(key);
-    exoCacheFilterNumber.clearCache();
-    //getCachedActivityStorage().invalidate();
+    exoProfileCache.remove(key);
+    exoIdentitiesCountCache.clearCache();
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public Profile loadProfile(final Profile profile) throws IdentityStorageException {
 
     IdentityKey key = new IdentityKey(new Identity(profile.getIdentity().getId()));
@@ -166,6 +172,9 @@ public class CachedIdentityStorage implements IdentityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public Identity findIdentity(final String providerId, final String remoteId) throws IdentityStorageException {
 
     //
@@ -179,7 +188,7 @@ public class CachedIdentityStorage implements IdentityStorage {
             Identity i = storage.findIdentity(providerId, remoteId);
             if (i == null) return null;
             IdentityKey key = new IdentityKey(i);
-            exoCacheIdentity.put(key, new IdentityData(i));
+            exoIdentityCache.put(key, new IdentityData(i));
             return key;
           }
         },
@@ -194,6 +203,9 @@ public class CachedIdentityStorage implements IdentityStorage {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public void saveProfile(final Profile profile) throws IdentityStorageException {
 
     //
@@ -201,10 +213,13 @@ public class CachedIdentityStorage implements IdentityStorage {
 
     //
     IdentityKey key = new IdentityKey(new Identity(profile.getIdentity().getId()));
-    exoCacheProfile.remove(key);
+    exoProfileCache.remove(key);
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public void updateProfile(final Profile profile) throws IdentityStorageException {
 
     //
@@ -212,16 +227,22 @@ public class CachedIdentityStorage implements IdentityStorage {
 
     //
     IdentityKey key = new IdentityKey(new Identity(profile.getIdentity().getId()));
-    exoCacheProfile.remove(key);
+    exoProfileCache.remove(key);
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public int getIdentitiesCount(final String providerId) throws IdentityStorageException {
 
     return storage.getIdentitiesCount(providerId);
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public List<Identity> getIdentitiesByProfileFilter(final String providerId, final ProfileFilter profileFilter,
       final long offset, final long limit, final boolean forceLoadOrReloadProfile) throws IdentityStorageException {
 
@@ -238,8 +259,8 @@ public class CachedIdentityStorage implements IdentityStorage {
             List<IdentityKey> data = new ArrayList<IdentityKey>();
             for (Identity i : got) {
               IdentityKey k = new IdentityKey(i);
-              exoCacheIdentity.put(k, new IdentityData(i));
-              exoCacheProfile.put(k, new ProfileData(i.getProfile()));
+              exoIdentityCache.put(k, new IdentityData(i));
+              exoProfileCache.put(k, new ProfileData(i.getProfile()));
               data.add(new IdentityKey(i));
             }
             return new ListIdentitiesData(data);
@@ -259,6 +280,9 @@ public class CachedIdentityStorage implements IdentityStorage {
     
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public int getIdentitiesByProfileFilterCount(final String providerId, final ProfileFilter profileFilter)
       throws IdentityStorageException {
 
@@ -266,7 +290,7 @@ public class CachedIdentityStorage implements IdentityStorage {
     IdentityFilterKey key = new IdentityFilterKey(providerId, profileFilter);
 
     //
-    return filterNumberCache.get(
+    return identitiesCountCache.get(
         new ServiceContext<IntegerData>() {
 
           public IntegerData execute() {
@@ -278,6 +302,9 @@ public class CachedIdentityStorage implements IdentityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public int getIdentitiesByFirstCharacterOfNameCount(final String providerId, final ProfileFilter profileFilter)
       throws IdentityStorageException {
 
@@ -285,7 +312,7 @@ public class CachedIdentityStorage implements IdentityStorage {
     IdentityFilterKey key = new IdentityFilterKey(providerId, profileFilter);
 
     //
-    return filterNumberCache.get(
+    return identitiesCountCache.get(
         new ServiceContext<IntegerData>() {
 
           public IntegerData execute() {
@@ -297,6 +324,9 @@ public class CachedIdentityStorage implements IdentityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public List<Identity> getIdentitiesByFirstCharacterOfName(final String providerId, final ProfileFilter profileFilter,
       final long offset, final long limit, final boolean forceLoadOrReloadProfile) throws IdentityStorageException {
 
@@ -313,8 +343,8 @@ public class CachedIdentityStorage implements IdentityStorage {
             List<IdentityKey> data = new ArrayList<IdentityKey>();
             for (Identity i : got) {
               IdentityKey k = new IdentityKey(i);
-              exoCacheIdentity.put(k, new IdentityData(i));
-              exoCacheProfile.put(k, new ProfileData(i.getProfile()));
+              exoIdentityCache.put(k, new IdentityData(i));
+              exoProfileCache.put(k, new ProfileData(i.getProfile()));
               data.add(new IdentityKey(i));
             }
             return new ListIdentitiesData(data);
@@ -334,12 +364,18 @@ public class CachedIdentityStorage implements IdentityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public String getType(final String nodetype, final String property) {
 
     return storage.getType(nodetype, property);
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public void addOrModifyProfileProperties(final Profile profile) throws IdentityStorageException {
 
     storage.addOrModifyProfileProperties(profile);

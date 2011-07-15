@@ -52,10 +52,10 @@ import org.exoplatform.social.core.storage.cache.model.key.SpaceRefKey;
 public class SocialStorageCacheService {
 
   // IdentityStorage
-  private final ExoCache<IdentityKey, IdentityData> identityCacheById;
+  private final ExoCache<IdentityKey, IdentityData> identityCache;
   private final ExoCache<IdentityCompositeKey, IdentityKey> identityIndexCache;
-  private final ExoCache<IdentityKey, ProfileData> profileCacheById;
-  private final ExoCache<IdentityFilterKey, IntegerData> countCacheByFilter;
+  private final ExoCache<IdentityKey, ProfileData> profileCache;
+  private final ExoCache<IdentityFilterKey, IntegerData> countIdentitiesCache;
   private final ExoCache<ListIdentitiesKey, ListIdentitiesData> identitiesCache;
 
   // RelationshipStorage
@@ -76,10 +76,10 @@ public class SocialStorageCacheService {
 
   public SocialStorageCacheService(CacheService cacheService) {
     
-    this.identityCacheById = CacheType.IDENTITY.getFromService(cacheService);
+    this.identityCache = CacheType.IDENTITY.getFromService(cacheService);
     this.identityIndexCache = CacheType.IDENTITY_INDEX.getFromService(cacheService);
-    this.profileCacheById = CacheType.PROFILE.getFromService(cacheService);
-    this.countCacheByFilter = CacheType.IDENTITIES_COUNT.getFromService(cacheService);
+    this.profileCache = CacheType.PROFILE.getFromService(cacheService);
+    this.countIdentitiesCache = CacheType.IDENTITIES_COUNT.getFromService(cacheService);
     this.identitiesCache = CacheType.IDENTITIES.getFromService(cacheService);
 
     this.relationshipCacheById = CacheType.RELATIONSHIP.getFromService(cacheService);
@@ -97,20 +97,20 @@ public class SocialStorageCacheService {
 
   }
 
-  public ExoCache<IdentityKey, IdentityData> getIdentityCacheById() {
-    return identityCacheById;
+  public ExoCache<IdentityKey, IdentityData> getIdentityCache() {
+    return identityCache;
   }
 
   public ExoCache<IdentityCompositeKey, IdentityKey> getIdentityIndexCache() {
     return identityIndexCache;
   }
 
-  public ExoCache<IdentityKey, ProfileData> getProfileCacheById() {
-    return profileCacheById;
+  public ExoCache<IdentityKey, ProfileData> getProfileCache() {
+    return profileCache;
   }
 
-  public ExoCache<IdentityFilterKey, IntegerData> getCountCacheByFilter() {
-    return countCacheByFilter;
+  public ExoCache<IdentityFilterKey, IntegerData> getCountIdentitiesCache() {
+    return countIdentitiesCache;
   }
 
   public ExoCache<ListIdentitiesKey, ListIdentitiesData> getIdentitiesCache() {

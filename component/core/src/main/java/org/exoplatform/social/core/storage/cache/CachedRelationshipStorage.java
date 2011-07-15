@@ -97,7 +97,7 @@ public class CachedRelationshipStorage implements RelationshipStorage {
     this.relationshipsCache = CacheType.RELATIONSHIPS.createFutureCache(exoCacheRelationships);
 
     //
-    this.exoCacheIdentity = cacheService.getIdentityCacheById();
+    this.exoCacheIdentity = cacheService.getIdentityCache();
 
   }
 

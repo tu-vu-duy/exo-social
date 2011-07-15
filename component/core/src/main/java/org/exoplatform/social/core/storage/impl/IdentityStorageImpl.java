@@ -53,6 +53,8 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
+ * IdentityStorage implementation.
+ *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
@@ -592,10 +594,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
    */
 
   /**
-   * Saves identity.
-   *
-   * @param identity the identity
-   * @throws IdentityStorageException
+   * {@inheritDoc}
    */
   public void saveIdentity(final Identity identity) throws IdentityStorageException {
 
@@ -618,12 +617,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
   }
 
   /**
-   * Updates existing identity's properties.
-   *
-   * @param identity the identity to be updated.
-   * @return the updated identity.
-   * @throws IdentityStorageException
-   * @since  1.2.0-GA
+   * {@inheritDoc}
    */
   public Identity updateIdentity(final Identity identity) throws IdentityStorageException {
 
@@ -636,11 +630,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
   }
 
   /**
-   * Gets the identity by his id.
-   *
-   * @param nodeId the id of identity
-   * @return the identity
-   * @throws IdentityStorageException
+   * {@inheritDoc}
    */
   public Identity findIdentityById(final String nodeId) throws IdentityStorageException {
 
@@ -662,10 +652,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
   }
 
   /**
-   * Deletes an identity from JCR
-   *
-   * @param identity
-   * @throws IdentityStorageException
+   * {@inheritDoc}
    */
   public void deleteIdentity(final Identity identity) throws IdentityStorageException {
     try {
@@ -677,10 +664,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
   }
 
   /**
-   * Load profile.
-   *
-   * @param profile the profile
-   * @throws IdentityStorageException
+   * {@inheritDoc}
    */
   public Profile loadProfile(Profile profile) throws IdentityStorageException {
     try {
@@ -703,12 +687,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
   }
 
   /**
-   * Gets the identity by remote id.
-   *
-   * @param providerId the identity provider
-   * @param remoteId   the id
-   * @return the identity by remote id
-   * @throws IdentityStorageException
+   * {@inheritDoc}
    */
   public Identity findIdentity(final String providerId, final String remoteId) throws IdentityStorageException {
     try {
@@ -720,10 +699,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
   }
 
   /**
-   * Saves profile.
-   *
-   * @param profile the profile
-   * @throws IdentityStorageException
+   * {@inheritDoc}
    */
   public void saveProfile(final Profile profile) throws IdentityStorageException {
 
@@ -742,19 +718,14 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
   }
 
   /**
-   * Updates profile.
-   *
-   * @param profile the profile
-   * @throws IdentityStorageException
-   * @since 1.2.0-GA
+   * {@inheritDoc}
    */
   public void updateProfile(final Profile profile) throws IdentityStorageException {
     saveProfile(profile);
   }
 
   /**
-   * Gets total number of identities in storage depend on providerId.
-   * @throws IdentityStorageException
+   * {@inheritDoc}
    */
   public int getIdentitiesCount (final String providerId) throws IdentityStorageException {
 
@@ -767,16 +738,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
   }
 
   /**
-   * Gets the identities by profile filter.
-   *
-   * @param providerId Id of provider.
-   * @param profileFilter    Information of profile that used in filtering.
-   * @param offset           Start index of list to be get.
-   * @param limit            End index of list to be get.
-   * @param forceLoadOrReloadProfile Load profile or not.
-   * @return the identities by profile filter.
-   * @throws IdentityStorageException
-   * @since 1.2.0-GA
+   * {@inheritDoc}
    */
   public List<Identity> getIdentitiesByProfileFilter(
       final String providerId, final ProfileFilter profileFilter, long offset, long limit,
@@ -819,13 +781,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
   }
 
   /**
-   * Counts the number of identity by profile filter.
-   *
-   * @param providerId Id of Provider.
-   * @param profileFilter Information of profile are used in filtering.
-   * @return Number of identities that are filtered by profile.
-   * @throws IdentityStorageException
-   * @since 1.2.0-GA
+   * {@inheritDoc}
    */
   public int getIdentitiesByProfileFilterCount(final String providerId, final ProfileFilter profileFilter)
       throws IdentityStorageException {
@@ -848,13 +804,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
   }
 
   /**
-   * Counts the number of identities that match the first character of name.
-   *
-   * @param providerId
-   * @param profileFilter Profile filter object.
-   * @return Number of identities that start with the first character of name.
-   * @throws IdentityStorageException
-   * @since 1.2.0-GA
+   * {@inheritDoc}
    */
   public int getIdentitiesByFirstCharacterOfNameCount(final String providerId, final ProfileFilter profileFilter)
       throws IdentityStorageException {
@@ -881,16 +831,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
   }
 
   /**
-   * Gets the identities that match the first character of name.
-   *
-   * @param providerId Id of provider.
-   * @param profileFilter Profile filter object.
-   * @param offset   Start index of list to be get.
-   * @param limit    End index of list to be get.
-   * @param forceLoadOrReloadProfile Load profile or not.
-   * @return Identities that have name start with the first character.
-   * @throws IdentityStorageException
-   * @since 1.2.0-GA
+   * {@inheritDoc}
    */
   public List<Identity> getIdentitiesByFirstCharacterOfName(final String providerId, final ProfileFilter profileFilter,
       long offset, long limit, boolean forceLoadOrReloadProfile) throws IdentityStorageException {
@@ -929,12 +870,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
   }
 
   /**
-   * Gets the type.
-   *
-   * @param nodetype the nodetype
-   * @param property the property
-   * @return the type
-   * @throws IdentityStorageException
+   * {@inheritDoc}
    */
   public String getType(final String nodetype, final String property) {
 
@@ -962,20 +898,14 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
   }
 
   /**
-   * Add or modify properties of profile and persist to JCR. Profile parameter is a lightweight that
-   * contains only the property that you want to add or modify. NOTE: The method will
-   * not delete the properties on old profile when the param profile have not those keys.
-   *
-   * @param profile
-   * @throws IdentityStorageException
+   * {@inheritDoc}
    */
   public void addOrModifyProfileProperties(final Profile profile) throws IdentityStorageException {
     getStorage().updateProfile(profile);
   }
 
   /**
-   * Set the cached storage
-   * @param storage The cached storage
+   * {@inheritDoc}
    */
   public void setStorage(IdentityStorage storage) {
     this.identityStorage = storage;

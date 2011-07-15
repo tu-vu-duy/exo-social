@@ -26,11 +26,16 @@ import org.exoplatform.social.core.storage.IdentityStorageException;
 import org.exoplatform.social.core.storage.impl.IdentityStorageImpl;
 
 /**
+ * Synchronization for IdentityStorage.
+ *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
 public class SynchronizedIdentityStorage extends IdentityStorageImpl {
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void saveIdentity(final Identity identity) throws IdentityStorageException {
 
@@ -45,6 +50,9 @@ public class SynchronizedIdentityStorage extends IdentityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Identity updateIdentity(final Identity identity) throws IdentityStorageException {
 
@@ -58,6 +66,9 @@ public class SynchronizedIdentityStorage extends IdentityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Identity findIdentityById(final String nodeId) throws IdentityStorageException {
 
@@ -71,6 +82,9 @@ public class SynchronizedIdentityStorage extends IdentityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void deleteIdentity(final Identity identity) throws IdentityStorageException {
 
@@ -84,6 +98,9 @@ public class SynchronizedIdentityStorage extends IdentityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Profile loadProfile(Profile profile) throws IdentityStorageException {
 
@@ -97,6 +114,9 @@ public class SynchronizedIdentityStorage extends IdentityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Identity findIdentity(final String providerId, final String remoteId) throws IdentityStorageException {
 
@@ -110,6 +130,9 @@ public class SynchronizedIdentityStorage extends IdentityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void saveProfile(final Profile profile) throws IdentityStorageException {
 
@@ -123,6 +146,9 @@ public class SynchronizedIdentityStorage extends IdentityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void updateProfile(final Profile profile) throws IdentityStorageException {
 
@@ -136,6 +162,9 @@ public class SynchronizedIdentityStorage extends IdentityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int getIdentitiesCount(final String providerId) throws IdentityStorageException {
 
@@ -149,6 +178,9 @@ public class SynchronizedIdentityStorage extends IdentityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public List<Identity> getIdentitiesByProfileFilter(
       final String providerId, final ProfileFilter profileFilter, final long offset, final long limit,
@@ -165,6 +197,9 @@ public class SynchronizedIdentityStorage extends IdentityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int getIdentitiesByProfileFilterCount(final String providerId, final ProfileFilter profileFilter)
       throws IdentityStorageException {
@@ -179,6 +214,9 @@ public class SynchronizedIdentityStorage extends IdentityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int getIdentitiesByFirstCharacterOfNameCount(final String providerId, final ProfileFilter profileFilter)
       throws IdentityStorageException {
@@ -193,6 +231,9 @@ public class SynchronizedIdentityStorage extends IdentityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public List<Identity> getIdentitiesByFirstCharacterOfName(
       final String providerId, final ProfileFilter profileFilter, final long offset, final long limit,
@@ -210,6 +251,9 @@ public class SynchronizedIdentityStorage extends IdentityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public String getType(final String nodetype, final String property) {
 
@@ -223,6 +267,9 @@ public class SynchronizedIdentityStorage extends IdentityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void addOrModifyProfileProperties(final Profile profile) throws IdentityStorageException {
 

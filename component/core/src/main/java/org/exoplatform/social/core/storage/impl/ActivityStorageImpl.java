@@ -271,10 +271,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
    */
 
   /**
-   * Load an activity by its id.
-   *
-   * @param activityId the id of the activity. An UUID.
-   * @return the activity
+   * {@inheritDoc}
    */
   public ExoSocialActivity getActivity(String activityId) throws ActivityStorageException {
 
@@ -300,10 +297,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets all the activities by identity.
-   *
-   * @param owner the identity
-   * @return the activities
+   * {@inheritDoc}
    */
   public List<ExoSocialActivity> getUserActivities(Identity owner) throws ActivityStorageException {
 
@@ -312,14 +306,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the activities by identity.
-   *
-   * Access a user's activity stream by specifying the offset and limit.
-   *
-   * @param owner the identity
-   * @param offset
-   * @param limit
-   * @return the activities
+   * {@inheritDoc}
    */
   public List<ExoSocialActivity> getUserActivities(Identity owner, long offset, long limit)
       throws ActivityStorageException {
@@ -357,12 +344,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
   
   /**
-   * Save comment to an activity.
-   * activity's ownerstream has to be the same as ownerStream param here.
-   *
-   * @param activity
-   * @param comment
-   * @since 1.1.1
+   * {@inheritDoc}
    */
   public void saveComment(ExoSocialActivity activity, ExoSocialActivity comment) throws ActivityStorageException {
 
@@ -410,17 +392,8 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-     * Saves an activity into a stream.
-     * Note that the field {@link org.exoplatform.social.core.activity.model.ExoSocialActivity#setUserId(String)}
-     * should be the id of an identity {@link Identity#getId()}
-     * @param owner owner of the stream where this activity is bound.
-     *              Usually a user or space identity
-     * @param activity the activity to save
-     * @return stored activity
-     * @throws ActivityStorageException activity storage exception with type:
-     * ActivityStorageException.Type.FAILED_TO_SAVE_ACTIVITY
-     * @since 1.1.1
-     */
+   * {@inheritDoc}
+   */
   public ExoSocialActivity saveActivity(Identity owner, ExoSocialActivity activity) throws ActivityStorageException {
     try {
       Validate.notNull(owner, "owner must not be null.");
@@ -465,6 +438,9 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public ExoSocialActivity getParentActivity(ExoSocialActivity comment) throws ActivityStorageException {
 
     try {
@@ -482,10 +458,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Deletes activity by its id.
-   * This will delete comments from this activity first, then delete the activity.
-   *
-   * @param activityId the activity id
+   * {@inheritDoc}
    */
   public void deleteActivity(String activityId) throws ActivityStorageException {
 
@@ -527,10 +500,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Delete comment by its id.
-   *
-   * @param activityId
-   * @param commentId
+   * {@inheritDoc}
    */
   public void deleteComment(String activityId, String commentId) throws ActivityStorageException {
 
@@ -539,16 +509,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the activities for a list of identities.
-   *
-   * Access a activity stream of a list of identities by specifying the offset and limit.
-   *
-   * @param connectionList the list of connections for which we want to get
-   * the latest activities
-   * @param offset
-   * @param limit
-   * @return the activities related to the list of connections
-   * @since 1.2.0-GA
+   * {@inheritDoc}
    */
   public List<ExoSocialActivity> getActivitiesOfIdentities(List<Identity> connectionList,
                                                            long offset, long limit) throws ActivityStorageException {
@@ -557,16 +518,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the activities for a list of identities.
-   *
-   * Access a activity stream of a list of identities by specifying the offset and limit.
-   *
-   * @param connectionList the list of connections for which we want to get
-   * the latest activities
-   * @param offset
-   * @param limit
-   * @return the activities related to the list of connections
-   * @since 1.2.0-GA
+   * {@inheritDoc}
    */
   public List<ExoSocialActivity> getActivitiesOfIdentities(
       List<Identity> connectionList, TimestampType type, long offset, long limit)
@@ -589,15 +541,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the activities for a list of identities.
-   *
-   * Access a activity stream of a list of identities by specifying the offset and limit.
-   *
-   * @param connectionList the list of connections for which we want to get
-   * the latest activities
-   * @param type
-   * @return the activities related to the list of connections
-   * @since 1.2.0-GA
+   * {@inheritDoc}
    */
   private Query<ActivityEntity> getActivitiesOfIdentitiesQuery(
       List<Identity> connectionList, TimestampType type)
@@ -643,10 +587,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Count the number of activities from an ownerIdentity
-   *
-   * @param owner
-   * @return the number of activities
+   * {@inheritDoc}
    */
   public int getNumberOfUserActivities(Identity owner) throws ActivityStorageException {
 
@@ -665,11 +606,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the number of newer activities based on an existing activity.
-   *
-   * @param ownerIdentity
-   * @param baseActivity
-   * @return
+   * {@inheritDoc}
    */
   public int getNumberOfNewerOnUserActivities(Identity ownerIdentity, ExoSocialActivity baseActivity) {
 
@@ -706,12 +643,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the list of newer activities based on an existing activity.
-   *
-   * @param ownerIdentity
-   * @param baseActivity
-   * @param limit
-   * @return
+   * {@inheritDoc}
    */
   public List<ExoSocialActivity> getNewerOnUserActivities(Identity ownerIdentity, ExoSocialActivity baseActivity,
                                                           int limit) {
@@ -754,11 +686,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the number of older activities based on an existing activity.
-   *
-   * @param ownerIdentity
-   * @param baseActivity
-   * @return
+   * {@inheritDoc}
    */
   public int getNumberOfOlderOnUserActivities(Identity ownerIdentity, ExoSocialActivity baseActivity) {
 
@@ -784,12 +712,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the list of older activities based on an existing activity.
-   *
-   * @param ownerIdentity
-   * @param baseActivity
-   * @param limit
-   * @return
+   * {@inheritDoc}
    */
   public List<ExoSocialActivity> getOlderOnUserActivities(Identity ownerIdentity, ExoSocialActivity baseActivity,
                                                           int limit) {
@@ -829,12 +752,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets activity feed from an identity.
-   *
-   * @param ownerIdentity
-   * @param offset
-   * @param limit
-   * @return
+   * {@inheritDoc}
    */
   public List<ExoSocialActivity> getActivityFeed(Identity ownerIdentity, int offset, int limit) {
 
@@ -849,6 +767,9 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
     return getActivitiesOfIdentities(identities, offset, limit);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public int getNumberOfActivitesOnActivityFeed(Identity ownerIdentity) {
 
     //
@@ -863,6 +784,9 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public int getNumberOfNewerOnActivityFeed(Identity ownerIdentity, ExoSocialActivity baseActivity) {
 
     //
@@ -878,6 +802,9 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public List<ExoSocialActivity> getNewerOnActivityFeed(Identity ownerIdentity, ExoSocialActivity baseActivity,
                                                          int limit) {
     //
@@ -892,6 +819,9 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public int getNumberOfOlderOnActivityFeed(Identity ownerIdentity, ExoSocialActivity baseActivity) {
 
     //
@@ -907,6 +837,9 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public List<ExoSocialActivity> getOlderOnActivityFeed(Identity ownerIdentity, ExoSocialActivity baseActivity,
                                                          int limit) {
     //
@@ -921,13 +854,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets activities of connections of an identity with offset, limit.
-   *
-   * @param ownerIdentity
-   * @param offset
-   * @param limit
-   * @return
-   * @since 1.2.0-Beta3
+   * {@inheritDoc}
    */
   public List<ExoSocialActivity> getActivitiesOfConnections(Identity ownerIdentity, int offset, int limit) {
 
@@ -937,11 +864,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the count of the activities of connections who connected with an identity.
-   *
-   * @param ownerIdentity
-   * @return
-   * @since 1.2.0-Beta3
+   * {@inheritDoc}
    */
   public int getNumberOfActivitiesOfConnections(Identity ownerIdentity) {
 
@@ -980,15 +903,8 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the activities of the identity with offset, limit.
-   *
-   * @param ownerIdentity
-   * @param offset
-   * @param limit
-   * @return
-   * @throws ActivityStorageException
-   * @since 1.2.0-Beta3
-    */
+   * {@inheritDoc}
+   */
   public List<ExoSocialActivity> getActivitiesOfIdentity(Identity ownerIdentity, long offset, long limit)
       throws ActivityStorageException {
 
@@ -997,12 +913,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the number of newer activities based on base activity of connections.
-   *
-   * @param ownerIdentity
-   * @param baseActivity
-   * @return
-   * @since 1.2.0-Beta3
+   * {@inheritDoc}
    */
   public int getNumberOfNewerOnActivitiesOfConnections(Identity ownerIdentity, ExoSocialActivity baseActivity) {
 
@@ -1021,13 +932,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the newer activities of connections based on baseActivity.
-   *
-   * @param ownerIdentity
-   * @param baseActivity
-   * @param limit
-   * @return
-   * @since 1.2.0-Beta3
+   * {@inheritDoc}
    */
   public List<ExoSocialActivity> getNewerOnActivitiesOfConnections(
       Identity ownerIdentity, ExoSocialActivity baseActivity, long limit) {
@@ -1041,12 +946,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the number of older activities of connections based on baseActivity.
-   *
-   * @param ownerIdentity
-   * @param baseActivity
-   * @return
-   * @since 1.2.0-Beta3
+   * {@inheritDoc}
    */
   public int getNumberOfOlderOnActivitiesOfConnections(Identity ownerIdentity, ExoSocialActivity baseActivity) {
 
@@ -1065,13 +965,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the older of activities of connections based on base an activity.
-   *
-   * @param ownerIdentity
-   * @param baseActivity
-   * @param limit
-   * @return
-   * @since 1.2.0-Beta3
+   * {@inheritDoc}
    */
   public List<ExoSocialActivity> getOlderOnActivitiesOfConnections(Identity ownerIdentity,
                                                                   ExoSocialActivity baseActivity, int limit) {
@@ -1085,13 +979,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the activities of spaces where identity can access (manager or member).
-   *
-   * @param ownerIdentity
-   * @param offset
-   * @param limit
-   * @return
-   * @since 1.2.0-Beta3
+   * {@inheritDoc}
    */
   public List<ExoSocialActivity> getUserSpacesActivities(Identity ownerIdentity, int offset, int limit) {
 
@@ -1104,11 +992,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the number of activities of spaces where identity can access (manager or member).
-   *
-   * @param ownerIdentity
-   * @return
-   * @since 1.2.0-Beta3
+   * {@inheritDoc}
    */
   public int getNumberOfUserSpacesActivities(Identity ownerIdentity) {
 
@@ -1126,12 +1010,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the number of newer activities of spaces where the identity can access, based on an existing activity.
-   *
-   * @param ownerIdentity
-   * @param baseActivity
-   * @return
-   * @since 1.2.0-Beta3
+   * {@inheritDoc}
    */
   public int getNumberOfNewerOnUserSpacesActivities(Identity ownerIdentity, ExoSocialActivity baseActivity) {
 
@@ -1150,13 +1029,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the newer activities of spaces where identity can access (manager or member), based on an existing activity.
-   *
-   * @param ownerIdentity
-   * @param baseActivity
-   * @param limit
-   * @return
-   * @since 1.2.0-Beta3
+   * {@inheritDoc}
    */
   public List<ExoSocialActivity> getNewerOnUserSpacesActivities(Identity ownerIdentity,
                                                                 ExoSocialActivity baseActivity, int limit) {
@@ -1170,12 +1043,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the number of newer activities of spaces where the identity can access, based on an existing activity.
-   *
-   * @param ownerIdentity
-   * @param baseActivity
-   * @return
-   * @since 1.2.0-Beta3
+   * {@inheritDoc}
    */
   public int getNumberOfOlderOnUserSpacesActivities(Identity ownerIdentity, ExoSocialActivity baseActivity) {
 
@@ -1194,13 +1062,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the older activities of spaces where identity can access (manager or member), based on an existing activity.
-   *
-   * @param ownerIdentity
-   * @param baseActivity
-   * @param limit
-   * @return
-   * @since 1.2.0-Beta3
+   * {@inheritDoc}
    */
   public List<ExoSocialActivity> getOlderOnUserSpacesActivities(Identity ownerIdentity,
                                                                 ExoSocialActivity baseActivity, int limit) {
@@ -1214,13 +1076,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the comments of an activity with offset, limit.
-   *
-   * @param existingActivity
-   * @param offset
-   * @param limit
-   * @return
-   * @since 1.2.0-Beta3
+   * {@inheritDoc}
    */
   public List<ExoSocialActivity> getComments(ExoSocialActivity existingActivity, int offset, int limit) {
 
@@ -1240,23 +1096,14 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the number of comments of an activity.
-   *
-   * @param existingActivity
-   * @return
-   * @since 1.2.0-Beta3
+   * {@inheritDoc}
    */
   public int getNumberOfComments(ExoSocialActivity existingActivity) {
     return getStorage().getActivity(existingActivity.getId()).getReplyToId().length;
   }
 
   /**
-   * Gets the number of newer comments of an activity based on a comment.
-   *
-   * @param existingActivity
-   * @param baseComment
-   * @return
-   * @since 1.2.0-Beta3
+   * {@inheritDoc}
    */
   public int getNumberOfNewerComments(ExoSocialActivity existingActivity, ExoSocialActivity baseComment) {
 
@@ -1266,12 +1113,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the newer comments of an activity based on a comment.
-   *
-   * @param existingActivity
-   * @param baseComment
-   * @param limit
-   * @return
+   * {@inheritDoc}
    */
   public List<ExoSocialActivity> getNewerComments(ExoSocialActivity existingActivity, ExoSocialActivity baseComment,
                                            int limit) {
@@ -1296,12 +1138,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the number of newer comments of an activity based on a comment.
-   *
-   * @param existingActivity
-   * @param baseComment
-   * @return
-   * @since 1.2.0-Beta3
+   * {@inheritDoc}
    */
   public int getNumberOfOlderComments(ExoSocialActivity existingActivity, ExoSocialActivity baseComment) {
 
@@ -1313,13 +1150,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the older comments of an activity based on a comment.
-   *
-   * @param existingActivity
-   * @param baseComment
-   * @param limit
-   * @return
-   * @since 1.2.0-Beta3
+   * {@inheritDoc}
    */
   public List<ExoSocialActivity> getOlderComments(ExoSocialActivity existingActivity, ExoSocialActivity baseComment,
                                            int limit) {
@@ -1341,19 +1172,14 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Gets the activity processors.
-   *
-   * @return 1.2.0-GA
+   * {@inheritDoc}
    */
   public SortedSet<ActivityProcessor> getActivityProcessors() {
     return activityProcessors;
   }
 
   /**
-   * Updates an existing activity.
-   *
-   * @param existingActivity
-   * @throws ActivityStorageException
+   * {@inheritDoc}
    */
   public void updateActivity(ExoSocialActivity existingActivity) throws ActivityStorageException {
 
@@ -1370,8 +1196,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   }
 
   /**
-   * Set the cached storage
-   * @param storage The cached storage
+   * {@inheritDoc}
    */
   public void setStorage(final ActivityStorage storage) {
     this.activityStorage = storage;

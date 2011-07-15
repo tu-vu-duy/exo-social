@@ -65,8 +65,8 @@ public class SocialStorageCacheService {
   private final ExoCache<ListRelationshipsKey, ListIdentitiesData> relationshipsCache;
 
   // ActivityStorage
-  private final ExoCache<ActivityKey, ActivityData> activityCacheById;
-  private final ExoCache<ActivityCountKey, IntegerData> activityCountCacheByIdentity;
+  private final ExoCache<ActivityKey, ActivityData> activityCache;
+  private final ExoCache<ActivityCountKey, IntegerData> activitiesCountCache;
   private final ExoCache<ListActivitiesKey, ListActivitiesData> activitiesCache;
 
   // SpaceStorage
@@ -87,8 +87,8 @@ public class SocialStorageCacheService {
     this.relationshipsCount = CacheType.RELATIONSHIPS_COUNT.getFromService(cacheService);
     this.relationshipsCache = CacheType.RELATIONSHIPS.getFromService(cacheService);
 
-    this.activityCacheById = CacheType.ACTIVITY.getFromService(cacheService);
-    this.activityCountCacheByIdentity = CacheType.ACTIVITIES_COUNT.getFromService(cacheService);
+    this.activityCache = CacheType.ACTIVITY.getFromService(cacheService);
+    this.activitiesCountCache = CacheType.ACTIVITIES_COUNT.getFromService(cacheService);
     this.activitiesCache = CacheType.ACTIVITIES.getFromService(cacheService);
 
     this.spaceCacheById = cacheService.getCacheInstance("SpaceCacheById");
@@ -133,12 +133,12 @@ public class SocialStorageCacheService {
     return relationshipsCache;
   }
 
-  public ExoCache<ActivityKey, ActivityData> getActivityCacheById() {
-    return activityCacheById;
+  public ExoCache<ActivityKey, ActivityData> getActivityCache() {
+    return activityCache;
   }
 
   public ExoCache<ActivityCountKey, IntegerData> getActivityCountCache() {
-    return activityCountCacheByIdentity;
+    return activitiesCountCache;
   }
 
   public ExoCache<ListActivitiesKey, ListActivitiesData> getActivitiesCache() {

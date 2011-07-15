@@ -27,7 +27,6 @@ import org.exoplatform.social.core.storage.cache.model.data.ListActivitiesData;
 import org.exoplatform.social.core.storage.cache.model.data.ListIdentitiesData;
 import org.exoplatform.social.core.storage.cache.model.key.ActivityType;
 import org.exoplatform.social.core.storage.cache.model.key.ListActivitiesKey;
-import org.exoplatform.social.core.storage.cache.model.key.ListIdentitiesKey;
 import org.exoplatform.social.core.storage.impl.ActivityStorageImpl;
 import org.exoplatform.social.core.storage.api.ActivityStorage;
 import org.exoplatform.social.core.storage.cache.loader.ServiceContext;
@@ -47,12 +46,12 @@ import java.util.SortedSet;
  */
 public class CachedActivityStorage implements ActivityStorage {
 
-  private final ExoCache<ActivityKey, ActivityData> eXoCacheActivityId;
-  private final ExoCache<ActivityCountKey, IntegerData> eXoCacheActivityCount;
-  private final ExoCache<ListActivitiesKey, ListActivitiesData> eXoCacheActivities;
+  private final ExoCache<ActivityKey, ActivityData> exoActivityCache;
+  private final ExoCache<ActivityCountKey, IntegerData> exoActivitiesCountCache;
+  private final ExoCache<ListActivitiesKey, ListActivitiesData> exoActivitiesCache;
 
   private final FutureExoCache<ActivityKey, ActivityData, ServiceContext<ActivityData>> activityCache;
-  private final FutureExoCache<ActivityCountKey, IntegerData, ServiceContext<IntegerData>> activityCountCache;
+  private final FutureExoCache<ActivityCountKey, IntegerData, ServiceContext<IntegerData>> activitiesCountCache;
   private final FutureExoCache<ListActivitiesKey, ListActivitiesData, ServiceContext<ListActivitiesData>> activitiesCache;
 
   private final ActivityStorageImpl storage;
@@ -64,17 +63,20 @@ public class CachedActivityStorage implements ActivityStorage {
     this.storage.setStorage(this);
 
     //
-    this.eXoCacheActivityId = cacheService.getActivityCacheById();
-    this.eXoCacheActivityCount = cacheService.getActivityCountCache();
-    this.eXoCacheActivities = cacheService.getActivitiesCache();
+    this.exoActivityCache = cacheService.getActivityCache();
+    this.exoActivitiesCountCache = cacheService.getActivityCountCache();
+    this.exoActivitiesCache = cacheService.getActivitiesCache();
 
     //
-    this.activityCache = CacheType.ACTIVITY.createFutureCache(eXoCacheActivityId);
-    this.activityCountCache = CacheType.ACTIVITIES_COUNT.createFutureCache(eXoCacheActivityCount);
-    this.activitiesCache = CacheType.ACTIVITIES.createFutureCache(eXoCacheActivities);
+    this.activityCache = CacheType.ACTIVITY.createFutureCache(exoActivityCache);
+    this.activitiesCountCache = CacheType.ACTIVITIES_COUNT.createFutureCache(exoActivitiesCountCache);
+    this.activitiesCache = CacheType.ACTIVITIES.createFutureCache(exoActivitiesCache);
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public ExoSocialActivity getActivity(final String activityId) throws ActivityStorageException {
 
     //
@@ -106,10 +108,16 @@ public class CachedActivityStorage implements ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public List<ExoSocialActivity> getUserActivities(final Identity owner) throws ActivityStorageException {
     return storage.getUserActivities(owner);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public List<ExoSocialActivity> getUserActivities(final Identity owner, final long offset, final long limit) throws ActivityStorageException {
 
     //
@@ -125,7 +133,7 @@ public class CachedActivityStorage implements ActivityStorage {
             List<ActivityKey> data = new ArrayList<ActivityKey>();
             for (ExoSocialActivity a : got) {
               ActivityKey k = new ActivityKey(a.getId());
-              eXoCacheActivityId.put(k, new ActivityData(a));
+              exoActivityCache.put(k, new ActivityData(a));
               data.add(k);
             }
             return new ListActivitiesData(data);
@@ -145,16 +153,22 @@ public class CachedActivityStorage implements ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public void saveComment(final ExoSocialActivity activity, final ExoSocialActivity comment) throws ActivityStorageException {
 
     //
     storage.saveComment(activity, comment);
 
     //
-    eXoCacheActivityId.remove(new ActivityKey(activity.getId()));
+    exoActivityCache.remove(new ActivityKey(activity.getId()));
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public ExoSocialActivity saveActivity(final Identity owner, final ExoSocialActivity activity) throws ActivityStorageException {
 
     //
@@ -162,7 +176,7 @@ public class CachedActivityStorage implements ActivityStorage {
 
     //
     ActivityKey key = new ActivityKey(a.getId());
-    eXoCacheActivityId.remove(key);
+    exoActivityCache.remove(key);
     invalidate();
 
     //
@@ -170,11 +184,16 @@ public class CachedActivityStorage implements ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public ExoSocialActivity getParentActivity(final ExoSocialActivity comment) throws ActivityStorageException {
     return storage.getParentActivity(comment);
   }
 
-
+  /**
+   * {@inheritDoc}
+   */
   public void deleteActivity(final String activityId) throws ActivityStorageException {
 
     //
@@ -182,22 +201,28 @@ public class CachedActivityStorage implements ActivityStorage {
 
     //
     ActivityKey key = new ActivityKey(activityId);
-    eXoCacheActivityId.remove(key);
+    exoActivityCache.remove(key);
     invalidate();
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public void deleteComment(final String activityId, final String commentId) throws ActivityStorageException {
     
     //
     storage.deleteComment(activityId, commentId);
 
     //
-    eXoCacheActivityId.remove(new ActivityKey(commentId));
-    eXoCacheActivityId.remove(new ActivityKey(activityId));
+    exoActivityCache.remove(new ActivityKey(commentId));
+    exoActivityCache.remove(new ActivityKey(activityId));
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public List<ExoSocialActivity> getActivitiesOfIdentities(final List<Identity> connectionList, final long offset, final long limit) throws ActivityStorageException {
 
     //
@@ -216,7 +241,7 @@ public class CachedActivityStorage implements ActivityStorage {
             List<ActivityKey> data = new ArrayList<ActivityKey>();
             for (ExoSocialActivity a : got) {
               ActivityKey k = new ActivityKey(a.getId());
-              eXoCacheActivityId.put(k, new ActivityData(a));
+              exoActivityCache.put(k, new ActivityData(a));
               data.add(k);
             }
             return new ListActivitiesData(data);
@@ -236,17 +261,23 @@ public class CachedActivityStorage implements ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public List<ExoSocialActivity> getActivitiesOfIdentities(final List<Identity> connectionList, final TimestampType type, final long offset, final long limit) throws ActivityStorageException {
     return storage.getActivitiesOfIdentities(connectionList, type, offset, limit);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public int getNumberOfUserActivities(final Identity owner) throws ActivityStorageException {
 
     //
     ActivityCountKey key = new ActivityCountKey(new IdentityKey(owner), ActivityType.USER);
 
     //
-    return activityCountCache.get(
+    return activitiesCountCache.get(
         new ServiceContext<IntegerData>() {
           public IntegerData execute() {
             return new IntegerData(storage.getNumberOfUserActivities(owner));
@@ -257,6 +288,9 @@ public class CachedActivityStorage implements ActivityStorage {
     
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public int getNumberOfNewerOnUserActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
 
     //
@@ -264,7 +298,7 @@ public class CachedActivityStorage implements ActivityStorage {
         new ActivityCountKey(new IdentityKey(ownerIdentity), baseActivity.getId(), ActivityType.NEWER_USER);
 
     //
-    return activityCountCache.get(
+    return activitiesCountCache.get(
         new ServiceContext<IntegerData>() {
           public IntegerData execute() {
             return new IntegerData(storage.getNumberOfNewerOnUserActivities(ownerIdentity, baseActivity));
@@ -275,6 +309,9 @@ public class CachedActivityStorage implements ActivityStorage {
     
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public List<ExoSocialActivity> getNewerOnUserActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final int limit) {
 
     //
@@ -290,7 +327,7 @@ public class CachedActivityStorage implements ActivityStorage {
             List<ActivityKey> data = new ArrayList<ActivityKey>();
             for (ExoSocialActivity a : got) {
               ActivityKey k = new ActivityKey(a.getId());
-              eXoCacheActivityId.put(k, new ActivityData(a));
+              exoActivityCache.put(k, new ActivityData(a));
               data.add(k);
             }
             return new ListActivitiesData(data);
@@ -310,6 +347,9 @@ public class CachedActivityStorage implements ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public int getNumberOfOlderOnUserActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
 
     //
@@ -317,7 +357,7 @@ public class CachedActivityStorage implements ActivityStorage {
         new ActivityCountKey(new IdentityKey(ownerIdentity), baseActivity.getId(), ActivityType.OLDER_USER);
 
     //
-    return activityCountCache.get(
+    return activitiesCountCache.get(
         new ServiceContext<IntegerData>() {
           public IntegerData execute() {
             return new IntegerData(storage.getNumberOfOlderOnUserActivities(ownerIdentity, baseActivity));
@@ -328,6 +368,9 @@ public class CachedActivityStorage implements ActivityStorage {
     
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public List<ExoSocialActivity> getOlderOnUserActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final int limit) {
 
     //
@@ -343,7 +386,7 @@ public class CachedActivityStorage implements ActivityStorage {
             List<ActivityKey> data = new ArrayList<ActivityKey>();
             for (ExoSocialActivity a : got) {
               ActivityKey k = new ActivityKey(a.getId());
-              eXoCacheActivityId.put(k, new ActivityData(a));
+              exoActivityCache.put(k, new ActivityData(a));
               data.add(k);
             }
             return new ListActivitiesData(data);
@@ -363,6 +406,9 @@ public class CachedActivityStorage implements ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public List<ExoSocialActivity> getActivityFeed(final Identity ownerIdentity, final int offset, final int limit) {
 
     //
@@ -378,7 +424,7 @@ public class CachedActivityStorage implements ActivityStorage {
             List<ActivityKey> data = new ArrayList<ActivityKey>();
             for (ExoSocialActivity a : got) {
               ActivityKey k = new ActivityKey(a.getId());
-              eXoCacheActivityId.put(k, new ActivityData(a));
+              exoActivityCache.put(k, new ActivityData(a));
               data.add(k);
             }
             return new ListActivitiesData(data);
@@ -398,6 +444,9 @@ public class CachedActivityStorage implements ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public int getNumberOfActivitesOnActivityFeed(final Identity ownerIdentity) {
 
     //
@@ -405,7 +454,7 @@ public class CachedActivityStorage implements ActivityStorage {
         new ActivityCountKey(new IdentityKey(ownerIdentity), ActivityType.FEED);
 
     //
-    return activityCountCache.get(
+    return activitiesCountCache.get(
         new ServiceContext<IntegerData>() {
           public IntegerData execute() {
             return new IntegerData(storage.getNumberOfActivitesOnActivityFeed(ownerIdentity));
@@ -416,6 +465,9 @@ public class CachedActivityStorage implements ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public int getNumberOfNewerOnActivityFeed(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
 
     //
@@ -423,7 +475,7 @@ public class CachedActivityStorage implements ActivityStorage {
         new ActivityCountKey(new IdentityKey(ownerIdentity), baseActivity.getId(), ActivityType.NEWER_FEED);
 
     //
-    return activityCountCache.get(
+    return activitiesCountCache.get(
         new ServiceContext<IntegerData>() {
           public IntegerData execute() {
             return new IntegerData(storage.getNumberOfNewerOnActivityFeed(ownerIdentity, baseActivity));
@@ -434,6 +486,9 @@ public class CachedActivityStorage implements ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public List<ExoSocialActivity> getNewerOnActivityFeed(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final int limit) {
 
     //
@@ -449,7 +504,7 @@ public class CachedActivityStorage implements ActivityStorage {
             List<ActivityKey> data = new ArrayList<ActivityKey>();
             for (ExoSocialActivity a : got) {
               ActivityKey k = new ActivityKey(a.getId());
-              eXoCacheActivityId.put(k, new ActivityData(a));
+              exoActivityCache.put(k, new ActivityData(a));
               data.add(k);
             }
             return new ListActivitiesData(data);
@@ -469,6 +524,9 @@ public class CachedActivityStorage implements ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public int getNumberOfOlderOnActivityFeed(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
 
     //
@@ -476,7 +534,7 @@ public class CachedActivityStorage implements ActivityStorage {
         new ActivityCountKey(new IdentityKey(ownerIdentity), baseActivity.getId(), ActivityType.OLDER_FEED);
 
     //
-    return activityCountCache.get(
+    return activitiesCountCache.get(
         new ServiceContext<IntegerData>() {
           public IntegerData execute() {
             return new IntegerData(storage.getNumberOfOlderOnActivityFeed(ownerIdentity, baseActivity));
@@ -487,6 +545,9 @@ public class CachedActivityStorage implements ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public List<ExoSocialActivity> getOlderOnActivityFeed(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final int limit) {
 
     //
@@ -502,7 +563,7 @@ public class CachedActivityStorage implements ActivityStorage {
             List<ActivityKey> data = new ArrayList<ActivityKey>();
             for (ExoSocialActivity a : got) {
               ActivityKey k = new ActivityKey(a.getId());
-              eXoCacheActivityId.put(k, new ActivityData(a));
+              exoActivityCache.put(k, new ActivityData(a));
               data.add(k);
             }
             return new ListActivitiesData(data);
@@ -522,6 +583,9 @@ public class CachedActivityStorage implements ActivityStorage {
     
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public List<ExoSocialActivity> getActivitiesOfConnections(final Identity ownerIdentity, final int offset, final int limit) {
 
     //
@@ -537,7 +601,7 @@ public class CachedActivityStorage implements ActivityStorage {
             List<ActivityKey> data = new ArrayList<ActivityKey>();
             for (ExoSocialActivity a : got) {
               ActivityKey k = new ActivityKey(a.getId());
-              eXoCacheActivityId.put(k, new ActivityData(a));
+              exoActivityCache.put(k, new ActivityData(a));
               data.add(k);
             }
             return new ListActivitiesData(data);
@@ -557,6 +621,9 @@ public class CachedActivityStorage implements ActivityStorage {
     
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public int getNumberOfActivitiesOfConnections(final Identity ownerIdentity) {
 
     //
@@ -564,7 +631,7 @@ public class CachedActivityStorage implements ActivityStorage {
         new ActivityCountKey(new IdentityKey(ownerIdentity), ActivityType.CONNECTION);
 
     //
-    return activityCountCache.get(
+    return activitiesCountCache.get(
         new ServiceContext<IntegerData>() {
           public IntegerData execute() {
             return new IntegerData(storage.getNumberOfActivitiesOfConnections(ownerIdentity));
@@ -575,10 +642,16 @@ public class CachedActivityStorage implements ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public List<ExoSocialActivity> getActivitiesOfIdentity(final Identity ownerIdentity, final long offset, final long limit) throws ActivityStorageException {
     return storage.getActivitiesOfIdentity(ownerIdentity, offset, limit);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public int getNumberOfNewerOnActivitiesOfConnections(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
 
     //
@@ -586,7 +659,7 @@ public class CachedActivityStorage implements ActivityStorage {
         new ActivityCountKey(new IdentityKey(ownerIdentity), baseActivity.getId(), ActivityType.NEWER_CONNECTION);
 
     //
-    return activityCountCache.get(
+    return activitiesCountCache.get(
         new ServiceContext<IntegerData>() {
           public IntegerData execute() {
             return new IntegerData(storage.getNumberOfNewerOnActivitiesOfConnections(ownerIdentity, baseActivity));
@@ -597,6 +670,9 @@ public class CachedActivityStorage implements ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public List<ExoSocialActivity> getNewerOnActivitiesOfConnections(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final long limit) {
 
     //
@@ -612,7 +688,7 @@ public class CachedActivityStorage implements ActivityStorage {
             List<ActivityKey> data = new ArrayList<ActivityKey>();
             for (ExoSocialActivity a : got) {
               ActivityKey k = new ActivityKey(a.getId());
-              eXoCacheActivityId.put(k, new ActivityData(a));
+              exoActivityCache.put(k, new ActivityData(a));
               data.add(k);
             }
             return new ListActivitiesData(data);
@@ -632,6 +708,9 @@ public class CachedActivityStorage implements ActivityStorage {
     
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public int getNumberOfOlderOnActivitiesOfConnections(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
 
     //
@@ -639,7 +718,7 @@ public class CachedActivityStorage implements ActivityStorage {
         new ActivityCountKey(new IdentityKey(ownerIdentity), baseActivity.getId(), ActivityType.OLDER_CONNECTION);
 
     //
-    return activityCountCache.get(
+    return activitiesCountCache.get(
         new ServiceContext<IntegerData>() {
           public IntegerData execute() {
             return new IntegerData(storage.getNumberOfOlderOnActivitiesOfConnections(ownerIdentity, baseActivity));
@@ -650,6 +729,9 @@ public class CachedActivityStorage implements ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public List<ExoSocialActivity> getOlderOnActivitiesOfConnections(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final int limit) {
 
     //
@@ -665,7 +747,7 @@ public class CachedActivityStorage implements ActivityStorage {
             List<ActivityKey> data = new ArrayList<ActivityKey>();
             for (ExoSocialActivity a : got) {
               ActivityKey k = new ActivityKey(a.getId());
-              eXoCacheActivityId.put(k, new ActivityData(a));
+              exoActivityCache.put(k, new ActivityData(a));
               data.add(k);
             }
             return new ListActivitiesData(data);
@@ -685,6 +767,9 @@ public class CachedActivityStorage implements ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public List<ExoSocialActivity> getUserSpacesActivities(final Identity ownerIdentity, final int offset, final int limit) {
 
     //
@@ -700,7 +785,7 @@ public class CachedActivityStorage implements ActivityStorage {
             List<ActivityKey> data = new ArrayList<ActivityKey>();
             for (ExoSocialActivity a : got) {
               ActivityKey k = new ActivityKey(a.getId());
-              eXoCacheActivityId.put(k, new ActivityData(a));
+              exoActivityCache.put(k, new ActivityData(a));
               data.add(k);
             }
             return new ListActivitiesData(data);
@@ -720,6 +805,9 @@ public class CachedActivityStorage implements ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public int getNumberOfUserSpacesActivities(final Identity ownerIdentity) {
 
     //
@@ -727,7 +815,7 @@ public class CachedActivityStorage implements ActivityStorage {
         new ActivityCountKey(new IdentityKey(ownerIdentity), ActivityType.SPACE);
 
     //
-    return activityCountCache.get(
+    return activitiesCountCache.get(
         new ServiceContext<IntegerData>() {
           public IntegerData execute() {
             return new IntegerData(storage.getNumberOfUserSpacesActivities(ownerIdentity));
@@ -738,6 +826,9 @@ public class CachedActivityStorage implements ActivityStorage {
     
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public int getNumberOfNewerOnUserSpacesActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
 
     //
@@ -745,7 +836,7 @@ public class CachedActivityStorage implements ActivityStorage {
         new ActivityCountKey(new IdentityKey(ownerIdentity), baseActivity.getId(), ActivityType.NEWER_SPACE);
 
     //
-    return activityCountCache.get(
+    return activitiesCountCache.get(
         new ServiceContext<IntegerData>() {
           public IntegerData execute() {
             return new IntegerData(storage.getNumberOfNewerOnUserSpacesActivities(ownerIdentity, baseActivity));
@@ -756,6 +847,9 @@ public class CachedActivityStorage implements ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public List<ExoSocialActivity> getNewerOnUserSpacesActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final int limit) {
 
     //
@@ -771,7 +865,7 @@ public class CachedActivityStorage implements ActivityStorage {
             List<ActivityKey> data = new ArrayList<ActivityKey>();
             for (ExoSocialActivity a : got) {
               ActivityKey k = new ActivityKey(a.getId());
-              eXoCacheActivityId.put(k, new ActivityData(a));
+              exoActivityCache.put(k, new ActivityData(a));
               data.add(k);
             }
             return new ListActivitiesData(data);
@@ -791,6 +885,9 @@ public class CachedActivityStorage implements ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public int getNumberOfOlderOnUserSpacesActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
 
     //
@@ -798,7 +895,7 @@ public class CachedActivityStorage implements ActivityStorage {
         new ActivityCountKey(new IdentityKey(ownerIdentity), baseActivity.getId(), ActivityType.OLDER_SPACE);
 
     //
-    return activityCountCache.get(
+    return activitiesCountCache.get(
         new ServiceContext<IntegerData>() {
           public IntegerData execute() {
             return new IntegerData(storage.getNumberOfOlderOnUserSpacesActivities(ownerIdentity, baseActivity));
@@ -809,6 +906,9 @@ public class CachedActivityStorage implements ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public List<ExoSocialActivity> getOlderOnUserSpacesActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final int limit) {
 
     //
@@ -824,7 +924,7 @@ public class CachedActivityStorage implements ActivityStorage {
             List<ActivityKey> data = new ArrayList<ActivityKey>();
             for (ExoSocialActivity a : got) {
               ActivityKey k = new ActivityKey(a.getId());
-              eXoCacheActivityId.put(k, new ActivityData(a));
+              exoActivityCache.put(k, new ActivityData(a));
               data.add(k);
             }
             return new ListActivitiesData(data);
@@ -844,34 +944,58 @@ public class CachedActivityStorage implements ActivityStorage {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public List<ExoSocialActivity> getComments(final ExoSocialActivity existingActivity, final int offset, final int limit) {
     return storage.getComments(existingActivity, offset, limit);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public int getNumberOfComments(final ExoSocialActivity existingActivity) {
     return storage.getNumberOfComments(existingActivity);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public int getNumberOfNewerComments(final ExoSocialActivity existingActivity, final ExoSocialActivity baseComment) {
     return storage.getNumberOfNewerComments(existingActivity, baseComment);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public List<ExoSocialActivity> getNewerComments(final ExoSocialActivity existingActivity, final ExoSocialActivity baseComment, final int limit) {
     return storage.getNewerComments(existingActivity, baseComment, limit);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public int getNumberOfOlderComments(final ExoSocialActivity existingActivity, final ExoSocialActivity baseComment) {
     return storage.getNumberOfOlderComments(existingActivity, baseComment);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public List<ExoSocialActivity> getOlderComments(final ExoSocialActivity existingActivity, final ExoSocialActivity baseComment, final int limit) {
     return storage.getOlderComments(existingActivity, baseComment, limit);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public SortedSet<ActivityProcessor> getActivityProcessors() {
     return storage.getActivityProcessors();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public void updateActivity(final ExoSocialActivity existingActivity) throws ActivityStorageException {
 
     //
@@ -879,13 +1003,13 @@ public class CachedActivityStorage implements ActivityStorage {
     
     //
     ActivityKey key = new ActivityKey(existingActivity.getId());
-    eXoCacheActivityId.remove(key);
+    exoActivityCache.remove(key);
 
   }
 
   public void invalidate() {
-    eXoCacheActivityCount.clearCache();
-    eXoCacheActivities.clearCache();
+    exoActivitiesCountCache.clearCache();
+    exoActivitiesCache.clearCache();
   }
   
 }

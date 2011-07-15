@@ -44,6 +44,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public ExoSocialActivity getActivity(final String activityId) throws ActivityStorageException {
 
@@ -57,6 +60,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public List<ExoSocialActivity> getUserActivities(final Identity owner) throws ActivityStorageException {
 
@@ -70,6 +76,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public List<ExoSocialActivity> getUserActivities(final Identity owner, final long offset, final long limit) throws ActivityStorageException {
 
@@ -83,6 +92,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void saveComment(final ExoSocialActivity activity, final ExoSocialActivity comment) throws ActivityStorageException {
 
@@ -96,6 +108,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public ExoSocialActivity saveActivity(final Identity owner, final ExoSocialActivity activity) throws ActivityStorageException {
 
@@ -109,6 +124,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public ExoSocialActivity getParentActivity(final ExoSocialActivity comment) throws ActivityStorageException {
 
@@ -122,6 +140,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void deleteActivity(final String activityId) throws ActivityStorageException {
 
@@ -135,6 +156,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void deleteComment(final String activityId, final String commentId) throws ActivityStorageException {
 
@@ -148,6 +172,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public List<ExoSocialActivity> getActivitiesOfIdentities(final List<Identity> connectionList, final long offset, final long limit) throws ActivityStorageException {
 
@@ -161,6 +188,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public List<ExoSocialActivity> getActivitiesOfIdentities(final List<Identity> connectionList, final TimestampType type, final long offset, final long limit) throws ActivityStorageException {
 
@@ -174,6 +204,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int getNumberOfUserActivities(final Identity owner) throws ActivityStorageException {
 
@@ -187,6 +220,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int getNumberOfNewerOnUserActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
 
@@ -200,6 +236,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public List<ExoSocialActivity> getNewerOnUserActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final int limit) {
 
@@ -213,6 +252,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int getNumberOfOlderOnUserActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
 
@@ -226,6 +268,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public List<ExoSocialActivity> getOlderOnUserActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final int limit) {
 
@@ -239,6 +284,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public List<ExoSocialActivity> getActivityFeed(final Identity ownerIdentity, final int offset, final int limit) {
 
@@ -252,6 +300,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int getNumberOfActivitesOnActivityFeed(final Identity ownerIdentity) {
 
@@ -265,6 +316,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int getNumberOfNewerOnActivityFeed(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
 
@@ -278,6 +332,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public List<ExoSocialActivity> getNewerOnActivityFeed(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final int limit) {
 
@@ -291,6 +348,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int getNumberOfOlderOnActivityFeed(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
 
@@ -304,6 +364,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public List<ExoSocialActivity> getOlderOnActivityFeed(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final int limit) {
 
@@ -317,6 +380,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public List<ExoSocialActivity> getActivitiesOfConnections(final Identity ownerIdentity, final int offset, final int limit) {
 
@@ -330,6 +396,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int getNumberOfActivitiesOfConnections(final Identity ownerIdentity) {
 
@@ -343,6 +412,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public List<ExoSocialActivity> getActivitiesOfIdentity(final Identity ownerIdentity, final long offset, final long limit) throws ActivityStorageException {
 
@@ -356,6 +428,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int getNumberOfNewerOnActivitiesOfConnections(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
 
@@ -369,6 +444,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public List<ExoSocialActivity> getNewerOnActivitiesOfConnections(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final long limit) {
 
@@ -382,6 +460,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int getNumberOfOlderOnActivitiesOfConnections(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
 
@@ -395,6 +476,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public List<ExoSocialActivity> getOlderOnActivitiesOfConnections(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final int limit) {
 
@@ -408,6 +492,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public List<ExoSocialActivity> getUserSpacesActivities(final Identity ownerIdentity, final int offset, final int limit) {
 
@@ -421,6 +508,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int getNumberOfUserSpacesActivities(final Identity ownerIdentity) {
 
@@ -434,6 +524,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int getNumberOfNewerOnUserSpacesActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
 
@@ -447,6 +540,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public List<ExoSocialActivity> getNewerOnUserSpacesActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final int limit) {
 
@@ -460,6 +556,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int getNumberOfOlderOnUserSpacesActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity) {
 
@@ -473,6 +572,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public List<ExoSocialActivity> getOlderOnUserSpacesActivities(final Identity ownerIdentity, final ExoSocialActivity baseActivity, final int limit) {
 
@@ -486,6 +588,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public List<ExoSocialActivity> getComments(final ExoSocialActivity existingActivity, final int offset, final int limit) {
 
@@ -499,6 +604,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int getNumberOfComments(final ExoSocialActivity existingActivity) {
 
@@ -512,6 +620,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int getNumberOfNewerComments(final ExoSocialActivity existingActivity, final ExoSocialActivity baseComment) {
 
@@ -525,6 +636,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public List<ExoSocialActivity> getNewerComments(final ExoSocialActivity existingActivity, final ExoSocialActivity baseComment, final int limit) {
 
@@ -538,6 +652,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int getNumberOfOlderComments(final ExoSocialActivity existingActivity, final ExoSocialActivity baseComment) {
 
@@ -551,6 +668,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public List<ExoSocialActivity> getOlderComments(final ExoSocialActivity existingActivity, final ExoSocialActivity baseComment, final int limit) {
 
@@ -564,6 +684,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public SortedSet<ActivityProcessor> getActivityProcessors() {
 
@@ -577,6 +700,9 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void updateActivity(final ExoSocialActivity existingActivity) throws ActivityStorageException {
 

@@ -30,15 +30,15 @@
 
   <groupId>org.exoplatform.social</groupId>
   <artifactId>social-project</artifactId>
-  <version>1.2.0-Beta3-SNAPSHOT</version>
+  <version>1.2.0-GA</version>
   <packaging>pom</packaging>
   <name>eXo Social</name>
   <description>eXo Social - Enterprise Social Networking</description>
 
   <scm>
-    <connection>scm:svn:http://svn.exoplatform.org/projects/social/trunk</connection>
-    <developerConnection>scm:svn:http://svn.exoplatform.org/projects/social/trunk</developerConnection>
-    <url>https://fisheye.exoplatform.org/browse/social/trunk</url>
+    <connection>scm:svn:http://svn.exoplatform.org/projects/social/tags/1.2.0-GA</connection>
+    <developerConnection>scm:svn:http://svn.exoplatform.org/projects/social/tags/1.2.0-GA</developerConnection>
+    <url>https://fisheye.exoplatform.org/browse/social/tags/1.2.0-GA</url>
   </scm>
 
   <ciManagement>
@@ -81,11 +81,11 @@
     <org.exoplatform.core.version>2.4.0-CR2</org.exoplatform.core.version>
     <org.exoplatform.ws.version>2.2.0-CR2</org.exoplatform.ws.version>
     <org.exoplatform.jcr.version>1.14.0-CR2</org.exoplatform.jcr.version>
-    <org.exoplatform.portal.version>3.2.0-PLF-SNAPSHOT</org.exoplatform.portal.version>
-    <org.exoplatform.ecms.version>2.2.0-Beta3-SNAPSHOT</org.exoplatform.ecms.version>  
+    <org.exoplatform.portal.version>3.2.0-PLF-Beta3</org.exoplatform.portal.version>
+    <org.exoplatform.ecms.version>2.2.0-Beta3</org.exoplatform.ecms.version>  
 
    
-    <org.exoplatform.commons.version>1.1.0-Beta02-SNAPSHOT</org.exoplatform.commons.version>
+    <org.exoplatform.commons.version>1.1.0-Beta02</org.exoplatform.commons.version>
     <org.exoplatform.exopackage.version>1.1.2</org.exoplatform.exopackage.version>
     <org.exoplatform.tool.version>1.0.0</org.exoplatform.tool.version>
 
@@ -108,7 +108,6 @@
 
     <net.oauth.core.version>20090531</net.oauth.core.version>
     <net.oauth.version>20080621</net.oauth.version>
-    <net.sourceforge.nekohtml.version>1.9.12</net.sourceforge.nekohtml.version>
 
     <com.google.collections.version>1.0-rc2</com.google.collections.version>
     <com.google.code.guice.version>2.0</com.google.code.guice.version>
@@ -267,11 +266,6 @@
         <groupId>net.oauth.core</groupId>
         <artifactId>oauth</artifactId>
         <version>${net.oauth.core.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>net.sourceforge.nekohtml</groupId>
-        <artifactId>nekohtml</artifactId>
-        <version>${net.sourceforge.nekohtml.version}</version>
       </dependency>
 
       <dependency>

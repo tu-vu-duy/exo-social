@@ -24,6 +24,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.exoplatform.container.xml.InitParams;
+import org.exoplatform.social.core.BaseActivityProcessorPlugin;
 import org.exoplatform.social.core.activity.model.ExoSocialActivity;
 import org.exoplatform.social.core.activity.model.ExoSocialActivityImpl;
 import org.exoplatform.social.core.application.RelationshipPublisher.TitleId;
@@ -34,7 +36,6 @@ import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.storage.ActivityStorageException;
 import org.exoplatform.social.core.storage.api.IdentityStorage;
 import org.exoplatform.social.core.storage.api.RelationshipStorage;
-import org.exoplatform.social.core.storage.impl.ActivityStorageImpl;
 import org.exoplatform.social.core.test.AbstractCoreTest;
 
 /**
@@ -170,7 +171,7 @@ public class ActivityStorageImplTestCase extends AbstractCoreTest {
   }
 
   /**
-   * Test {@link org.exoplatform.social.core.storage.ActivityStorage#getActivity(String)}
+   * Test {@link org.exoplatform.social.core.storage.impl.ActivityStorageImpl#getActivity(String)}
    */
   public void testUserPostActivityToSpace() throws ActivityStorageException {
     // Create new Space and its Identity
@@ -291,7 +292,7 @@ public class ActivityStorageImplTestCase extends AbstractCoreTest {
     activity = activityStorage.getActivity(activity.getId());
     for (String commentId : activity.getReplyToId()) {
       if (!"".equals(commentId) && i < 5) {
-        activityStorage.deleteComment(activity.getId(), commentId);
+        activityStorage.deleteActivity(commentId);
         ++i;
       }
     }
@@ -438,7 +439,47 @@ public class ActivityStorageImplTestCase extends AbstractCoreTest {
     
   }
 
-  
+  public void testActivityProcessing() throws Exception {
+
+    //
+    BaseActivityProcessorPlugin processor = new DummyProcessor(null);
+    activityStorage.getActivityProcessors().add(processor);
+
+    //
+    ExoSocialActivity activity = new ExoSocialActivityImpl();
+    activity.setTitle("activity");
+    activityStorage._createActivity(rootIdentity, activity);
+    assertNotNull(activity.getId());
+
+    //
+    ExoSocialActivity got = activityStorage.getActivity(activity.getId());
+    assertEquals(activity.getId(), got.getId());
+    assertEquals("edited", got.getTitle());
+
+    //
+    ExoSocialActivity comment = new ExoSocialActivityImpl();
+    comment.setTitle("comment");
+    comment.setUserId(rootIdentity.getId());
+    activityStorage.saveComment(activity, comment);
+    assertNotNull(comment.getId());
+
+    //
+    ExoSocialActivity gotComment = activityStorage.getActivity(comment.getId());
+    assertEquals(comment.getId(), gotComment.getId());
+    assertEquals("edited", gotComment.getTitle());
+
+    //
+    ExoSocialActivity gotParentActivity = activityStorage.getParentActivity(comment);
+    assertEquals(activity.getId(), gotParentActivity.getId());
+    assertEquals("edited", gotParentActivity.getTitle());
+    assertEquals(1, activity.getReplyToId().length);
+    assertEquals(comment.getId(), activity.getReplyToId()[0]);
+
+    //
+    activityStorage.getActivityProcessors().remove(processor);
+
+  }
+
   /**
    * Gets an instance of Space.
    *
@@ -457,6 +498,18 @@ public class ActivityStorageImplTestCase extends AbstractCoreTest {
     space.setManagers(managers);
     return space;
   }
-  
+
+  class DummyProcessor extends BaseActivityProcessorPlugin {
+
+    DummyProcessor(final InitParams params) {
+      super(params);
+    }
+
+    @Override
+    public void processActivity(final ExoSocialActivity activity) {
+      activity.setTitle("edited");
+    }
+  }
+
   // TODO : test many days
 }

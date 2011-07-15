@@ -179,6 +179,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
     activity.setExternalId(activityEntity.getExternalId());
     activity.setUrl(activityEntity.getUrl());
     activity.setPriority(activityEntity.getPriority());
+    activity.isComment(activityEntity.isComment());
 
     //
     List<String> computeCommentid = new ArrayList<String>();
@@ -287,6 +288,8 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
       activity.setId(activityEntity.getId());
       fillActivityFromEntity(activityEntity, activity);
 
+      processActivity(activity);
+
       //
       return activity;
 
@@ -364,8 +367,6 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   public void saveComment(ExoSocialActivity activity, ExoSocialActivity comment) throws ActivityStorageException {
 
     try {
-
-      processActivity(comment);
 
       //
       long currentMillis = System.currentTimeMillis();
@@ -1236,7 +1237,6 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
 
     //
     return activities;
-    
   }
 
   /**

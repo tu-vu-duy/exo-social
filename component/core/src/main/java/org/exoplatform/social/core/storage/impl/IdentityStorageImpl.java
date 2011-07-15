@@ -392,7 +392,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
     ));
   }
 
-  public Identity _findIdentity(final String providerId, final String remoteId) throws NodeNotFoundException {
+  protected Identity _findIdentity(final String providerId, final String remoteId) throws NodeNotFoundException {
 
     IdentityEntity identityEntity = _findIdentityEntity(providerId, remoteId);
 
@@ -417,7 +417,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
     return identity;
   }
 
-  public IdentityEntity _findIdentityEntity(final String providerId, final String remoteId)
+  protected IdentityEntity _findIdentityEntity(final String providerId, final String remoteId)
       throws NodeNotFoundException {
 
     ProviderEntity providerEntity = getProviderRoot().getProviders().get(providerId);
@@ -595,7 +595,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
    * Saves identity.
    *
    * @param identity the identity
-   * @throws org.exoplatform.social.core.storage.IdentityStorageException
+   * @throws IdentityStorageException
    */
   public void saveIdentity(final Identity identity) throws IdentityStorageException {
 
@@ -683,7 +683,6 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
    * @throws IdentityStorageException
    */
   public Profile loadProfile(Profile profile) throws IdentityStorageException {
-
     try {
       profile = _loadProfile(profile);
     }
@@ -797,7 +796,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
     WhereExpression whereExpression = new WhereExpression();
 
     whereExpression
-        .like(JCRProperties.path, "/production/soc:providers/soc:" + providerId + SLASH_STR + PERCENT_STR);
+        .like(JCRProperties.path, getProviderRoot().getProviders().get(providerId).getPath() + SLASH_STR + PERCENT_STR);
 
     applyExcludes(whereExpression, excludedIdentityList);
     applyFilter(whereExpression, profileFilter);
@@ -810,10 +809,8 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
       ProfileEntity profileEntity = results.next();
 
       Identity identity = createIdentityFromEntity(profileEntity.getIdentity());
-
       Profile profile = getStorage().loadProfile(new Profile(identity));
       identity.setProfile(profile);
-
       listIdentity.add(identity);
 
     }
@@ -839,7 +836,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
     WhereExpression whereExpression = new WhereExpression();
 
     whereExpression
-        .like(JCRProperties.path, "/production/soc:providers/soc:" + providerId + SLASH_STR + PERCENT_STR);
+        .like(JCRProperties.path, getProviderRoot().getProviders().get(providerId).getPath() + SLASH_STR + PERCENT_STR);
 
     applyExcludes(whereExpression, excludedIdentityList);
     applyFilter(whereExpression, profileFilter);
@@ -868,7 +865,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
     WhereExpression whereExpression = new WhereExpression();
 
     whereExpression
-        .like(JCRProperties.path, "/production/soc:providers/soc:" + providerId + SLASH_STR + PERCENT_STR);
+        .like(JCRProperties.path, getProviderRoot().getProviders().get(providerId).getPath() + SLASH_STR + PERCENT_STR);
 
     applyExcludes(whereExpression, excludedIdentityList);
 
@@ -906,7 +903,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
     WhereExpression whereExpression = new WhereExpression();
 
     whereExpression
-        .like(JCRProperties.path, "/production/soc:providers/soc:" + providerId + SLASH_STR + PERCENT_STR);
+        .like(JCRProperties.path, getProviderRoot().getProviders().get(providerId).getPath() + SLASH_STR + PERCENT_STR);
 
     applyExcludes(whereExpression, excludedIdentityList);
 
@@ -921,10 +918,8 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
       ProfileEntity profileEntity = results.next();
 
       Identity identity = createIdentityFromEntity(profileEntity.getIdentity());
-
       Profile profile = getStorage().loadProfile(new Profile(identity));
       identity.setProfile(profile);
-
       listIdentity.add(identity);
 
     }

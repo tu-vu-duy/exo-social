@@ -278,6 +278,39 @@ public class RelationshipManagerTest extends AbstractCoreTest {
   }
   
   /**
+   * Test {@link RelationshipManager#inviteToConnect(Identity, Identity)}
+   *
+   * @throws Exception
+   * @since 1.2.0-Beta3
+  */
+  public void testDupdicateInviteToConnect() throws Exception {
+    Relationship relationship1 = relationshipManager.inviteToConnect(rootIdentity, demoIdentity);
+    Relationship relationship2 = relationshipManager.inviteToConnect(rootIdentity, demoIdentity);
+    assertEquals("relationShip1 and relationShip2 must be the same",relationship1.getId(), relationship2.getId());
+    tearDownRelationshipList.add(relationship1);
+  }
+  
+  /**
+   * Test {@link RelationshipManager#inviteToConnect(Identity, Identity)}
+   *
+   * @throws Exception
+   * @since 1.2.0-Beta3
+   */
+  public void testDupdicateInviteToConnectWithConfirmedRelationShip() throws Exception {
+    Relationship relationship1 = relationshipManager.inviteToConnect(rootIdentity, demoIdentity);
+    assertEquals("RelationShip status must be PENDING",Relationship.Type.PENDING, relationship1.getStatus());
+    relationshipManager.confirm(rootIdentity, demoIdentity);
+    relationship1 = relationshipManager.get(rootIdentity, demoIdentity);
+    assertEquals("RelationShip status must be CONFIRMED",Relationship.Type.CONFIRMED, relationship1.getStatus());
+    Relationship relationship2 = relationshipManager.inviteToConnect(rootIdentity, demoIdentity);
+    assertEquals("RelationShip status must be CONFIRMED",Relationship.Type.CONFIRMED, relationship2.getStatus());
+    
+    assertEquals("relationShip1 and relationShip2 must be the same",relationship1.getId(), relationship2.getId());
+    
+    tearDownRelationshipList.add(relationship1);
+  }
+  
+  /**
    * Test {@link RelationshipManager#confirm(Identity, Identity)}
    * 
    * @throws Exception
@@ -287,6 +320,8 @@ public class RelationshipManagerTest extends AbstractCoreTest {
     Relationship rootToDemoRelationship = relationshipManager.inviteToConnect(rootIdentity, demoIdentity);
     Relationship maryToRootRelationship = relationshipManager.inviteToConnect(maryIdentity, rootIdentity);
     Relationship rootToJohnRelationship = relationshipManager.inviteToConnect(rootIdentity, johnIdentity);
+    
+    rootToJohnRelationship = relationshipManager.get(rootToJohnRelationship.getId());
     
     relationshipManager.confirm(rootIdentity, demoIdentity);
     rootToDemoRelationship = relationshipManager.get(rootIdentity, demoIdentity);
@@ -321,6 +356,13 @@ public class RelationshipManagerTest extends AbstractCoreTest {
     Relationship rootToDemoRelationship = relationshipManager.inviteToConnect(rootIdentity, demoIdentity);
     Relationship maryToRootRelationship = relationshipManager.inviteToConnect(maryIdentity, rootIdentity);
     Relationship rootToJohnRelationship = relationshipManager.inviteToConnect(rootIdentity, johnIdentity);
+    
+    relationshipManager.confirm(johnIdentity, rootIdentity);
+    relationshipManager.deny(johnIdentity, rootIdentity);
+    assertNotNull(relationshipManager.get(rootToJohnRelationship.getId()));
+    
+    rootToJohnRelationship.setStatus(Relationship.Type.PENDING);
+    relationshipManager.update(rootToJohnRelationship);
     
     relationshipManager.deny(demoIdentity, rootIdentity);
     rootToDemoRelationship = relationshipManager.get(rootIdentity, demoIdentity);

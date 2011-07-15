@@ -18,6 +18,7 @@ package org.exoplatform.social.core.manager;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
@@ -36,8 +37,8 @@ import org.exoplatform.social.core.activity.model.ExoSocialActivity;
 import org.exoplatform.social.core.activity.model.ExoSocialActivityImpl;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.space.spi.SpaceService;
-import org.exoplatform.social.core.storage.ActivityStorageException;
 import org.exoplatform.social.core.storage.api.ActivityStorage;
+import org.exoplatform.social.core.storage.ActivityStorageException;
 
 /**
  * Class ActivityManagerImpl implements ActivityManager without caching.
@@ -80,6 +81,12 @@ public class ActivityManagerImpl implements ActivityManager {
    * {@inheritDoc}
    */
   public void saveActivityNoReturn(Identity streamOwner, ExoSocialActivity newActivity) {
+    long currentTime = System.currentTimeMillis();
+    newActivity.setUpdated(new Date(currentTime));
+    //new activity
+    if (newActivity.getId() == null) {
+      newActivity.setPostedTime(currentTime);
+    }
     activityStorage.saveActivity(streamOwner, newActivity);
   }
 

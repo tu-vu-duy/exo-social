@@ -25,7 +25,7 @@
   <parent>
     <artifactId>exo.social.packaging</artifactId>
     <groupId>org.exoplatform.social</groupId>
-    <version>1.2.0-Beta3-SNAPSHOT</version>
+    <version>1.2.0-GA</version>
   </parent>
 
   <groupId>org.exoplatform.social</groupId>
@@ -163,13 +163,6 @@
       <groupId>org.javassist</groupId>
       <artifactId>javassist</artifactId>
       <version>${javassist.version}</version>
-      <type>jar</type>
-    </dependency>
-
-    <dependency>
-      <groupId>net.sourceforge.nekohtml</groupId>
-      <artifactId>nekohtml</artifactId>
-      <version>${net.sourceforge.nekohtml.version}</version>
       <type>jar</type>
     </dependency>
 

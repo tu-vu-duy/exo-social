@@ -1,24 +1,28 @@
 /*
-* Copyright (C) 2003-2009 eXo Platform SAS.
-*
-* This is free software; you can redistribute it and/or modify it
-* under the terms of the GNU Lesser General Public License as
-* published by the Free Software Foundation; either version 2.1 of
-* the License, or (at your option) any later version.
-*
-* This software is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-* Lesser General Public License for more details.
-*
-* You should have received a copy of the GNU Lesser General Public
-* License along with this software; if not, write to the Free
-* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
-* 02110-1301 USA, or see the FSF site: http://www.fsf.org.
-*/
+ * Copyright (C) 2003-2011 eXo Platform SAS.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 package org.exoplatform.social.core.storage.impl;
 
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 import org.chromattic.api.query.Query;
 import org.chromattic.api.query.QueryBuilder;
@@ -40,13 +44,9 @@ import org.exoplatform.social.core.storage.exception.NodeNotFoundException;
 import org.exoplatform.social.core.storage.query.QueryFunction;
 import org.exoplatform.social.core.storage.query.WhereExpression;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-
 /**
+ * Space storage layer.
+ *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
@@ -55,16 +55,27 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
   /** Logger */
   private static final Log LOG = ExoLogger.getLogger(SpaceStorageImpl.class);
 
+  /**
+   * The identity storage
+   */
   private final IdentityStorageImpl identityStorage;
 
+  /**
+   * Constructor.
+   *
+   * @param identityStorage the identity storage
+   */
   public SpaceStorageImpl(IdentityStorageImpl identityStorage) {
    this.identityStorage = identityStorage;
  }
 
-  /*
-   Private
-  */
-  private void fillSpaceFormEntity(SpaceEntity entity, Space space) {
+  /**
+   * Fills {@link Space}'s properties to {@link SpaceEntity}'s.
+   *
+   * @param entity the space entity from chromattic
+   * @param space  the space pojo for services
+   */
+  private void fillSpaceFromEntity(SpaceEntity entity, Space space) {
 
     space.setApp(entity.getApp());
     space.setId(entity.getId());
@@ -88,7 +99,13 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
 
   }
 
-  private void fillEntityFormSpace(Space space, SpaceEntity entity) {
+  /**
+   * Fills {@link SpaceEntity}'s properties from {@link Space}'s.
+   *
+   * @param space the space pojo for services
+   * @param entity the space entity from chromattic
+   */
+  private void fillEntityFromSpace(Space space, SpaceEntity entity) {
 
     entity.setApp(space.getApp());
     entity.setPrettyName(space.getPrettyName());
@@ -104,10 +121,13 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
     entity.setManagerMembersId(space.getManagers());
     entity.setPendingMembersId(space.getPendingUsers());
     entity.setInvitedMembersId(space.getInvitedUsers());
-    entity.setHasAvatar(space.getAvatarAttachment() != null);
+    entity.setHasAvatar(space.getAvatarAttachment() != null || space.getAvatarUrl() != null);
 
   }
 
+  /**
+   * The reference types.
+   */
   private enum RefType {
     MEMBER() {
       @Override
@@ -196,7 +216,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
           ref.setSpaceRef(spaceEntity);
         }
         catch (NodeNotFoundException e) {
-          LOG.debug(e.getMessage(), e);
+          LOG.warn(e.getMessage(), e);
         }
       }
 
@@ -208,7 +228,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
           getSession().remove(ref);
         }
         catch (NodeNotFoundException e) {
-          LOG.debug(e.getMessage(), e);
+          LOG.warn(e.getMessage(), e);
         }
       }
     }
@@ -222,10 +242,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
 
     if (filter.getSpaceNameSearchCondition() != null &&
         filter.getSpaceNameSearchCondition().length() != 0) {
-      if (isValidInput(filter.getSpaceNameSearchCondition())) {
-        return true;
-      }
-      return false;
+      return isValidInput(filter.getSpaceNameSearchCondition());
     }
     else if (!Character.isDigit(filter.getFirstCharacterOfSpaceName())) {
       return true;
@@ -476,7 +493,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
     
     if (result.hasNext()) {
       space = new Space();
-      fillSpaceFormEntity(result.next(), space);
+      fillSpaceFromEntity(result.next(), space);
     }
 
     return space;
@@ -505,7 +522,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
 
       //
       createRefs(entity, space);
-      fillEntityFormSpace(space, entity);
+      fillEntityFromSpace(space, entity);
 
       //
       getSession().save();
@@ -606,7 +623,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
       for (SpaceRef space : identityEntity.getSpaces().getRefs().values()) {
 
         Space newSpace = new Space();
-        fillSpaceFormEntity(space.getSpaceRef(), newSpace);
+        fillSpaceFromEntity(space.getSpaceRef(), newSpace);
         spaces.add(newSpace);
       }
 
@@ -648,7 +665,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
           SpaceRef spaceRef = it.next();
 
           Space space = new Space();
-          fillSpaceFormEntity(spaceRef.getSpaceRef(), space);
+          fillSpaceFromEntity(spaceRef.getSpaceRef(), space);
           spaces.add(space);
 
           if (++i >= limit) {
@@ -685,7 +702,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
     while (results.hasNext()) {
       SpaceEntity currentSpace = results.next();
       Space space = new Space();
-      fillSpaceFormEntity(currentSpace, space);
+      fillSpaceFromEntity(currentSpace, space);
       spaces.add(space);
     }
 
@@ -747,7 +764,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
       for (SpaceRef ref : spaceEntities) {
 
         Space space = new Space();
-        fillEntityFormSpace(space, ref.getSpaceRef());
+        fillEntityFromSpace(space, ref.getSpaceRef());
         spaces.add(space);
       }
     }
@@ -789,7 +806,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
           SpaceRef spaceRef = it.next();
 
           Space space = new Space();
-          fillSpaceFormEntity(spaceRef.getSpaceRef(), space);
+          fillSpaceFromEntity(spaceRef.getSpaceRef(), space);
           spaces.add(space);
 
           if (++i >= limit) {
@@ -826,7 +843,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
     while (results.hasNext()) {
       SpaceEntity currentSpace = results.next();
       Space space = new Space();
-      fillSpaceFormEntity(currentSpace, space);
+      fillSpaceFromEntity(currentSpace, space);
       spaces.add(space);
     }
 
@@ -895,7 +912,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
       for (SpaceRef ref : spaceEntities) {
 
         Space space = new Space();
-        fillEntityFormSpace(space, ref.getSpaceRef());
+        fillEntityFromSpace(space, ref.getSpaceRef());
         spaces.add(space);
       }
     }
@@ -935,7 +952,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
           SpaceRef spaceRef = it.next();
 
           Space space = new Space();
-          fillSpaceFormEntity(spaceRef.getSpaceRef(), space);
+          fillSpaceFromEntity(spaceRef.getSpaceRef(), space);
           spaces.add(space);
 
           if (++i >= limit) {
@@ -972,7 +989,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
     while (results.hasNext()) {
       SpaceEntity currentSpace = results.next();
       Space space = new Space();
-      fillSpaceFormEntity(currentSpace, space);
+      fillSpaceFromEntity(currentSpace, space);
       spaces.add(space);
     }
 
@@ -1034,12 +1051,12 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
     List<Space> spaces = new ArrayList<Space>();
 
     //
-    QueryResult<SpaceEntity> results = _getSpacesByFilterQuery(userId, spaceFilter).objects(offset, limit);
+    QueryResult<SpaceEntity> results = getPublicSpacesQuery(userId, spaceFilter).objects(offset, limit);
 
     while (results.hasNext()) {
       SpaceEntity currentSpace = results.next();
       Space space = new Space();
-      fillSpaceFormEntity(currentSpace, space);
+      fillSpaceFromEntity(currentSpace, space);
       spaces.add(space);
     }
 
@@ -1063,7 +1080,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
     while (results.hasNext()) {
       SpaceEntity currentSpace = results.next();
       Space space = new Space();
-      fillSpaceFormEntity(currentSpace, space);
+      fillSpaceFromEntity(currentSpace, space);
       spaces.add(space);
     }
 
@@ -1090,7 +1107,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
     while (results.hasNext()) {
       SpaceEntity currentSpace = results.next();
       Space space = new Space();
-      fillSpaceFormEntity(currentSpace, space);
+      fillSpaceFromEntity(currentSpace, space);
       spaces.add(space);
     }
 
@@ -1143,7 +1160,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
     while (results.hasNext()) {
       SpaceEntity currentSpace = results.next();
       Space space = new Space();
-      fillSpaceFormEntity(currentSpace, space);
+      fillSpaceFromEntity(currentSpace, space);
       spaces.add(space);
     }
 
@@ -1169,7 +1186,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
     while (results.hasNext()) {
       SpaceEntity currentSpace = results.next();
       Space space = new Space();
-      fillSpaceFormEntity(currentSpace, space);
+      fillSpaceFromEntity(currentSpace, space);
       spaces.add(space);
     }
 
@@ -1196,7 +1213,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
     while (results.hasNext()) {
       SpaceEntity currentSpace = results.next();
       Space space = new Space();
-      fillSpaceFormEntity(currentSpace, space);
+      fillSpaceFromEntity(currentSpace, space);
       spaces.add(space);
     }
 
@@ -1258,7 +1275,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
         for (SpaceRef spaceRef : spaceEntities) {
 
           Space space = new Space();
-          fillSpaceFormEntity(spaceRef.getSpaceRef(), space);
+          fillSpaceFromEntity(spaceRef.getSpaceRef(), space);
           spaces.add(space);
         }
       }
@@ -1302,7 +1319,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
           SpaceRef spaceRef = it.next();
 
           Space space = new Space();
-          fillSpaceFormEntity(spaceRef.getSpaceRef(), space);
+          fillSpaceFromEntity(spaceRef.getSpaceRef(), space);
           spaces.add(space);
 
           if (++i >= limit) {
@@ -1339,7 +1356,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
     while (results.hasNext()) {
       SpaceEntity currentSpace = results.next();
       Space space = new Space();
-      fillSpaceFormEntity(currentSpace, space);
+      fillSpaceFromEntity(currentSpace, space);
       spaces.add(space);
     }
 
@@ -1377,7 +1394,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
 
     for (SpaceEntity spaceEntity : getSpaceRoot().getSpaces().values()) {
       Space space = new Space();
-      fillSpaceFormEntity(spaceEntity, space);
+      fillSpaceFromEntity(spaceEntity, space);
       spaces.add(space);
     }
 
@@ -1431,7 +1448,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
       SpaceEntity spaceEntity = it.next();
 
       Space space = new Space();
-      fillSpaceFormEntity(spaceEntity, space);
+      fillSpaceFromEntity(spaceEntity, space);
       spaces.add(space);
 
       if (++i >= limit) {
@@ -1467,7 +1484,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
     while (results.hasNext()) {
       SpaceEntity currentSpace = results.next();
       Space space = new Space();
-      fillSpaceFormEntity(currentSpace, space);
+      fillSpaceFromEntity(currentSpace, space);
       spaces.add(space);
     }
 
@@ -1489,7 +1506,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
 
       Space space = new Space();
 
-      fillSpaceFormEntity(spaceEntity, space);
+      fillSpaceFromEntity(spaceEntity, space);
 
       return space;
 
@@ -1515,7 +1532,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
       SpaceEntity entity = _findByPath(SpaceEntity.class, String.format("/production/soc:spaces/soc:%s", spacePrettyName));
 
       Space space = new Space();
-      fillSpaceFormEntity(entity, space);
+      fillSpaceFromEntity(entity, space);
 
       return space;
 
@@ -1548,7 +1565,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
       SpaceEntity entity =  result.next();
       Space space = new Space();
 
-      fillSpaceFormEntity(entity, space);
+      fillSpaceFromEntity(entity, space);
 
       return space;
     }
@@ -1584,7 +1601,7 @@ public class SpaceStorageImpl extends AbstractStorage implements SpaceStorage {
       Space space = new Space();
       SpaceEntity entity =  builder.get().objects().next();
 
-      fillSpaceFormEntity(entity, space);
+      fillSpaceFromEntity(entity, space);
 
       return space;
 

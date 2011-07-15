@@ -1,21 +1,24 @@
 /*
- * Copyright (C) 2003-2010 eXo Platform SAS.
+ * Copyright (C) 2003-2011 eXo Platform SAS.
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; either version 3
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, see<http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package org.exoplatform.social.core.storage;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.model.AvatarAttachment;
@@ -26,9 +29,6 @@ import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.storage.api.IdentityStorage;
 import org.exoplatform.social.core.storage.api.SpaceStorage;
 import org.exoplatform.social.core.test.AbstractCoreTest;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Unit Tests for {@link org.exoplatform.social.core.storage.api.SpaceStorage}
@@ -55,6 +55,7 @@ public class SpaceStorageTest extends AbstractCoreTest {
   private Identity jame;
   private Identity paul;
   private Identity hacker;
+  private Identity newStranger;
 
   @Override
   protected void setUp() throws Exception {
@@ -62,8 +63,6 @@ public class SpaceStorageTest extends AbstractCoreTest {
     spaceStorage = (SpaceStorage) this.getContainer().getComponentInstanceOfType(SpaceStorage.class);
     identityStorage = (IdentityStorage) this.getContainer().getComponentInstanceOfType(IdentityStorage.class);
 
-    assertNotNull("spaceStorage must not be null", spaceStorage);
-    assertNotNull("identityStorage must not be null", identityStorage);
 
     demo = new Identity("organization", "demo");
     tom = new Identity("organization", "tom");
@@ -75,6 +74,7 @@ public class SpaceStorageTest extends AbstractCoreTest {
     jame = new Identity("organization", "jame");
     paul = new Identity("organization", "paul");
     hacker = new Identity("organization", "hacker");
+    newStranger = new Identity("organization", "newStranger");
 
     identityStorage.saveIdentity(demo);
     identityStorage.saveIdentity(tom);
@@ -86,6 +86,7 @@ public class SpaceStorageTest extends AbstractCoreTest {
     identityStorage.saveIdentity(jame);
     identityStorage.saveIdentity(paul);
     identityStorage.saveIdentity(hacker);
+    identityStorage.saveIdentity(newStranger);
 
     tearDownIdentityList = new ArrayList<Identity>();
     tearDownIdentityList.add(demo);
@@ -98,6 +99,7 @@ public class SpaceStorageTest extends AbstractCoreTest {
     tearDownIdentityList.add(jame);
     tearDownIdentityList.add(paul);
     tearDownIdentityList.add(hacker);
+    tearDownIdentityList.add(newStranger);
 
     tearDownSpaceList = new ArrayList<Space>();
   }
@@ -114,9 +116,6 @@ public class SpaceStorageTest extends AbstractCoreTest {
     for (Identity id : tearDownIdentityList) {
       identityStorage.deleteIdentity(id);
     }
-
-    assertTrue("spaceStorage.getAllSpaces().isEmpty() must return true",
-           spaceStorage.getAllSpaces().isEmpty());
 
     super.tearDown();
   }
@@ -1576,39 +1575,39 @@ public class SpaceStorageTest extends AbstractCoreTest {
       spaceStorage.saveSpace(listSpace[i], true);
       tearDownSpaceList.add(listSpace[i]);
     }
-    List<Space> publicSpaces = spaceStorage.getPublicSpacesByFilter("mary", new SpaceFilter("add new"), 0, 10);
+    List<Space> publicSpaces = spaceStorage.getPublicSpacesByFilter(mary.getRemoteId(), new SpaceFilter("add new"), 0, 10);
     assertNotNull("publicSpaces must not be  null", publicSpaces);
     assertEquals("publicSpaces.size() must return: " + 0, 0, publicSpaces.size());
 
-    publicSpaces = spaceStorage.getPublicSpacesByFilter("mary", new SpaceFilter("my space"), 0, 10);
+    publicSpaces = spaceStorage.getPublicSpacesByFilter(mary.getRemoteId(), new SpaceFilter("my space"), 0, 10);
     assertNotNull("publicSpaces must not be  null", publicSpaces);
     assertEquals("publicSpaces.size() must return: " + 0, 0, publicSpaces.size());
 
-    publicSpaces = spaceStorage.getPublicSpacesByFilter("mary", new SpaceFilter('m'), 0, 10);
+    publicSpaces = spaceStorage.getPublicSpacesByFilter(mary.getRemoteId(), new SpaceFilter('m'), 0, 10);
     assertNotNull("publicSpaces must not be  null", publicSpaces);
     assertEquals("publicSpaces.size() must return: " + 0, 0, publicSpaces.size());
 
-    publicSpaces = spaceStorage.getPublicSpacesByFilter("mary", new SpaceFilter('M'), 0, 10);
+    publicSpaces = spaceStorage.getPublicSpacesByFilter(mary.getRemoteId(), new SpaceFilter('M'), 0, 10);
     assertNotNull("publicSpaces must not be  null", publicSpaces);
     assertEquals("publicSpaces.size() must return: " + 0, 0, publicSpaces.size());
 
-    publicSpaces = spaceStorage.getPublicSpacesByFilter("demo", new SpaceFilter("my space"), 0, 10);
+    publicSpaces = spaceStorage.getPublicSpacesByFilter(demo.getRemoteId(), new SpaceFilter("my space"), 0, 10);
     assertNotNull("publicSpaces must not be  null", publicSpaces);
     assertEquals("publicSpaces.size() must return: " + 0, 0, publicSpaces.size());
 
-    publicSpaces = spaceStorage.getPublicSpacesByFilter("newstranger", new SpaceFilter('m'), 0, 10);
+    publicSpaces = spaceStorage.getPublicSpacesByFilter(newStranger.getRemoteId(), new SpaceFilter('m'), 0, 10);
     assertNotNull("publicSpaces must not be  null", publicSpaces);
     assertEquals("publicSpaces.size() must return: " + 10, 10, publicSpaces.size());
 
-    publicSpaces = spaceStorage.getPublicSpacesByFilter("newstranger", new SpaceFilter('M'), 0, 10);
+    publicSpaces = spaceStorage.getPublicSpacesByFilter(newStranger.getRemoteId(), new SpaceFilter('M'), 0, 10);
     assertNotNull("publicSpaces must not be  null", publicSpaces);
     assertEquals("publicSpaces.size() must return: " + 10, 10, publicSpaces.size());
 
-    publicSpaces = spaceStorage.getPublicSpacesByFilter("newstranger", new SpaceFilter("add new "), 0, 10);
+    publicSpaces = spaceStorage.getPublicSpacesByFilter(newStranger.getRemoteId(), new SpaceFilter("add new "), 0, 10);
     assertNotNull("publicSpaces must not be  null", publicSpaces);
     assertEquals("publicSpaces.size() must return: " + 10, 10, publicSpaces.size());
 
-    publicSpaces = spaceStorage.getPublicSpacesByFilter("newstranger", new SpaceFilter("my space "), 0, 10);
+    publicSpaces = spaceStorage.getPublicSpacesByFilter(newStranger.getRemoteId(), new SpaceFilter("my space "), 0, 10);
     assertNotNull("publicSpaces must not be  null", publicSpaces);
     assertEquals("publicSpaces.size() must return: " + 10, 10, publicSpaces.size());
   }
@@ -2456,6 +2455,28 @@ public class SpaceStorageTest extends AbstractCoreTest {
     assertEquals(LinkProvider.buildAvatarImageUri(got.getPrettyName()), got.getAvatarUrl());
   }
 
+  /**
+   * Test {@link org.exoplatform.social.core.storage.SpaceStorage#saveSpace(org.exoplatform.social.core.space.model.Space, boolean)} with isNew is false
+   *
+   * @throws Exception
+   */
+  public void testUpdateSpace() throws Exception {
+    int number = 1;
+    Space space = this.getSpaceInstance(number);
+    space.setAvatarAttachment(new AvatarAttachment());
+    tearDownSpaceList.add(space);
+    spaceStorage.saveSpace(space, true);
+
+    //
+    Space spaceForUpdate = spaceStorage.getSpaceById(space.getId());
+    spaceStorage.saveSpace(spaceForUpdate, false);
+
+    //
+    Space got = spaceStorage.getSpaceById(spaceForUpdate.getId());
+
+    assertFalse(got.getAvatarUrl() == null);
+  }
+  
   // TODO : test getSpaceByGroupId without result
   // TODO : save space with null member[]
   // TODO : test space member number

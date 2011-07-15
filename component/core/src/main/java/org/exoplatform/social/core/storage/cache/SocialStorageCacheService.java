@@ -59,7 +59,7 @@ public class SocialStorageCacheService {
   private final ExoCache<ListIdentitiesKey, ListIdentitiesData> identitiesCache;
 
   // RelationshipStorage
-  private final ExoCache<RelationshipKey, RelationshipData> relationshipCacheById;
+  private final ExoCache<RelationshipKey, RelationshipData> relationshipCache;
   private final ExoCache<RelationshipIdentityKey, RelationshipKey> relationshipCacheByIdentity;
   private final ExoCache<RelationshipCountKey, IntegerData> relationshipsCount;
   private final ExoCache<ListRelationshipsKey, ListIdentitiesData> relationshipsCache;
@@ -82,7 +82,7 @@ public class SocialStorageCacheService {
     this.countIdentitiesCache = CacheType.IDENTITIES_COUNT.getFromService(cacheService);
     this.identitiesCache = CacheType.IDENTITIES.getFromService(cacheService);
 
-    this.relationshipCacheById = CacheType.RELATIONSHIP.getFromService(cacheService);
+    this.relationshipCache = CacheType.RELATIONSHIP.getFromService(cacheService);
     this.relationshipCacheByIdentity = CacheType.RELATIONSHIP_FROM_IDENTITY.getFromService(cacheService);
     this.relationshipsCount = CacheType.RELATIONSHIPS_COUNT.getFromService(cacheService);
     this.relationshipsCache = CacheType.RELATIONSHIPS.getFromService(cacheService);
@@ -117,8 +117,8 @@ public class SocialStorageCacheService {
     return identitiesCache;
   }
 
-  public ExoCache<RelationshipKey, RelationshipData> getRelationshipCacheById() {
-    return relationshipCacheById;
+  public ExoCache<RelationshipKey, RelationshipData> getRelationshipCache() {
+    return relationshipCache;
   }
 
   public ExoCache<RelationshipIdentityKey, RelationshipKey> getRelationshipCacheByIdentity() {

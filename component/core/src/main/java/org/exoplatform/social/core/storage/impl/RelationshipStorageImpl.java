@@ -431,10 +431,7 @@ public class RelationshipStorageImpl extends AbstractStorage implements Relation
    */
 
   /**
-   * Saves relationship.
-   *
-   * @param relationship the relationship
-   * @throws RelationshipStorageException
+   * {@inheritDoc}
    */
   public Relationship saveRelationship(final Relationship relationship) throws RelationshipStorageException {
     try {
@@ -455,10 +452,7 @@ public class RelationshipStorageImpl extends AbstractStorage implements Relation
   }
 
   /**
-   * Removes the relationship.
-   *
-   * @param relationship the relationship
-   * @throws RelationshipStorageException
+   * {@inheritDoc}
    */
   public void removeRelationship(Relationship relationship) throws RelationshipStorageException {
 
@@ -498,11 +492,7 @@ public class RelationshipStorageImpl extends AbstractStorage implements Relation
   }
 
   /**
-   * Gets the relationship.
-   *
-   * @param uuid the uuid
-   * @return the relationship
-   * @throws RelationshipStorageException
+   * {@inheritDoc}
    */
   public Relationship getRelationship(String uuid) throws RelationshipStorageException {
 
@@ -515,14 +505,7 @@ public class RelationshipStorageImpl extends AbstractStorage implements Relation
   }
 
   /**
-   * Gets the list of relationship by identity id matching with checking
-   * identity ids
-   *
-   * @param sender the identity
-   * @param type
-   * @param listCheckIdentity identity the checking identities
-   * @return the relationship
-   * @throws RelationshipStorageException
+   * {@inheritDoc}
    */
   public List<Relationship> getSenderRelationships(
       final Identity sender, final Relationship.Type type, final List<Identity> listCheckIdentity)
@@ -538,14 +521,7 @@ public class RelationshipStorageImpl extends AbstractStorage implements Relation
   }
 
   /**
-   * Gets the list of relationship by identity id matching with checking
-   * identity ids
-   *
-   * @param senderId the identity id
-   * @param type
-   * @param listCheckIdentity identity the checking identities
-   * @return the relationship
-   * @throws RelationshipStorageException
+   * {@inheritDoc}
    */
   public List<Relationship> getSenderRelationships(
       final String senderId, final Relationship.Type type, final List<Identity> listCheckIdentity)
@@ -556,14 +532,7 @@ public class RelationshipStorageImpl extends AbstractStorage implements Relation
   }
 
   /**
-   * Gets the list of relationship by identity id matching with checking
-   * identity ids
-   *
-   * @param receiver the identity id
-   * @param type
-   * @param listCheckIdentity identityId the checking identity ids
-   * @return the relationship
-   * @throws RelationshipStorageException
+   * {@inheritDoc}
    */
   public List<Relationship> getReceiverRelationships(
       final Identity receiver, final Relationship.Type type, final List<Identity> listCheckIdentity)
@@ -579,12 +548,7 @@ public class RelationshipStorageImpl extends AbstractStorage implements Relation
   }
 
   /**
-   * Gets the relationship of 2 identities.
-   *
-   * @param identity1 the identity1
-   * @param identity2 the identity2
-   * @return the relationship
-   * @throws RelationshipStorageException
+   * {@inheritDoc}
    */
   public Relationship getRelationship(final Identity identity1, final Identity identity2)
       throws RelationshipStorageException {
@@ -598,14 +562,7 @@ public class RelationshipStorageImpl extends AbstractStorage implements Relation
   }
 
   /**
-   * Gets the list of relationship by identity matching with checking
-   * identity ids
-   *
-   * @param identity the identity
-   * @param type
-   * @param listCheckIdentity identity the checking identities
-   * @return the relationship
-   * @throws RelationshipStorageException
+   * {@inheritDoc}
    */
   public List<Relationship> getRelationships(
       final Identity identity, final Relationship.Type type, final List<Identity> listCheckIdentity)
@@ -649,12 +606,7 @@ public class RelationshipStorageImpl extends AbstractStorage implements Relation
   }
 
   /**
-   * Gets the list of relationship by identity matching with checking
-   * identity ids
-   *
-   * @param identity the identity
-   * @return the relationship
-   * @throws RelationshipStorageException
+   * {@inheritDoc}
    */
   public List<Identity> getRelationships(final Identity identity, long offset, long limit)
       throws RelationshipStorageException {
@@ -702,14 +654,7 @@ public class RelationshipStorageImpl extends AbstractStorage implements Relation
   }
 
   /**
-   * Gets the list of relationship by identity matching with checking
-   * identity ids with offset, limit.
-   *
-   * @param receiver the identity
-   * @param offset
-   * @param limit
-   * @return the identities
-   * @throws RelationshipStorageException
+   * {@inheritDoc}
    */
   public List<Identity> getIncomingRelationships(Identity receiver,
                                                  long offset, long limit) throws RelationshipStorageException {
@@ -731,12 +676,7 @@ public class RelationshipStorageImpl extends AbstractStorage implements Relation
   }
 
   /**
-   * Gets the count of the list of relationship by identity matching with checking
-   * identity ids.
-   *
-   * @param receiver the identity
-   * @return the relationship number
-   * @throws RelationshipStorageException
+   * {@inheritDoc}
    */
    public int getIncomingRelationshipsCount(Identity receiver) throws RelationshipStorageException {
 
@@ -754,14 +694,7 @@ public class RelationshipStorageImpl extends AbstractStorage implements Relation
    }
 
   /**
-   * Gets the list of relationship by identity matching with checking
-   * identity ids with offset, limit.
-   *
-   * @param sender the identity
-   * @param offset
-   * @param limit
-   * @return the identities
-   * @throws RelationshipStorageException
+   * {@inheritDoc}
    */
   public List<Identity> getOutgoingRelationships(Identity sender,
                                                  long offset, long limit) throws RelationshipStorageException {
@@ -783,12 +716,7 @@ public class RelationshipStorageImpl extends AbstractStorage implements Relation
   }
 
   /**
-   * Gets the count of the list of relationship by identity matching with checking
-   * identity ids.
-   *
-   * @param sender the identity
-   * @return the relationship number
-   * @throws RelationshipStorageException
+   * {@inheritDoc}
    */
   public int getOutgoingRelationshipsCount(Identity sender) throws RelationshipStorageException {
 
@@ -807,13 +735,7 @@ public class RelationshipStorageImpl extends AbstractStorage implements Relation
   }
 
   /**
-   * Gets the count of identities by identity matching with checking
-   * identity ids.
-   *
-   * @param identity the identity id
-   * @return the relationships number
-   * @throws RelationshipStorageException
-   * @since 1.2.0-Beta3
+   * {@inheritDoc}
    */
    public int getRelationshipsCount(Identity identity) throws RelationshipStorageException {
 
@@ -841,14 +763,7 @@ public class RelationshipStorageImpl extends AbstractStorage implements Relation
    }
 
   /**
-   * Gets connections with the identity.
-   *
-   * @param identity
-   * @param offset
-   * @param limit
-   * @return number of connections belong to limitation of offset and limit.
-   * @throws RelationshipStorageException
-   * @since 1.2.0-GA
+   * {@inheritDoc}
    */
   public List<Identity> getConnections(Identity identity, long offset, long limit) throws RelationshipStorageException {
 
@@ -865,12 +780,7 @@ public class RelationshipStorageImpl extends AbstractStorage implements Relation
   }
 
   /**
-   * Gets connections with the identity.
-   *
-   * @param identity
-   * @return number of connections belong to limitation of offset and limit.
-   * @throws RelationshipStorageException
-   * @since 1.2.0-GA
+   * {@inheritDoc}
    */
   public List<Identity> getConnections(Identity identity) throws RelationshipStorageException {
 
@@ -879,12 +789,7 @@ public class RelationshipStorageImpl extends AbstractStorage implements Relation
   }
 
   /**
-   * Gets count of connection with the identity.
-   *
-   * @param identity
-   * @return
-   * @throws RelationshipStorageException
-   * @since 1.2.0-GA
+   * {@inheritDoc}
    */
   public int getConnectionsCount(Identity identity) throws RelationshipStorageException {
 

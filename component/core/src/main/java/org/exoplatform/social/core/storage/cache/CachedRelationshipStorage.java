@@ -26,6 +26,7 @@ import org.exoplatform.social.core.storage.RelationshipStorageException;
 import org.exoplatform.social.core.storage.api.IdentityStorage;
 import org.exoplatform.social.core.storage.cache.model.data.IdentityData;
 import org.exoplatform.social.core.storage.cache.model.data.ListIdentitiesData;
+import org.exoplatform.social.core.storage.cache.model.data.ProfileData;
 import org.exoplatform.social.core.storage.cache.model.key.ListRelationshipsKey;
 import org.exoplatform.social.core.storage.cache.model.key.RelationshipType;
 import org.exoplatform.social.core.storage.impl.RelationshipStorageImpl;
@@ -72,6 +73,41 @@ public class CachedRelationshipStorage implements RelationshipStorage {
   //
   private static final RelationshipKey RELATIONSHIP_NOT_FOUND = new RelationshipKey(null);
 
+
+  /**
+   * Build the identity list from the caches Ids.
+   *
+   * @param data ids
+   * @return identities
+   */
+  private List<Identity> buildRelationships(ListIdentitiesData data) {
+
+    List<Identity> identities = new ArrayList<Identity>();
+    for (IdentityKey k : data.getIds()) {
+      Identity gotIdentity = identityStorage.findIdentityById(k.getId());
+      identities.add(gotIdentity);
+    }
+    return identities;
+
+  }
+
+  /**
+   * Build the ids from the identitiy list.
+   *
+   * @param identities identities
+   * @return ids
+   */
+  private ListIdentitiesData buildIds(List<Identity> identities) {
+
+    List<IdentityKey> data = new ArrayList<IdentityKey>();
+    for (Identity i : identities) {
+      IdentityKey k = new IdentityKey(i);
+      exoIdentityCache.put(k, new IdentityData(i));
+      data.add(new IdentityKey(i));
+    }
+    return new ListIdentitiesData(data);
+
+  }
   public CachedActivityStorage getCachedActivityStorage() {
     if (cachedActivityStorage == null) {
       cachedActivityStorage = (CachedActivityStorage)
@@ -253,27 +289,13 @@ public class CachedRelationshipStorage implements RelationshipStorage {
         new ServiceContext<ListIdentitiesData>() {
           public ListIdentitiesData execute() {
             List<Identity> got = storage.getRelationships(identity, offset, limit);
-
-            List<IdentityKey> data = new ArrayList<IdentityKey>();
-            for (Identity i : got) {
-              IdentityKey k = new IdentityKey(i);
-              exoIdentityCache.put(k, new IdentityData(i));
-              data.add(new IdentityKey(i));
-            }
-            return new ListIdentitiesData(data);
+            return buildIds(got);
           }
         },
         listKey);
 
     //
-    List<Identity> identities = new ArrayList<Identity>();
-    for (IdentityKey k : keys.getIds()) {
-      Identity gotIdentity = identityStorage.findIdentityById(k.getId());
-      identities.add(gotIdentity);
-    }
-
-    //
-    return identities;
+    return buildRelationships(keys);
 
   }
 
@@ -290,27 +312,13 @@ public class CachedRelationshipStorage implements RelationshipStorage {
         new ServiceContext<ListIdentitiesData>() {
           public ListIdentitiesData execute() {
             List<Identity> got = storage.getIncomingRelationships(receiver, offset, limit);
-
-            List<IdentityKey> data = new ArrayList<IdentityKey>();
-            for (Identity i : got) {
-              IdentityKey k = new IdentityKey(i);
-              exoIdentityCache.put(k, new IdentityData(i));
-              data.add(new IdentityKey(i));
-            }
-            return new ListIdentitiesData(data);
+            return buildIds(got);
           }
         },
         listKey);
 
     //
-    List<Identity> identities = new ArrayList<Identity>();
-    for (IdentityKey k : keys.getIds()) {
-      Identity gotIdentity = identityStorage.findIdentityById(k.getId());
-      identities.add(gotIdentity);
-    }
-
-    //
-    return identities;
+    return buildRelationships(keys);
 
   }
 
@@ -348,27 +356,13 @@ public class CachedRelationshipStorage implements RelationshipStorage {
         new ServiceContext<ListIdentitiesData>() {
           public ListIdentitiesData execute() {
             List<Identity> got = storage.getOutgoingRelationships(sender, offset, limit);
-
-            List<IdentityKey> data = new ArrayList<IdentityKey>();
-            for (Identity i : got) {
-              IdentityKey k = new IdentityKey(i);
-              exoIdentityCache.put(k, new IdentityData(i));
-              data.add(new IdentityKey(i));
-            }
-            return new ListIdentitiesData(data);
+            return buildIds(got);
           }
         },
         listKey);
 
     //
-    List<Identity> identities = new ArrayList<Identity>();
-    for (IdentityKey k : keys.getIds()) {
-      Identity gotIdentity = identityStorage.findIdentityById(k.getId());
-      identities.add(gotIdentity);
-    }
-
-    //
-    return identities;
+    return buildRelationships(keys);
 
   }
 
@@ -427,27 +421,13 @@ public class CachedRelationshipStorage implements RelationshipStorage {
         new ServiceContext<ListIdentitiesData>() {
           public ListIdentitiesData execute() {
             List<Identity> got = storage.getConnections(identity, offset, limit);
-
-            List<IdentityKey> data = new ArrayList<IdentityKey>();
-            for (Identity i : got) {
-              IdentityKey k = new IdentityKey(i);
-              exoIdentityCache.put(k, new IdentityData(i));
-              data.add(new IdentityKey(i));
-            }
-            return new ListIdentitiesData(data);
+            return buildIds(got);
           }
         },
         listKey);
 
     //
-    List<Identity> identities = new ArrayList<Identity>();
-    for (IdentityKey k : keys.getIds()) {
-      Identity gotIdentity = identityStorage.findIdentityById(k.getId());
-      identities.add(gotIdentity);
-    }
-
-    //
-    return identities;
+    return buildRelationships(keys);
 
   }
 

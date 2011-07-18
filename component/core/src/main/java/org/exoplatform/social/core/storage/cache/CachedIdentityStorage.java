@@ -60,6 +60,43 @@ public class CachedIdentityStorage implements IdentityStorage {
 
   private final IdentityStorageImpl storage;
 
+  /**
+   * Build the identity list from the caches Ids.
+   *
+   * @param data ids
+   * @return identities
+   */
+  private List<Identity> buildIdentities(ListIdentitiesData data) {
+
+    List<Identity> identities = new ArrayList<Identity>();
+    for (IdentityKey k : data.getIds()) {
+      Identity gotIdentity = findIdentityById(k.getId());
+      gotIdentity.setProfile(loadProfile(gotIdentity.getProfile()));
+      identities.add(gotIdentity);
+    }
+    return identities;
+
+  }
+
+  /**
+   * Build the ids from the identitiy list.
+   *
+   * @param identities identities
+   * @return ids
+   */
+  private ListIdentitiesData buildIds(List<Identity> identities) {
+
+    List<IdentityKey> data = new ArrayList<IdentityKey>();
+    for (Identity i : identities) {
+      IdentityKey k = new IdentityKey(i);
+      exoIdentityCache.put(k, new IdentityData(i));
+      exoProfileCache.put(k, new ProfileData(i.getProfile()));
+      data.add(new IdentityKey(i));
+    }
+    return new ListIdentitiesData(data);
+
+  }
+
   public CachedIdentityStorage(final IdentityStorageImpl storage, final SocialStorageCacheService cacheService) {
 
     //
@@ -250,33 +287,19 @@ public class CachedIdentityStorage implements IdentityStorage {
     IdentityFilterKey key = new IdentityFilterKey(providerId, profileFilter);
     ListIdentitiesKey listKey = new ListIdentitiesKey(key, offset, limit);
 
+    //
     ListIdentitiesData keys = identitiesCache.get(
         new ServiceContext<ListIdentitiesData>() {
           public ListIdentitiesData execute() {
-            List<Identity> got =
-                storage.getIdentitiesByProfileFilter(providerId, profileFilter, offset, limit, forceLoadOrReloadProfile);
-
-            List<IdentityKey> data = new ArrayList<IdentityKey>();
-            for (Identity i : got) {
-              IdentityKey k = new IdentityKey(i);
-              exoIdentityCache.put(k, new IdentityData(i));
-              exoProfileCache.put(k, new ProfileData(i.getProfile()));
-              data.add(new IdentityKey(i));
-            }
-            return new ListIdentitiesData(data);
+            List<Identity> got = storage.getIdentitiesByProfileFilter(
+                providerId, profileFilter, offset, limit, forceLoadOrReloadProfile);
+            return buildIds(got);
           }
         },
         listKey);
 
-    List<Identity> identities = new ArrayList<Identity>();
-
-    for (IdentityKey k : keys.getIds()) {
-      Identity gotIdentity = findIdentityById(k.getId());
-      gotIdentity.setProfile(loadProfile(gotIdentity.getProfile()));
-      identities.add(gotIdentity);
-    }
-
-    return identities;
+    //
+    return buildIdentities(keys);
     
   }
 
@@ -334,33 +357,19 @@ public class CachedIdentityStorage implements IdentityStorage {
     IdentityFilterKey key = new IdentityFilterKey(providerId, profileFilter);
     ListIdentitiesKey listKey = new ListIdentitiesKey(key, offset, limit);
 
+    //
     ListIdentitiesData keys = identitiesCache.get(
         new ServiceContext<ListIdentitiesData>() {
           public ListIdentitiesData execute() {
-            List<Identity> got =
-                storage.getIdentitiesByFirstCharacterOfName(providerId, profileFilter, offset, limit, forceLoadOrReloadProfile);
-
-            List<IdentityKey> data = new ArrayList<IdentityKey>();
-            for (Identity i : got) {
-              IdentityKey k = new IdentityKey(i);
-              exoIdentityCache.put(k, new IdentityData(i));
-              exoProfileCache.put(k, new ProfileData(i.getProfile()));
-              data.add(new IdentityKey(i));
-            }
-            return new ListIdentitiesData(data);
+            List<Identity> got = storage.getIdentitiesByFirstCharacterOfName(
+                providerId, profileFilter, offset, limit, forceLoadOrReloadProfile);
+            return buildIds(got);
           }
         },
         listKey);
 
-    List<Identity> identities = new ArrayList<Identity>();
-
-    for (IdentityKey k : keys.getIds()) {
-      Identity gotIdentity = findIdentityById(k.getId());
-      gotIdentity.setProfile(loadProfile(gotIdentity.getProfile()));
-      identities.add(gotIdentity);
-    }
-
-    return identities;
+    //
+    return buildIdentities(keys);
 
   }
 

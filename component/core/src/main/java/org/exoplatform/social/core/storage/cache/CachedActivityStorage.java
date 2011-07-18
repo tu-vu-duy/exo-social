@@ -23,8 +23,10 @@ import org.exoplatform.social.core.ActivityProcessor;
 import org.exoplatform.social.core.activity.model.ExoSocialActivity;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.storage.ActivityStorageException;
+import org.exoplatform.social.core.storage.cache.model.data.IdentityData;
 import org.exoplatform.social.core.storage.cache.model.data.ListActivitiesData;
 import org.exoplatform.social.core.storage.cache.model.data.ListIdentitiesData;
+import org.exoplatform.social.core.storage.cache.model.data.ProfileData;
 import org.exoplatform.social.core.storage.cache.model.key.ActivityType;
 import org.exoplatform.social.core.storage.cache.model.key.ListActivitiesKey;
 import org.exoplatform.social.core.storage.impl.ActivityStorageImpl;
@@ -55,6 +57,41 @@ public class CachedActivityStorage implements ActivityStorage {
   private final FutureExoCache<ListActivitiesKey, ListActivitiesData, ServiceContext<ListActivitiesData>> activitiesCache;
 
   private final ActivityStorageImpl storage;
+
+  /**
+   * Build the activity list from the caches Ids.
+   *
+   * @param data ids
+   * @return activities
+   */
+  private List<ExoSocialActivity> buildActivities(ListActivitiesData data) {
+
+    List<ExoSocialActivity> activities = new ArrayList<ExoSocialActivity>();
+    for (ActivityKey k : data.getIds()) {
+      ExoSocialActivity a = getActivity(k.getId());
+      activities.add(a);
+    }
+    return activities;
+
+  }
+
+  /**
+   * Build the ids from the activity list.
+   *
+   * @param activities activities
+   * @return ids
+   */
+  private ListActivitiesData buildIds(List<ExoSocialActivity> activities) {
+
+    List<ActivityKey> data = new ArrayList<ActivityKey>();
+    for (ExoSocialActivity a : activities) {
+      ActivityKey k = new ActivityKey(a.getId());
+      exoActivityCache.put(k, new ActivityData(a));
+      data.add(k);
+    }
+    return new ListActivitiesData(data);
+
+  }
 
   public CachedActivityStorage(final ActivityStorageImpl storage, final SocialStorageCacheService cacheService) {
 
@@ -129,27 +166,13 @@ public class CachedActivityStorage implements ActivityStorage {
         new ServiceContext<ListActivitiesData>() {
           public ListActivitiesData execute() {
             List<ExoSocialActivity> got = storage.getUserActivities(owner, offset, limit);
-
-            List<ActivityKey> data = new ArrayList<ActivityKey>();
-            for (ExoSocialActivity a : got) {
-              ActivityKey k = new ActivityKey(a.getId());
-              exoActivityCache.put(k, new ActivityData(a));
-              data.add(k);
-            }
-            return new ListActivitiesData(data);
+            return buildIds(got);
           }
         },
         listKey);
 
     //
-    List<ExoSocialActivity> activities = new ArrayList<ExoSocialActivity>();
-    for (ActivityKey k : keys.getIds()) {
-      ExoSocialActivity a = getActivity(k.getId());
-      activities.add(a);
-    }
-
-    //
-    return activities;
+    return buildActivities(keys);
 
   }
 
@@ -237,27 +260,13 @@ public class CachedActivityStorage implements ActivityStorage {
         new ServiceContext<ListActivitiesData>() {
           public ListActivitiesData execute() {
             List<ExoSocialActivity> got = storage.getActivitiesOfIdentities(connectionList, offset, limit);
-
-            List<ActivityKey> data = new ArrayList<ActivityKey>();
-            for (ExoSocialActivity a : got) {
-              ActivityKey k = new ActivityKey(a.getId());
-              exoActivityCache.put(k, new ActivityData(a));
-              data.add(k);
-            }
-            return new ListActivitiesData(data);
+            return buildIds(got);
           }
         },
         listKey);
 
     //
-    List<ExoSocialActivity> activities = new ArrayList<ExoSocialActivity>();
-    for (ActivityKey k : keys.getIds()) {
-      ExoSocialActivity a = getActivity(k.getId());
-      activities.add(a);
-    }
-
-    //
-    return activities;
+    return buildActivities(keys);
 
   }
 
@@ -323,27 +332,13 @@ public class CachedActivityStorage implements ActivityStorage {
         new ServiceContext<ListActivitiesData>() {
           public ListActivitiesData execute() {
             List<ExoSocialActivity> got = storage.getNewerOnUserActivities(ownerIdentity, baseActivity, limit);
-
-            List<ActivityKey> data = new ArrayList<ActivityKey>();
-            for (ExoSocialActivity a : got) {
-              ActivityKey k = new ActivityKey(a.getId());
-              exoActivityCache.put(k, new ActivityData(a));
-              data.add(k);
-            }
-            return new ListActivitiesData(data);
+            return buildIds(got);
           }
         },
         listKey);
 
     //
-    List<ExoSocialActivity> activities = new ArrayList<ExoSocialActivity>();
-    for (ActivityKey k : keys.getIds()) {
-      ExoSocialActivity a = getActivity(k.getId());
-      activities.add(a);
-    }
-
-    //
-    return activities;
+    return buildActivities(keys);
 
   }
 
@@ -382,27 +377,13 @@ public class CachedActivityStorage implements ActivityStorage {
         new ServiceContext<ListActivitiesData>() {
           public ListActivitiesData execute() {
             List<ExoSocialActivity> got = storage.getOlderOnUserActivities(ownerIdentity, baseActivity, limit);
-
-            List<ActivityKey> data = new ArrayList<ActivityKey>();
-            for (ExoSocialActivity a : got) {
-              ActivityKey k = new ActivityKey(a.getId());
-              exoActivityCache.put(k, new ActivityData(a));
-              data.add(k);
-            }
-            return new ListActivitiesData(data);
+            return buildIds(got);
           }
         },
         listKey);
 
     //
-    List<ExoSocialActivity> activities = new ArrayList<ExoSocialActivity>();
-    for (ActivityKey k : keys.getIds()) {
-      ExoSocialActivity a = getActivity(k.getId());
-      activities.add(a);
-    }
-
-    //
-    return activities;
+    return buildActivities(keys);
 
   }
 
@@ -420,27 +401,13 @@ public class CachedActivityStorage implements ActivityStorage {
         new ServiceContext<ListActivitiesData>() {
           public ListActivitiesData execute() {
             List<ExoSocialActivity> got = storage.getActivityFeed(ownerIdentity, offset, limit);
-
-            List<ActivityKey> data = new ArrayList<ActivityKey>();
-            for (ExoSocialActivity a : got) {
-              ActivityKey k = new ActivityKey(a.getId());
-              exoActivityCache.put(k, new ActivityData(a));
-              data.add(k);
-            }
-            return new ListActivitiesData(data);
+            return buildIds(got);
           }
         },
         listKey);
 
     //
-    List<ExoSocialActivity> activities = new ArrayList<ExoSocialActivity>();
-    for (ActivityKey k : keys.getIds()) {
-      ExoSocialActivity a = getActivity(k.getId());
-      activities.add(a);
-    }
-
-    //
-    return activities;
+    return buildActivities(keys);
 
   }
 
@@ -500,27 +467,13 @@ public class CachedActivityStorage implements ActivityStorage {
         new ServiceContext<ListActivitiesData>() {
           public ListActivitiesData execute() {
             List<ExoSocialActivity> got = storage.getNewerOnActivityFeed(ownerIdentity, baseActivity, limit);
-
-            List<ActivityKey> data = new ArrayList<ActivityKey>();
-            for (ExoSocialActivity a : got) {
-              ActivityKey k = new ActivityKey(a.getId());
-              exoActivityCache.put(k, new ActivityData(a));
-              data.add(k);
-            }
-            return new ListActivitiesData(data);
+            return buildIds(got);
           }
         },
         listKey);
 
     //
-    List<ExoSocialActivity> activities = new ArrayList<ExoSocialActivity>();
-    for (ActivityKey k : keys.getIds()) {
-      ExoSocialActivity a = getActivity(k.getId());
-      activities.add(a);
-    }
-
-    //
-    return activities;
+    return buildActivities(keys);
 
   }
 
@@ -559,27 +512,13 @@ public class CachedActivityStorage implements ActivityStorage {
         new ServiceContext<ListActivitiesData>() {
           public ListActivitiesData execute() {
             List<ExoSocialActivity> got = storage.getOlderOnActivityFeed(ownerIdentity, baseActivity, limit);
-
-            List<ActivityKey> data = new ArrayList<ActivityKey>();
-            for (ExoSocialActivity a : got) {
-              ActivityKey k = new ActivityKey(a.getId());
-              exoActivityCache.put(k, new ActivityData(a));
-              data.add(k);
-            }
-            return new ListActivitiesData(data);
+            return buildIds(got);
           }
         },
         listKey);
 
     //
-    List<ExoSocialActivity> activities = new ArrayList<ExoSocialActivity>();
-    for (ActivityKey k : keys.getIds()) {
-      ExoSocialActivity a = getActivity(k.getId());
-      activities.add(a);
-    }
-
-    //
-    return activities;
+    return buildActivities(keys);
     
   }
 
@@ -597,27 +536,13 @@ public class CachedActivityStorage implements ActivityStorage {
         new ServiceContext<ListActivitiesData>() {
           public ListActivitiesData execute() {
             List<ExoSocialActivity> got = storage.getActivitiesOfConnections(ownerIdentity, offset, limit);
-
-            List<ActivityKey> data = new ArrayList<ActivityKey>();
-            for (ExoSocialActivity a : got) {
-              ActivityKey k = new ActivityKey(a.getId());
-              exoActivityCache.put(k, new ActivityData(a));
-              data.add(k);
-            }
-            return new ListActivitiesData(data);
+            return buildIds(got);
           }
         },
         listKey);
 
     //
-    List<ExoSocialActivity> activities = new ArrayList<ExoSocialActivity>();
-    for (ActivityKey k : keys.getIds()) {
-      ExoSocialActivity a = getActivity(k.getId());
-      activities.add(a);
-    }
-
-    //
-    return activities;
+    return buildActivities(keys);
     
   }
 
@@ -684,27 +609,13 @@ public class CachedActivityStorage implements ActivityStorage {
         new ServiceContext<ListActivitiesData>() {
           public ListActivitiesData execute() {
             List<ExoSocialActivity> got = storage.getNewerOnActivitiesOfConnections(ownerIdentity, baseActivity, limit);
-
-            List<ActivityKey> data = new ArrayList<ActivityKey>();
-            for (ExoSocialActivity a : got) {
-              ActivityKey k = new ActivityKey(a.getId());
-              exoActivityCache.put(k, new ActivityData(a));
-              data.add(k);
-            }
-            return new ListActivitiesData(data);
+            return buildIds(got);
           }
         },
         listKey);
 
     //
-    List<ExoSocialActivity> activities = new ArrayList<ExoSocialActivity>();
-    for (ActivityKey k : keys.getIds()) {
-      ExoSocialActivity a = getActivity(k.getId());
-      activities.add(a);
-    }
-
-    //
-    return activities;
+    return buildActivities(keys);
     
   }
 
@@ -743,27 +654,13 @@ public class CachedActivityStorage implements ActivityStorage {
         new ServiceContext<ListActivitiesData>() {
           public ListActivitiesData execute() {
             List<ExoSocialActivity> got = storage.getOlderOnActivitiesOfConnections(ownerIdentity, baseActivity, limit);
-
-            List<ActivityKey> data = new ArrayList<ActivityKey>();
-            for (ExoSocialActivity a : got) {
-              ActivityKey k = new ActivityKey(a.getId());
-              exoActivityCache.put(k, new ActivityData(a));
-              data.add(k);
-            }
-            return new ListActivitiesData(data);
+            return buildIds(got);
           }
         },
         listKey);
 
     //
-    List<ExoSocialActivity> activities = new ArrayList<ExoSocialActivity>();
-    for (ActivityKey k : keys.getIds()) {
-      ExoSocialActivity a = getActivity(k.getId());
-      activities.add(a);
-    }
-
-    //
-    return activities;
+    return buildActivities(keys);
 
   }
 
@@ -781,27 +678,13 @@ public class CachedActivityStorage implements ActivityStorage {
         new ServiceContext<ListActivitiesData>() {
           public ListActivitiesData execute() {
             List<ExoSocialActivity> got = storage.getUserSpacesActivities(ownerIdentity, offset, limit);
-
-            List<ActivityKey> data = new ArrayList<ActivityKey>();
-            for (ExoSocialActivity a : got) {
-              ActivityKey k = new ActivityKey(a.getId());
-              exoActivityCache.put(k, new ActivityData(a));
-              data.add(k);
-            }
-            return new ListActivitiesData(data);
+            return buildIds(got);
           }
         },
         listKey);
 
     //
-    List<ExoSocialActivity> activities = new ArrayList<ExoSocialActivity>();
-    for (ActivityKey k : keys.getIds()) {
-      ExoSocialActivity a = getActivity(k.getId());
-      activities.add(a);
-    }
-
-    //
-    return activities;
+    return buildActivities(keys);
 
   }
 
@@ -861,27 +744,13 @@ public class CachedActivityStorage implements ActivityStorage {
         new ServiceContext<ListActivitiesData>() {
           public ListActivitiesData execute() {
             List<ExoSocialActivity> got = storage.getNewerOnUserSpacesActivities(ownerIdentity, baseActivity, limit);
-
-            List<ActivityKey> data = new ArrayList<ActivityKey>();
-            for (ExoSocialActivity a : got) {
-              ActivityKey k = new ActivityKey(a.getId());
-              exoActivityCache.put(k, new ActivityData(a));
-              data.add(k);
-            }
-            return new ListActivitiesData(data);
+            return buildIds(got);
           }
         },
         listKey);
 
     //
-    List<ExoSocialActivity> activities = new ArrayList<ExoSocialActivity>();
-    for (ActivityKey k : keys.getIds()) {
-      ExoSocialActivity a = getActivity(k.getId());
-      activities.add(a);
-    }
-
-    //
-    return activities;
+    return buildActivities(keys);
 
   }
 
@@ -920,27 +789,13 @@ public class CachedActivityStorage implements ActivityStorage {
         new ServiceContext<ListActivitiesData>() {
           public ListActivitiesData execute() {
             List<ExoSocialActivity> got = storage.getOlderOnUserSpacesActivities(ownerIdentity, baseActivity, limit);
-
-            List<ActivityKey> data = new ArrayList<ActivityKey>();
-            for (ExoSocialActivity a : got) {
-              ActivityKey k = new ActivityKey(a.getId());
-              exoActivityCache.put(k, new ActivityData(a));
-              data.add(k);
-            }
-            return new ListActivitiesData(data);
+            return buildIds(got);
           }
         },
         listKey);
 
     //
-    List<ExoSocialActivity> activities = new ArrayList<ExoSocialActivity>();
-    for (ActivityKey k : keys.getIds()) {
-      ExoSocialActivity a = getActivity(k.getId());
-      activities.add(a);
-    }
-
-    //
-    return activities;
+    return buildActivities(keys);
 
   }
 

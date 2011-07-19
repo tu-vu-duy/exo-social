@@ -94,7 +94,7 @@ public class CachedSpaceStorage implements SpaceStorage {
 
     this.exoSpaceCache = cacheService.getSpaceCache();
     this.exoRefSpaceCache = cacheService.getSpaceRefCache();
-    this.exoSpacesCountCache = cacheService.getSpaceCountCache();
+    this.exoSpacesCountCache = cacheService.getSpacesCountCache();
     this.exoSpacesCache = cacheService.getSpacesCache();
 
     this.spaceCache = CacheType.SPACE.createFutureCache(exoSpaceCache);

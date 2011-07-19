@@ -20,8 +20,10 @@ package org.exoplatform.social.core.storage.cache.model.key;
 import java.io.Serializable;
 
 /**
+ * Immutable data key.
+ *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public interface CacheKey<T> extends Serializable {
+public interface CacheKey extends Serializable {
 }

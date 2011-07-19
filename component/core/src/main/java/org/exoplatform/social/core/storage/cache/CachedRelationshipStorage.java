@@ -123,7 +123,7 @@ public class CachedRelationshipStorage implements RelationshipStorage {
     //
     this.exoRelationshipCache = cacheService.getRelationshipCache();
     this.exoRelationshipByIdentityCache = cacheService.getRelationshipCacheByIdentity();
-    this.exoRelationshipCountCache = cacheService.getRelationshipCount();
+    this.exoRelationshipCountCache = cacheService.getRelationshipsCount();
     this.exoRelationshipsCache = cacheService.getRelationshipsCache();
 
     //

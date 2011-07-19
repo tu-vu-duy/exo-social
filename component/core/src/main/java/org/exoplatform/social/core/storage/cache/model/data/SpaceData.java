@@ -20,6 +20,8 @@ package org.exoplatform.social.core.storage.cache.model.data;
 import org.exoplatform.social.core.space.model.Space;
 
 /**
+ * Immutable space data.
+ *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */

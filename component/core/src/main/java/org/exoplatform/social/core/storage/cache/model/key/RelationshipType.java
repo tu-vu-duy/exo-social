@@ -18,6 +18,8 @@
 package org.exoplatform.social.core.storage.cache.model.key;
 
 /**
+ * Factoring relationship cache.
+ *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */

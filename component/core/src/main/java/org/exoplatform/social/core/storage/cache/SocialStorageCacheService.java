@@ -126,7 +126,7 @@ public class SocialStorageCacheService {
     return relationshipCacheByIdentity;
   }
 
-  public ExoCache<RelationshipCountKey, IntegerData> getRelationshipCount() {
+  public ExoCache<RelationshipCountKey, IntegerData> getRelationshipsCount() {
     return relationshipsCount;
   }
 
@@ -138,7 +138,7 @@ public class SocialStorageCacheService {
     return activityCache;
   }
 
-  public ExoCache<ActivityCountKey, IntegerData> getActivityCountCache() {
+  public ExoCache<ActivityCountKey, IntegerData> getActivitiesCountCache() {
     return activitiesCountCache;
   }
 
@@ -154,7 +154,7 @@ public class SocialStorageCacheService {
     return spaceRefCache;
   }
 
-  public ExoCache<SpaceFilterKey, IntegerData> getSpaceCountCache() {
+  public ExoCache<SpaceFilterKey, IntegerData> getSpacesCountCache() {
     return spacesCountCache;
   }
 

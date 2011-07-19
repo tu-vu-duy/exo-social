@@ -17,9 +17,11 @@
 
 package org.exoplatform.social.core.storage.cache.model.key;
 
-import org.exoplatform.social.core.identity.model.Identity;
 
 /**
+ * Immutable identity list key.
+ * This key is used to cache identity list.
+ *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */

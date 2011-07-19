@@ -18,9 +18,17 @@
 package org.exoplatform.social.core.storage.cache.loader;
 
 /**
+ * Kind of closure.
+ *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
 public interface ServiceContext<V> {
+
+  /**
+   * Contains the code which allow to get the data from storage.
+   *
+   * @return the data
+   */
   V execute();
 }

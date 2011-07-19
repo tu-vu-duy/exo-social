@@ -17,9 +17,9 @@
 
 package org.exoplatform.social.core.storage.cache.model.key;
 
-import org.apache.poi.hssf.record.formula.functions.Offset;
-
 /**
+ * Immutable list key.
+ * 
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */

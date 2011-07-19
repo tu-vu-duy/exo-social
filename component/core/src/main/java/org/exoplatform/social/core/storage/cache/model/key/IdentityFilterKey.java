@@ -25,6 +25,9 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * Immutable identity filter key.
+ * This key is used to cache the search results.
+ *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */

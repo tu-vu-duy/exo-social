@@ -18,6 +18,9 @@
 package org.exoplatform.social.core.storage.cache.model.key;
 
 /**
+ * Immutable space reference key.
+ * This key is used to cache space by displayName, prettyName, groupId or url.
+ *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */

@@ -18,6 +18,8 @@
 package org.exoplatform.social.core.storage.cache.model.data;
 
 /**
+ * Immutable integer.
+ *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */

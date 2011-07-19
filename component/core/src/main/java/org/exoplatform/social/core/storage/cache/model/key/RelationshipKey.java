@@ -18,6 +18,8 @@
 package org.exoplatform.social.core.storage.cache.model.key;
 
 /**
+ * Immutable relationship key.
+ *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */

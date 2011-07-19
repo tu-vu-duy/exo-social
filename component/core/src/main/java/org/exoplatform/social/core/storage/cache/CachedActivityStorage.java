@@ -98,7 +98,7 @@ public class CachedActivityStorage implements ActivityStorage {
 
     //
     this.exoActivityCache = cacheService.getActivityCache();
-    this.exoActivitiesCountCache = cacheService.getActivityCountCache();
+    this.exoActivitiesCountCache = cacheService.getActivitiesCountCache();
     this.exoActivitiesCache = cacheService.getActivitiesCache();
 
     //

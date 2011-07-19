@@ -18,14 +18,20 @@
 package org.exoplatform.social.core.storage.cache.model.data;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
+ * Immutable cached data.
+ *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
 public interface CacheData<T> extends Serializable {
 
+  /**
+   * Build UI mutable model.
+   *
+   * @return Mutable model
+   */
   public T build();
 
 }

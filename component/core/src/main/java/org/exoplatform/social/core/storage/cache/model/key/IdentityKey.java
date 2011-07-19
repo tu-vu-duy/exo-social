@@ -22,6 +22,8 @@ import org.exoplatform.social.core.identity.model.Identity;
 import java.io.Serializable;
 
 /**
+ * Immutable identity key.
+ *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */

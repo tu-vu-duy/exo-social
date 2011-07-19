@@ -24,6 +24,8 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
+ * Immutable profile data.
+ *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */

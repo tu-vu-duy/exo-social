@@ -20,6 +20,9 @@ package org.exoplatform.social.core.storage.cache.model.key;
 import org.exoplatform.social.core.storage.cache.model.data.ListIdentitiesData;
 
 /**
+ * Immutable activity list key.
+ * This key is used to cache activity list.
+ *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */

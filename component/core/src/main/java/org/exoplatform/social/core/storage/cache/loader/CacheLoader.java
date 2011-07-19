@@ -21,11 +21,21 @@ import org.exoplatform.commons.cache.future.Loader;
 import org.exoplatform.social.core.storage.cache.model.key.CacheKey;
 
 /**
+ * Used by FutureCache to execute the ServiceContext.
+ *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
 public class CacheLoader<K extends CacheKey, V> implements Loader<K, V, ServiceContext<V>> {
 
+  /**
+   * Execute the context.
+   *
+   * @param cacheContext
+   * @param key
+   * @return
+   * @throws Exception
+   */
   public V retrieve(final ServiceContext<V> cacheContext, final K key) throws Exception {
     return cacheContext.execute();
   }

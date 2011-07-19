@@ -22,6 +22,8 @@ import org.exoplatform.social.core.storage.cache.model.key.ActivityKey;
 import java.util.List;
 
 /**
+ * Immutable activity list keys.
+ *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */

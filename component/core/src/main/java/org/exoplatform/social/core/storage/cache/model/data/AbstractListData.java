@@ -17,13 +17,12 @@
 
 package org.exoplatform.social.core.storage.cache.model.data;
 
-
-import org.exoplatform.social.core.storage.cache.model.key.IdentityKey;
-
 import java.io.Serializable;
 import java.util.List;
 
 /**
+ * Cached data list.
+ *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */

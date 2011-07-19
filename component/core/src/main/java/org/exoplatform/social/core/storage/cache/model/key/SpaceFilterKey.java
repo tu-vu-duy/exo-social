@@ -20,6 +20,9 @@ package org.exoplatform.social.core.storage.cache.model.key;
 import org.exoplatform.social.core.space.SpaceFilter;
 
 /**
+ * Immutable space filter key.
+ * This key is used to cache the search results.
+ *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */

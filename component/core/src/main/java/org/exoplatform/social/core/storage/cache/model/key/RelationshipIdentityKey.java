@@ -18,6 +18,9 @@
 package org.exoplatform.social.core.storage.cache.model.key;
 
 /**
+ * Immutable relationship key.
+ * This key is used to cache the relationship by identity.
+ *
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */

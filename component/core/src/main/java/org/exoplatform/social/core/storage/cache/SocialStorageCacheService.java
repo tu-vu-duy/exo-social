@@ -17,16 +17,14 @@
 
 package org.exoplatform.social.core.storage.cache;
 
-import org.exoplatform.commons.cache.future.FutureExoCache;
 import org.exoplatform.services.cache.CacheService;
 import org.exoplatform.services.cache.ExoCache;
-import org.exoplatform.social.core.storage.cache.loader.CacheLoader;
-import org.exoplatform.social.core.storage.cache.loader.ServiceContext;
 import org.exoplatform.social.core.storage.cache.model.data.ActivityData;
 import org.exoplatform.social.core.storage.cache.model.data.IdentityData;
 import org.exoplatform.social.core.storage.cache.model.data.IntegerData;
 import org.exoplatform.social.core.storage.cache.model.data.ListActivitiesData;
 import org.exoplatform.social.core.storage.cache.model.data.ListIdentitiesData;
+import org.exoplatform.social.core.storage.cache.model.data.ListSpacesData;
 import org.exoplatform.social.core.storage.cache.model.data.ProfileData;
 import org.exoplatform.social.core.storage.cache.model.data.RelationshipData;
 import org.exoplatform.social.core.storage.cache.model.data.SpaceData;
@@ -38,6 +36,7 @@ import org.exoplatform.social.core.storage.cache.model.key.IdentityKey;
 import org.exoplatform.social.core.storage.cache.model.key.ListActivitiesKey;
 import org.exoplatform.social.core.storage.cache.model.key.ListIdentitiesKey;
 import org.exoplatform.social.core.storage.cache.model.key.ListRelationshipsKey;
+import org.exoplatform.social.core.storage.cache.model.key.ListSpacesKey;
 import org.exoplatform.social.core.storage.cache.model.key.RelationshipCountKey;
 import org.exoplatform.social.core.storage.cache.model.key.RelationshipIdentityKey;
 import org.exoplatform.social.core.storage.cache.model.key.RelationshipKey;
@@ -70,9 +69,10 @@ public class SocialStorageCacheService {
   private final ExoCache<ListActivitiesKey, ListActivitiesData> activitiesCache;
 
   // SpaceStorage
-  private final ExoCache<SpaceKey, SpaceData> spaceCacheById;
+  private final ExoCache<SpaceKey, SpaceData> spaceCache;
   private final ExoCache<SpaceRefKey, SpaceKey> spaceRefCache;
-  private final ExoCache<SpaceFilterKey, IntegerData> spaceCountCache;
+  private final ExoCache<SpaceFilterKey, IntegerData> spacesCountCache;
+  private final ExoCache<ListSpacesKey, ListSpacesData> spacesCache;
 
   public SocialStorageCacheService(CacheService cacheService) {
     
@@ -91,9 +91,10 @@ public class SocialStorageCacheService {
     this.activitiesCountCache = CacheType.ACTIVITIES_COUNT.getFromService(cacheService);
     this.activitiesCache = CacheType.ACTIVITIES.getFromService(cacheService);
 
-    this.spaceCacheById = cacheService.getCacheInstance("SpaceCacheById");
-    this.spaceRefCache = cacheService.getCacheInstance("SpaceRefCache");
-    this.spaceCountCache = cacheService.getCacheInstance("SpaceCount");
+    this.spaceCache = CacheType.SPACE.getFromService(cacheService);
+    this.spaceRefCache = CacheType.SPACE_REF.getFromService(cacheService);
+    this.spacesCountCache = CacheType.SPACES_COUNT.getFromService(cacheService);
+    this.spacesCache = CacheType.SPACES.getFromService(cacheService);
 
   }
 
@@ -145,37 +146,19 @@ public class SocialStorageCacheService {
     return activitiesCache;
   }
 
-  public FutureExoCache<SpaceKey, SpaceData, ServiceContext<SpaceData>> createSpaceCacheById() {
-    return new FutureExoCache<SpaceKey, SpaceData, ServiceContext<SpaceData>>(
-        new CacheLoader<SpaceKey, SpaceData>(),
-        getSpaceCacheById()
-    );
-  }
-
-  public ExoCache<SpaceKey, SpaceData> getSpaceCacheById() {
-    return spaceCacheById;
-  }
-
-  public FutureExoCache<SpaceRefKey, SpaceKey, ServiceContext<SpaceKey>> createSpaceRefCache() {
-    return new FutureExoCache<SpaceRefKey, SpaceKey, ServiceContext<SpaceKey>>(
-        new CacheLoader<SpaceRefKey, SpaceKey>(),
-        getSpaceRefCache()
-    );
+  public ExoCache<SpaceKey, SpaceData> getSpaceCache() {
+    return spaceCache;
   }
 
   public ExoCache<SpaceRefKey, SpaceKey> getSpaceRefCache() {
     return spaceRefCache;
   }
 
-  public FutureExoCache<SpaceFilterKey, IntegerData, ServiceContext<IntegerData>> createSpaceCount() {
-    return new FutureExoCache<SpaceFilterKey, IntegerData, ServiceContext<IntegerData>>(
-        new CacheLoader<SpaceFilterKey, IntegerData>(),
-        getSpaceCount()
-    );
+  public ExoCache<SpaceFilterKey, IntegerData> getSpaceCountCache() {
+    return spacesCountCache;
   }
 
-  public ExoCache<SpaceFilterKey, IntegerData> getSpaceCount() {
-    return spaceCountCache;
+  public ExoCache<ListSpacesKey, ListSpacesData> getSpacesCache() {
+    return spacesCache;
   }
-
 }

@@ -17,16 +17,13 @@
 
 package org.exoplatform.social.core.storage.cache;
 
-import org.exoplatform.commons.cache.future.FutureExoCache;
 import org.exoplatform.services.cache.ExoCache;
 import org.exoplatform.social.core.ActivityProcessor;
 import org.exoplatform.social.core.activity.model.ExoSocialActivity;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.storage.ActivityStorageException;
-import org.exoplatform.social.core.storage.cache.model.data.IdentityData;
 import org.exoplatform.social.core.storage.cache.model.data.ListActivitiesData;
 import org.exoplatform.social.core.storage.cache.model.data.ListIdentitiesData;
-import org.exoplatform.social.core.storage.cache.model.data.ProfileData;
 import org.exoplatform.social.core.storage.cache.model.key.ActivityType;
 import org.exoplatform.social.core.storage.cache.model.key.ListActivitiesKey;
 import org.exoplatform.social.core.storage.impl.ActivityStorageImpl;
@@ -118,30 +115,18 @@ public class CachedActivityStorage implements ActivityStorage {
 
     //
     ActivityKey key = new ActivityKey(activityId);
-    final ExceptionWrapper<ActivityStorageException> wrapper = new ExceptionWrapper<ActivityStorageException>();
 
     //
     ActivityData activity = activityCache.get(
         new ServiceContext<ActivityData>() {
           public ActivityData execute() {
-            try {
-              return new ActivityData(storage.getActivity(activityId));
-            }
-            catch (ActivityStorageException e) {
-              wrapper.setException(e);
-              return null;
-            }
+            return new ActivityData(storage.getActivity(activityId));
           }
         },
         key);
 
     //
-    if (wrapper.getException() != null) {
-      throw wrapper.getException();
-    }
-    else {
-      return activity.build();
-    }
+    return activity.build();
 
   }
 

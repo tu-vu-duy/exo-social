@@ -168,7 +168,7 @@ public class ActivityStorageTest extends AbstractCoreTest {
       boolean exceptionThrown = false;
       try {
         activityStorage.getActivity(activity.getId());
-      } catch (ActivityStorageException ase) {
+      } catch (Exception ase) {
         exceptionThrown = true;
       }
       assertTrue("exceptionThrows must be true", exceptionThrown);

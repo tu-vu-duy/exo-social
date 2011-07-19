@@ -17,7 +17,6 @@
 
 package org.exoplatform.social.core.storage.cache;
 
-import org.exoplatform.commons.cache.future.FutureExoCache;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.services.cache.ExoCache;
 import org.exoplatform.social.core.identity.model.Identity;
@@ -26,7 +25,6 @@ import org.exoplatform.social.core.storage.RelationshipStorageException;
 import org.exoplatform.social.core.storage.api.IdentityStorage;
 import org.exoplatform.social.core.storage.cache.model.data.IdentityData;
 import org.exoplatform.social.core.storage.cache.model.data.ListIdentitiesData;
-import org.exoplatform.social.core.storage.cache.model.data.ProfileData;
 import org.exoplatform.social.core.storage.cache.model.key.ListRelationshipsKey;
 import org.exoplatform.social.core.storage.cache.model.key.RelationshipType;
 import org.exoplatform.social.core.storage.impl.RelationshipStorageImpl;

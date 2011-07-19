@@ -15,22 +15,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.core.storage.cache;
+package org.exoplatform.social.core.storage.cache.model.data;
+
+import org.exoplatform.social.core.storage.cache.model.key.SpaceKey;
+
+import java.util.List;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class ExceptionWrapper <T extends Exception> {
+public class ListSpacesData extends AbstractListData<SpaceKey> {
 
-  private T exception;
-
-  public T getException() {
-    return exception;
-  }
-
-  public void setException(final T exception) {
-    this.exception = exception;
+  public ListSpacesData(final List<SpaceKey> ids) {
+    super(ids);
   }
   
 }

@@ -17,7 +17,6 @@
 
 package org.exoplatform.social.core.storage.cache;
 
-import org.exoplatform.commons.cache.future.FutureExoCache;
 import org.exoplatform.services.cache.CacheService;
 import org.exoplatform.services.cache.ExoCache;
 import org.exoplatform.social.core.storage.cache.loader.CacheLoader;
@@ -49,6 +48,12 @@ public enum CacheType {
   ACTIVITY("ActivityCache"),
   ACTIVITIES_COUNT("ActivitiesCountCache"),
   ACTIVITIES("ActivitiesCache"),
+
+  //
+  SPACE("SpaceCache"),
+  SPACE_REF("SpaceRefCache"),
+  SPACES_COUNT("SpacesCountCache"),
+  SPACES("SpacesCache")
 
   ;
 

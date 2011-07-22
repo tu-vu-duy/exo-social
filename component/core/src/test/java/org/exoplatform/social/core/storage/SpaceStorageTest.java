@@ -17,8 +17,10 @@
 
 package org.exoplatform.social.core.storage;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.model.Profile;
 import org.exoplatform.social.core.identity.provider.SpaceIdentityProvider;
@@ -28,8 +30,6 @@ import org.exoplatform.social.core.space.impl.DefaultSpaceApplicationHandler;
 import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.test.AbstractCoreTest;
 import org.exoplatform.social.core.test.Util;
-
-import java.io.InputStream;
 
 /**
  * Unit Tests for {@link org.exoplatform.social.core.storage.SpaceStorage}
@@ -2502,6 +2502,7 @@ public class SpaceStorageTest extends AbstractCoreTest {
     identityStorage.saveIdentity(identity);
     identityStorage.saveProfile(profile);
 
+    tearDownIdentityList.add(identity);
     //
     Space spaceForUpdate = spaceStorage.getSpaceById(space.getId());
     spaceStorage.saveSpace(spaceForUpdate, false);

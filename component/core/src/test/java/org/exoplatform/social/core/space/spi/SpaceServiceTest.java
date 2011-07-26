@@ -19,7 +19,6 @@ package org.exoplatform.social.core.space.spi;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.commons.lang.ArrayUtils;
 import org.exoplatform.commons.utils.ListAccess;
 import org.exoplatform.commons.utils.PageList;
@@ -44,7 +43,6 @@ import org.exoplatform.social.core.space.impl.DefaultSpaceApplicationHandler;
 import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.storage.IdentityStorage;
 import org.exoplatform.social.core.test.AbstractCoreTest;
-import org.exoplatform.social.core.test.Util;
 
 public class SpaceServiceTest extends AbstractCoreTest {
   private SpaceService spaceService;
@@ -1424,11 +1422,11 @@ public class SpaceServiceTest extends AbstractCoreTest {
     } else {
       avatarURL = avatarRandomURL;
     }
-    assertEquals(Util.escapeJCRSpecialCharacters(
+    assertEquals(LinkProvider.escapeJCRSpecialCharacters(
             String.format(
               "/rest/jcr/repository/portal-test/production/soc:providers/soc:space/soc:%s/soc:profile/soc:avatar",
               space.getPrettyName())
-            ),avatarURL);
+            ), avatarURL);
 
   }
 

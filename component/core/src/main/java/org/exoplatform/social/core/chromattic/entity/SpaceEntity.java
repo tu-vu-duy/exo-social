@@ -17,6 +17,7 @@
 
 package org.exoplatform.social.core.chromattic.entity;
 
+import java.util.Date;
 import org.chromattic.api.annotations.Id;
 import org.chromattic.api.annotations.Name;
 import org.chromattic.api.annotations.PrimaryType;
@@ -61,10 +62,10 @@ public abstract class SpaceEntity {
   public abstract void setDescription(String description);
   public static final PropertyLiteralExpression<String> description =
       new PropertyLiteralExpression<String>(String.class, "soc:description");
-
-  @Property(name = "soc:hasAvatar")
-  public abstract boolean getHasAvatar();
-  public abstract void setHasAvatar(boolean hasAvatar);
+  
+  @Property(name = "soc:avatarLastUpdated")
+  public abstract Long getAvatarLastUpdated();
+  public abstract void setAvatarLastUpdated(Long avatarLastUpdated);
 
   @Property(name = "soc:type")
   public abstract String getType();

@@ -22,16 +22,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.exoplatform.social.core.chromattic.entity.IdentityEntity;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.model.Profile;
 import org.exoplatform.social.core.model.AvatarAttachment;
 import org.exoplatform.social.core.profile.ProfileFilter;
+import org.exoplatform.social.core.service.LinkProvider;
 import org.exoplatform.social.core.storage.exception.NodeAlreadyExistsException;
 import org.exoplatform.social.core.storage.exception.NodeNotFoundException;
 import org.exoplatform.social.core.test.AbstractCoreTest;
-import org.exoplatform.social.core.test.Util;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
@@ -643,7 +642,7 @@ public class IdentityStorageNewTestCase extends AbstractCoreTest {
       avatarURL = avatarRandomURL;
     }
     assertEquals(
-        Util.escapeJCRSpecialCharacters("/rest/jcr/repository/portal-test/production/soc:providers/soc:organization/soc:remoteid/soc:profile/soc:avatar"),
+        LinkProvider.escapeJCRSpecialCharacters("/rest/jcr/repository/portal-test/production/soc:providers/soc:organization/soc:remoteid/soc:profile/soc:avatar"),
         avatarURL);
     
   }

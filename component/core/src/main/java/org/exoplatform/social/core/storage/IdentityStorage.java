@@ -39,7 +39,6 @@ import org.exoplatform.social.core.storage.query.JCRProperties;
 import org.exoplatform.social.core.storage.query.Order;
 import org.exoplatform.social.core.storage.query.QueryFunction;
 import org.exoplatform.social.core.storage.query.WhereExpression;
-
 import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -562,9 +561,18 @@ public class IdentityStorage extends AbstractStorage {
     NTFile avatar = profileEntity.getAvatar();
     if (avatar != null) {
       ChromatticSession chromatticSession = getSession();
-      profile.setProperty(Profile.AVATAR_URL,
-                          LinkProvider.buildUriFromPath(chromatticSession.getJCRSession().getWorkspace(),
-                                   chromatticSession.getPath(avatar)));
+      try {
+        StringBuilder avatarUrlSB = new StringBuilder(); 
+        avatarUrlSB = avatarUrlSB.append("/").append(container.getRestContextName()).append("/jcr/").
+                                  append(lifeCycle.getRepositoryName()).append("/").
+                                  append(chromatticSession.getJCRSession().getWorkspace().getName()).
+                                  append(chromatticSession.getPath(avatar)).
+                                  append("/?upd=").append(avatar.getLastModified().getTime());
+        
+        profile.setProperty(Profile.AVATAR_URL, LinkProvider.escapeJCRSpecialCharacters(avatarUrlSB.toString()));
+      } catch (Exception e) {
+        LOG.warn("Failed to build file url from fileResource: " + e.getMessage());
+      }
     }
 
     //

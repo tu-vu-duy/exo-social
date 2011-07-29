@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data>
+  <node name="fooA">
+    <node name="barAA">
+      <node name="foobarAAA"/>
+      <node name="foobarAAB"/>
+      <node name="foobarAAC"/>
+    </node>
+    <node name="barAB">
+      <node name="foobarABA"/>
+      <node name="foobarABB"/>
+      <property name="somewhere">somewhereValue</property>
+      <node name="foobarABC"/>
+    </node>
+    <node name="barAC">
+      <node name="foobarACA"/>
+      <node name="foobarACB"/>
+      <node name="foobarACC"/>
+    </node>
+  </node>
+  <node name="fooB">
+    <node name="barBA"/>
+    <node name="barBB">
+      <property name="nameBBA">valueBBA</property>
+      <property name="nameBBB">valueBBB</property>
+      <property name="nameBBC">valueBBC</property>
+    </node>
+    <node name="barBC"/>
+  </node>
+  <node name="fooC">
+    <node name="barCA">
+      <node name="sibling"/>
+      <node name="sibling"/>
+      <node name="sibling"/>
+    </node>
+    <node name="barCB"/>
+    <node name="barCC"/>
+  </node>
+</data>

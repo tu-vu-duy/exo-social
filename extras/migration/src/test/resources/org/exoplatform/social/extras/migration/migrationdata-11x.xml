@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data>
+  <node name="exo:applications">
+    <node name="Social_Identity">
+
+      <node name="exo:identity"></node>
+      <node name="exo:identity"></node>
+      <node name="exo:identity"></node>
+      <node name="exo:identity"></node>
+      <node name="exo:identity"></node>
+
+      <node name="user_a"></node>
+      <node name="user_b"></node>
+      <node name="user_c"></node>
+      <node name="user_d"></node>
+      <node name="user_e"></node>
+
+      <node name="azertyuiop1234567890"></node>
+      <node name="azertyuiop1234567891"></node>
+      <node name="azertyuiop1234567892"></node>
+      <node name="azertyuiop1234567893"></node>
+      <node name="azertyuiop1234567894"></node>
+
+    </node>
+  </node>
+</data>

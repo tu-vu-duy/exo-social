@@ -20,17 +20,22 @@ package org.exoplatform.social.extras.migraiton.loading;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.services.jcr.RepositoryService;
 import org.exoplatform.services.jcr.core.ManageableRepository;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 import org.staxnav.Naming;
 import org.staxnav.StaxNavigator;
 import org.staxnav.StaxNavigatorImpl;
 
 import javax.jcr.Node;
+import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
@@ -38,11 +43,13 @@ import java.io.InputStream;
  */
 public class DataLoader {
 
-  private final StaxNavigator<String> navigator;
+  private final StaxNavigator<QName> navigator;
 
   private Session session;
 
   private final String DATA_PACKAGE = "org.exoplatform.social.extras.migration";
+
+  private static final Log LOG = ExoLogger.getLogger(DataLoader.class);
 
   public Session getSession() throws RepositoryException {
     if (session == null) {
@@ -67,7 +74,7 @@ public class DataLoader {
     try {
       XMLInputFactory factory = XMLInputFactory.newInstance();
       XMLStreamReader stream = factory.createXMLStreamReader(is);
-      navigator = new StaxNavigatorImpl<String>(new Naming.Local(), stream);
+      navigator = new StaxNavigatorImpl<QName>(new Naming.Qualified(), stream);
     }
     catch (XMLStreamException e) {
       throw new RuntimeException(e);
@@ -83,31 +90,75 @@ public class DataLoader {
     
   }
 
-  private void writeNode(Node node, StaxNavigator<String> nav) throws RepositoryException {
+  private void writeNode(Node node, StaxNavigator<QName> nav) throws RepositoryException {
 
-    boolean found = nav.child("node");
+    QName current = nav.child();
 
-    while (found) {
+    while (current != null) {
 
-      Node created = node.addNode(nav.getAttribute("name"));
-      
+      if ("loader".equals(current.getPrefix())) {
+        current = nav.sibling();
+        continue;
+      }
+
+      String name = current.getLocalPart();
+      if (!"".equals(current.getPrefix())) {
+        name = current.getPrefix() + ":" + name;
+      }
+
+      String type = nav.getAttribute(new QName("loader", "type"));
+      Node created;
+      if (type == null) {
+        created = node.addNode(name);
+      }
+      else {
+        created = node.addNode(name, type);
+      }
+      LOG.info("Create node : " + created.getPath());
+
       writeNode(created, nav.fork());
+      handleMixins(created, nav.fork());
       writeProperty(created, nav.fork());
 
-      found = nav.sibling("node");
+      current = nav.sibling();
 
     }
   }
 
-  private void writeProperty(Node node, StaxNavigator<String> nav) throws RepositoryException {
+  private void writeProperty(Node node, StaxNavigator<QName> nav) throws RepositoryException {
 
-    boolean found = nav.child("property");
+    Map<QName, String> attributes = nav.getQualifiedAttributes();
+    if (attributes.isEmpty()) {
+      return;
+    }
+
+    for (QName key : attributes.keySet()) {
+
+
+      if ("loader".equals(key.getPrefix())) {
+        continue;
+      }
+
+      String name = key.getLocalPart();
+      if (!"".equals(key.getPrefix())) {
+        name = key.getPrefix() + ":" + name;
+      }
+
+      Property p = node.setProperty(name, attributes.get(key));
+      LOG.info("Create property : " + p.getPath());
+    }
+
+  }
+
+  private void handleMixins(Node node, StaxNavigator<QName> nav) throws RepositoryException {
+
+    boolean found = nav.child(new QName("loader", "mixin"));
 
     while (found) {
 
-      node.setProperty(nav.getAttribute("name"), nav.getContent());
+      node.addMixin(nav.getContent());
 
-      found = nav.sibling("property");
+      found = nav.sibling(new QName("loader", "mixin"));
 
     }
 

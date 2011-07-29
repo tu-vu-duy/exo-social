@@ -108,4 +108,11 @@ public class LoadDataTestCase extends AbstractMigrationTestCase {
     assertEquals("somewhereValue", rootNode.getNode("fooA").getNode("barAB").getProperty("somewhere").getString());
     
   }
+
+  public void testNamespace() throws Exception {
+
+    assertNotNull(rootNode.getNode("exo:foo"));
+    assertEquals("value", rootNode.getNode("fooC").getProperty("exo:p").getString());
+
+  }
 }

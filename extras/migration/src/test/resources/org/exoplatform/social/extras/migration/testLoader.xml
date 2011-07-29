@@ -1,39 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<data>
-  <node name="fooA">
-    <node name="barAA">
-      <node name="foobarAAA"/>
-      <node name="foobarAAB"/>
-      <node name="foobarAAC"/>
-    </node>
-    <node name="barAB">
-      <node name="foobarABA"/>
-      <node name="foobarABB"/>
-      <property name="somewhere">somewhereValue</property>
-      <node name="foobarABC"/>
-    </node>
-    <node name="barAC">
-      <node name="foobarACA"/>
-      <node name="foobarACB"/>
-      <node name="foobarACC"/>
-    </node>
-  </node>
-  <node name="fooB">
-    <node name="barBA"/>
-    <node name="barBB">
-      <property name="nameBBA">valueBBA</property>
-      <property name="nameBBB">valueBBB</property>
-      <property name="nameBBC">valueBBC</property>
-    </node>
-    <node name="barBC"/>
-  </node>
-  <node name="fooC">
-    <node name="barCA">
-      <node name="sibling"/>
-      <node name="sibling"/>
-      <node name="sibling"/>
-    </node>
-    <node name="barCB"/>
-    <node name="barCC"/>
-  </node>
+<data xmlns:exo="http://www.exoplatform.com/jcr/exo/1.0">
+  <fooA>
+    <barAA>
+      <foobarAAA/>
+      <foobarAAB/>
+      <foobarAAC/>
+    </barAA>
+    <barAB somewhere="somewhereValue">
+      <foobarABA/>
+      <foobarABB/>
+      <foobarABC/>
+    </barAB>
+    <barAC>
+      <foobarACA/>
+      <foobarACB/>
+      <foobarACC/>
+    </barAC>
+  </fooA>
+  <fooB>
+    <barBA/>
+    <barBB nameBBA="valueBBA" nameBBB="valueBBB" nameBBC="valueBBC"/>
+    <barBC/>
+  </fooB>
+  <fooC exo:p="value">
+    <barCA>
+      <sibling/>
+      <sibling/>
+      <sibling/>
+    </barCA>
+    <barCB/>
+    <barCC/>
+  </fooC>
+  <exo:foo/>
 </data>

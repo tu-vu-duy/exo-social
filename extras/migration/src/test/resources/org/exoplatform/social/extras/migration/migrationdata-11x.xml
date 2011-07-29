@@ -1,26 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<data>
-  <node name="exo:applications">
-    <node name="Social_Identity">
+<data xmlns:exo="http://www.exoplatform.com/jcr/exo/1.0" xmlns:loader="loader">
+  <exo:applications>
+    <Social_Identity>
+      
+      <exo:identity loader:type="exo:identity"
+          exo:providerId="organization"
+          exo:remoteId="user_idA"
+          >
+          <!--<loader:mixin>exo:sortable</loader:mixin>
+          <loader:mixin>exo:modify</loader:mixin>
+          <loader:mixin>exo:datetime</loader:mixin>
+          <loader:mixin>exo:owneable</loader:mixin>
+          <loader:mixin>mix:referenceable</loader:mixin>-->
+        </exo:identity>
 
-      <node name="exo:identity"></node>
-      <node name="exo:identity"></node>
-      <node name="exo:identity"></node>
-      <node name="exo:identity"></node>
-      <node name="exo:identity"></node>
+      <exo:identity loader:type="exo:identity"
+          exo:providerId="organization"
+          exo:remoteId="user_idB"
+          />
+      <exo:identity loader:type="exo:identity"
+          exo:providerId="organization"
+          exo:remoteId="user_idC"
+          />
+      <exo:identity loader:type="exo:identity"
+          exo:providerId="organization"
+          exo:remoteId="user_idD"
+          />
+      <exo:identity loader:type="exo:identity"
+          exo:providerId="organization"
+          exo:remoteId="user_idE"
+          />
 
-      <node name="user_a"></node>
-      <node name="user_b"></node>
-      <node name="user_c"></node>
-      <node name="user_d"></node>
-      <node name="user_e"></node>
+      <user_a loader:type="exo:identity"
+          exo:providerId="organization"
+          exo:remoteId="user_a"
+          />
+      <user_b loader:type="exo:identity"
+          exo:providerId="organization"
+          exo:remoteId="user_b"
+          />
+      <user_c loader:type="exo:identity"
+          exo:providerId="organization"
+          exo:remoteId="user_c"
+          />
+      <user_d loader:type="exo:identity"
+          exo:providerId="organization"
+          exo:remoteId="user_d"
+          />
+      <user_e loader:type="exo:identity"
+          exo:providerId="organization"
+          exo:remoteId="user_e"
+          />
 
-      <node name="azertyuiop1234567890"></node>
-      <node name="azertyuiop1234567891"></node>
-      <node name="azertyuiop1234567892"></node>
-      <node name="azertyuiop1234567893"></node>
-      <node name="azertyuiop1234567894"></node>
+    </Social_Identity>
 
-    </node>
-  </node>
+    <Social_Space/>
+    <Social_Relationship/>
+    <Social_Profile/>
+    <Social_Activity/>
+    
+  </exo:applications>
 </data>

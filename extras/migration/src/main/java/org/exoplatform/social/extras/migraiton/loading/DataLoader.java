@@ -26,10 +26,12 @@ import org.staxnav.Naming;
 import org.staxnav.StaxNavigator;
 import org.staxnav.StaxNavigatorImpl;
 
+import javax.jcr.Item;
 import javax.jcr.Node;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.jcr.nodetype.PropertyDefinition;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -144,8 +146,15 @@ public class DataLoader {
         name = key.getPrefix() + ":" + name;
       }
 
-      Property p = node.setProperty(name, attributes.get(key));
-      LOG.info("Create property : " + p.getPath());
+      String propertyValue = resolvePropertyValue(attributes.get(key));
+      Property p;
+      if (isMultiple(node, name)) {
+        p = node.setProperty(name, propertyValue.split(","));
+      }
+      else {
+        p = node.setProperty(name, propertyValue);
+      }
+      LOG.info("Create property : " + p.getPath() + " = " + propertyValue);
     }
 
   }
@@ -162,6 +171,30 @@ public class DataLoader {
 
     }
 
+  }
+
+  private String resolvePropertyValue(String value) throws RepositoryException {
+
+    // get UUID from path
+    if (value.startsWith("@")) {
+      Item item = session.getItem(value.substring(1));
+      if (item.isNode()) {
+        return ((Node) item).getUUID();
+      }
+    }
+
+    // return value
+    return value;
+
+  }
+
+  private boolean isMultiple(Node node, String propertyName) throws RepositoryException {
+    for (PropertyDefinition propertyDefinition : node.getPrimaryNodeType().getPropertyDefinitions()) {
+      if (propertyDefinition.getName().equals(propertyName)) {
+        return propertyDefinition.isMultiple();
+      }
+    }
+    return false;
   }
   
 }

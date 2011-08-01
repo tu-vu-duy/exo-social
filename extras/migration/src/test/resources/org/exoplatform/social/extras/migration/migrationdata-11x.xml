@@ -10,52 +10,134 @@
           <!--<loader:mixin>exo:sortable</loader:mixin>
           <loader:mixin>exo:modify</loader:mixin>
           <loader:mixin>exo:datetime</loader:mixin>
-          <loader:mixin>exo:owneable</loader:mixin>
-          <loader:mixin>mix:referenceable</loader:mixin>-->
+          <loader:mixin>exo:owneable</loader:mixin>-->
+          <loader:mixin>mix:referenceable</loader:mixin>
         </exo:identity>
 
       <exo:identity loader:type="exo:identity"
           exo:providerId="organization"
           exo:remoteId="user_idB"
-          />
+          >
+          <loader:mixin>mix:referenceable</loader:mixin>
+      </exo:identity>
       <exo:identity loader:type="exo:identity"
           exo:providerId="organization"
           exo:remoteId="user_idC"
-          />
+          >
+          <loader:mixin>mix:referenceable</loader:mixin>
+      </exo:identity>
       <exo:identity loader:type="exo:identity"
           exo:providerId="organization"
           exo:remoteId="user_idD"
-          />
+          >
+          <loader:mixin>mix:referenceable</loader:mixin>
+      </exo:identity>
       <exo:identity loader:type="exo:identity"
           exo:providerId="organization"
           exo:remoteId="user_idE"
-          />
+          >
+          <loader:mixin>mix:referenceable</loader:mixin>
+      </exo:identity>
 
       <user_a loader:type="exo:identity"
           exo:providerId="organization"
           exo:remoteId="user_a"
-          />
+          >
+          <loader:mixin>mix:referenceable</loader:mixin>
+      </user_a>
       <user_b loader:type="exo:identity"
           exo:providerId="organization"
           exo:remoteId="user_b"
-          />
+          >
+          <loader:mixin>mix:referenceable</loader:mixin>
+      </user_b>
       <user_c loader:type="exo:identity"
           exo:providerId="organization"
           exo:remoteId="user_c"
-          />
+          >
+          <loader:mixin>mix:referenceable</loader:mixin>
+      </user_c>
       <user_d loader:type="exo:identity"
           exo:providerId="organization"
           exo:remoteId="user_d"
-          />
+          >
+          <loader:mixin>mix:referenceable</loader:mixin>
+      </user_d>
       <user_e loader:type="exo:identity"
           exo:providerId="organization"
           exo:remoteId="user_e"
-          />
+          >
+          <loader:mixin>mix:referenceable</loader:mixin>
+      </user_e>
 
     </Social_Identity>
 
-    <Social_Space/>
-    <Social_Relationship/>
+    <Social_Space>
+      <Space>
+        <exo:space loader:type="exo:space"
+            exo:description="foo A"
+            exo:name="Name A"
+            exo:groupId="/spaces/namea"
+            exo:pendingUsers="user_a,user_b,user_d"
+            exo:priority="2"
+            exo:registration="validation"
+            exo:type="classic"
+            exo:url="namea"
+            exo:visibility="private"
+        />
+        <exo:space loader:type="exo:space"
+            exo:description="foo B"
+            exo:name="Name B"
+            exo:groupId="/spaces/nameb"
+            exo:priority="2"
+            exo:registration="validation"
+            exo:type="classic"
+            exo:url="nameb"
+            exo:visibility="private"
+        >
+          <image loader:type="nt:file"/>
+        </exo:space>
+      </Space>
+    </Social_Space>
+
+    <Social_Relationship>
+      <exo:relationship loader:type="exo:relationship"
+          exo:identity1Id="@/exo:applications/Social_Identity/exo:identity[3]"
+          exo:identity2Id="@/exo:applications/Social_Identity/exo:identity[2]"
+          exo:status="CONFIRM"
+          />
+      <exo:relationship loader:type="exo:relationship"
+          exo:identity1Id="@/exo:applications/Social_Identity/exo:identity[3]"
+          exo:identity2Id="@/exo:applications/Social_Identity/exo:identity[4]"
+          exo:status="PENDING"
+          />
+      <exo:relationship loader:type="exo:relationship"
+          exo:identity1Id="@/exo:applications/Social_Identity/user_a"
+          exo:identity2Id="@/exo:applications/Social_Identity/exo:identity[4]"
+          exo:status="CONFIRM"
+          />
+      <exo:relationship loader:type="exo:relationship"
+          exo:identity1Id="@/exo:applications/Social_Identity/user_d"
+          exo:identity2Id="@/exo:applications/Social_Identity/exo:identity"
+          exo:status="CONFIRM"
+          />
+      <exo:relationship loader:type="exo:relationship"
+          exo:identity1Id="@/exo:applications/Social_Identity/user_b"
+          exo:identity2Id="@/exo:applications/Social_Identity/user_a"
+          exo:status="PENDING"
+          />
+      <exo:relationship loader:type="exo:relationship"
+          exo:identity1Id="@/exo:applications/Social_Identity/user_c"
+          exo:identity2Id="@/exo:applications/Social_Identity/user_d"
+          exo:status="CONFIRM"
+          />
+      <ec1bbdea2e8902a901cf62bd95f0bdc8 loader:type="exo:relationship"
+          exo:identity1Id="@/exo:applications/Social_Identity/user_c"
+          exo:identity2Id="@/exo:applications/Social_Identity/user_a"
+          exo:status="CONFIRM"
+          />
+    </Social_Relationship>
+
     <Social_Profile/>
     <Social_Activity/>
     

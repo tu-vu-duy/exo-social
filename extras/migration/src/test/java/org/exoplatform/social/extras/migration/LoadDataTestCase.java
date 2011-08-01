@@ -20,6 +20,9 @@ package org.exoplatform.social.extras.migration;
 import org.exoplatform.social.extras.migraiton.loading.DataLoader;
 
 import javax.jcr.Node;
+import javax.jcr.Property;
+import javax.jcr.Value;
+import javax.jcr.nodetype.NodeType;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
@@ -113,6 +116,38 @@ public class LoadDataTestCase extends AbstractMigrationTestCase {
 
     assertNotNull(rootNode.getNode("exo:foo"));
     assertEquals("value", rootNode.getNode("fooC").getProperty("exo:p").getString());
+
+  }
+
+  public void testRef() throws Exception {
+
+    Property p = rootNode.getNode("fooC").getNode("barCB").getProperty("ref");
+    String id = rootNode.getNode("fooA").getNode("barAB").getNode("foobarABC").getUUID();
+
+    assertNotNull(p.getString());
+    assertEquals(id, p.getString());
+
+  }
+
+  public void testMixin() throws Exception {
+
+    NodeType[] mixins = rootNode.getNode("fooA").getNode("barAB").getNode("foobarABC").getMixinNodeTypes();
+
+    assertEquals(1, mixins.length);
+    assertEquals("mix:referenceable", mixins[0].getName());
+
+  }
+
+  public void testMultiple() throws Exception {
+
+    Value[] values = rootNode.getNode("fooD").getProperty("multiple").getValues();
+
+    assertEquals(5, values.length);
+    assertEquals("a", values[0].getString());
+    assertEquals("b", values[1].getString());
+    assertEquals("c", values[2].getString());
+    assertEquals("d", values[3].getString());
+    assertEquals("e", values[4].getString());
 
   }
 }

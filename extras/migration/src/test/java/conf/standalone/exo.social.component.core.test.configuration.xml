@@ -475,6 +475,7 @@
           <description>Node types configuration file</description>
           <value>jar:/conf/portal/chromattic-nodetypes.xml</value>
           <value>jar:/conf/standalone/nodetypes-11x.xml</value>
+          <value>jar:/conf/standalone/testLoader-nodetype.xml</value>
         </values-param>
       </init-params>
     </component-plugin>

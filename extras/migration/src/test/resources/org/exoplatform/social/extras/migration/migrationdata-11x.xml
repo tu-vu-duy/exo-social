@@ -226,7 +226,14 @@
       </exo:profile>
     </Social_Profile>
 
-    <Social_Activity/>
+    <Social_Activity>
+      <organization>
+        <user_a>
+          <published/>
+        </user_a>
+      </organization>
+      <space/>
+    </Social_Activity>
     
   </exo:applications>
 </data>

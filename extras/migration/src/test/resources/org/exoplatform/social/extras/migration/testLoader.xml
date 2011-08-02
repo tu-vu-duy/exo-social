@@ -30,7 +30,7 @@
       <sibling/>
       <sibling/>
     </barCA>
-    <barCB ref="@/fooA/barAB/foobarABC" />
+    <barCB ref="#/fooA/barAB/foobarABC" />
     <barCC/>
   </fooC>
   <fooD loader:type="testmultiple" multiple="a,b,c,d,e"/>

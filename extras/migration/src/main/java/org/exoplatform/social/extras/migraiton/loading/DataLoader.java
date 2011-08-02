@@ -176,7 +176,7 @@ public class DataLoader {
   private String resolvePropertyValue(String value) throws RepositoryException {
 
     // get UUID from path
-    if (value.startsWith("@")) {
+    if (value.startsWith("#")) {
       Item item = session.getItem(value.substring(1));
       if (item.isNode()) {
         return ((Node) item).getUUID();

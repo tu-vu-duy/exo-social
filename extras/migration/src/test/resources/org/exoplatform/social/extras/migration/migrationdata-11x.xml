@@ -132,38 +132,38 @@
 
     <Social_Relationship>
       <exo:relationship loader:type="exo:relationship"
-          exo:identity1Id="@/exo:applications/Social_Identity/exo:identity[3]"
-          exo:identity2Id="@/exo:applications/Social_Identity/exo:identity[2]"
+          exo:identity1Id="#/exo:applications/Social_Identity/exo:identity[3]"
+          exo:identity2Id="#/exo:applications/Social_Identity/exo:identity[2]"
           exo:status="CONFIRM"
           />
       <exo:relationship loader:type="exo:relationship"
-          exo:identity1Id="@/exo:applications/Social_Identity/exo:identity[3]"
-          exo:identity2Id="@/exo:applications/Social_Identity/exo:identity[4]"
+          exo:identity1Id="#/exo:applications/Social_Identity/exo:identity[3]"
+          exo:identity2Id="#/exo:applications/Social_Identity/exo:identity[4]"
           exo:status="PENDING"
           />
       <exo:relationship loader:type="exo:relationship"
-          exo:identity1Id="@/exo:applications/Social_Identity/user_a"
-          exo:identity2Id="@/exo:applications/Social_Identity/exo:identity[4]"
+          exo:identity1Id="#/exo:applications/Social_Identity/user_a"
+          exo:identity2Id="#/exo:applications/Social_Identity/exo:identity[4]"
           exo:status="CONFIRM"
           />
       <exo:relationship loader:type="exo:relationship"
-          exo:identity1Id="@/exo:applications/Social_Identity/user_d"
-          exo:identity2Id="@/exo:applications/Social_Identity/exo:identity"
+          exo:identity1Id="#/exo:applications/Social_Identity/user_d"
+          exo:identity2Id="#/exo:applications/Social_Identity/exo:identity"
           exo:status="CONFIRM"
           />
       <exo:relationship loader:type="exo:relationship"
-          exo:identity1Id="@/exo:applications/Social_Identity/user_b"
-          exo:identity2Id="@/exo:applications/Social_Identity/user_a"
+          exo:identity1Id="#/exo:applications/Social_Identity/user_b"
+          exo:identity2Id="#/exo:applications/Social_Identity/user_a"
           exo:status="PENDING"
           />
       <exo:relationship loader:type="exo:relationship"
-          exo:identity1Id="@/exo:applications/Social_Identity/user_c"
-          exo:identity2Id="@/exo:applications/Social_Identity/user_d"
+          exo:identity1Id="#/exo:applications/Social_Identity/user_c"
+          exo:identity2Id="#/exo:applications/Social_Identity/user_d"
           exo:status="CONFIRM"
           />
       <ec1bbdea2e8902a901cf62bd95f0bdc8 loader:type="exo:relationship"
-          exo:identity1Id="@/exo:applications/Social_Identity/user_c"
-          exo:identity2Id="@/exo:applications/Social_Identity/user_a"
+          exo:identity1Id="#/exo:applications/Social_Identity/user_c"
+          exo:identity2Id="#/exo:applications/Social_Identity/user_a"
           exo:status="CONFIRM"
           />
     </Social_Relationship>
@@ -175,7 +175,7 @@
           lastName="a"
           position="position a"
           username="user_a"
-          exo:identity="@/exo:applications/Social_Identity/user_a"
+          exo:identity="#/exo:applications/Social_Identity/user_a"
           >
         <avatar loader:type="nt:file"/>
         <emails loader:type="exo:profileKeyValue"
@@ -229,7 +229,38 @@
     <Social_Activity>
       <organization>
         <user_a>
-          <published/>
+          <published>
+            <ad25a8622e8902a9004557b913a2982b loader:type="exo:activity"
+                exo:hidden="false"
+                exo:params="SENDER=user_b,RECEIVER=user_a"
+                exo:postedTime="1298642872377"
+                exo:title="@user_b has invited @user_a to connect"
+                exo:titleTemplate="CONNECTION_REQUESTED"
+                exo:type="exosocial:relationship"
+                exo:updatedTimestamp="1298642872377"
+                exo:userId="#/exo:applications/Social_Identity/user_a"
+              />
+            <ad25a8622e8902a9004557b913a2982c loader:type="exo:activity"
+                exo:hidden="false"
+                exo:params="SENDER=user_c,RECEIVER=user_a"
+                exo:postedTime="1298642872378"
+                exo:title="@user_c has invited @user_a to connect"
+                exo:titleTemplate="CONNECTION_REQUESTED"
+                exo:type="exosocial:relationship"
+                exo:updatedTimestamp="1298642872378"
+                exo:userId="#/exo:applications/Social_Identity/user_a"
+              />
+            <ad25a8622e8902a9004557b913a2982d loader:type="exo:activity"
+                exo:hidden="false"
+                exo:params="SENDER=user_d,RECEIVER=user_a"
+                exo:postedTime="1298642872379"
+                exo:title="@user_d has invited @user_a to connect"
+                exo:titleTemplate="CONNECTION_REQUESTED"
+                exo:type="exosocial:relationship"
+                exo:updatedTimestamp="1298642872379"
+                exo:userId="#/exo:applications/Social_Identity/user_a"
+              />
+          </published>
         </user_a>
       </organization>
       <space/>

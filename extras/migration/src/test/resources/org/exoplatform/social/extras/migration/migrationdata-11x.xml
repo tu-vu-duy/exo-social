@@ -7,10 +7,6 @@
           exo:providerId="organization"
           exo:remoteId="user_idA"
           >
-          <!--<loader:mixin>exo:sortable</loader:mixin>
-          <loader:mixin>exo:modify</loader:mixin>
-          <loader:mixin>exo:datetime</loader:mixin>
-          <loader:mixin>exo:owneable</loader:mixin>-->
           <loader:mixin>mix:referenceable</loader:mixin>
         </exo:identity>
 
@@ -97,6 +93,40 @@
         >
           <image loader:type="nt:file"/>
         </exo:space>
+        <exo:space loader:type="exo:space"
+            exo:description="foo C"
+            exo:name="Name C"
+            exo:groupId="/spaces/namec"
+            exo:priority="2"
+            exo:invitedUsers="user_a,user_d"
+            exo:registration="validation"
+            exo:type="classic"
+            exo:url="namec"
+            exo:visibility="private"
+        />
+        <exo:space loader:type="exo:space"
+            exo:description="foo D"
+            exo:name="Name D"
+            exo:groupId="/spaces/named"
+            exo:priority="2"
+            exo:invitedUsers="user_a,user_d"
+            exo:registration="validation"
+            exo:type="classic"
+            exo:url="named"
+            exo:visibility="private"
+        />
+        <exo:space loader:type="exo:space"
+            exo:description="foo E"
+            exo:name="Name E"
+            exo:groupId="/spaces/namee"
+            exo:priority="2"
+            exo:pendingUsers="user_c"
+            exo:invitedUsers="user_a,user_d"
+            exo:registration="validation"
+            exo:type="classic"
+            exo:url="named"
+            exo:visibility="private"
+        />
       </Space>
     </Social_Space>
 
@@ -138,7 +168,64 @@
           />
     </Social_Relationship>
 
-    <Social_Profile/>
+    <Social_Profile>
+      <exo:profile
+          Url="/portal/private/classic/profile/user_a"
+          firstName="a"
+          lastName="a"
+          position="position a"
+          username="user_a"
+          exo:identity="@/exo:applications/Social_Identity/user_a"
+          >
+        <avatar loader:type="nt:file"/>
+        <emails loader:type="exo:profileKeyValue"
+            key="work"
+            value="user_a@foo.com"
+         />
+        <ims loader:type="exo:profileKeyValue"
+            key="Gtalk"
+            value="user_a1"
+            />
+        <ims loader:type="exo:profileKeyValue"
+            key="Msn"
+            value="user_a2"
+            />
+        <urls loader:type="exo:profileKeyValue"
+            key="http://foo.com"
+            value="http://foo.com"
+            />
+        <urls loader:type="exo:profileKeyValue"
+            key="http://bar.com"
+            value="http://bar.com"
+            />
+        <phones loader:type="exo:profileKeyValue"
+            key="Work"
+            value="0000000000"
+            />
+        <phones loader:type="exo:profileKeyValue"
+            key="Home"
+            value="0000000001"
+            />
+        <experiences loader:type="exo:profileExperience"
+            company="foo"
+            description="bar"
+            startDate="01/08/2011"
+            endDate="02/08/2011"
+            isCurrent="false"
+            position="foobar"
+            skills="foo, bar"
+            />
+        <experiences loader:type="exo:profileExperience"
+            company="foo"
+            description="bar"
+            startDate="01/08/2011"
+            isCurrent="true"
+            position="foobar"
+            skills="foo, bar"
+            />
+      </exo:profile>
+    </Social_Profile>
+
     <Social_Activity/>
     
   </exo:applications>

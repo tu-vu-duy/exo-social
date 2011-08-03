@@ -22,6 +22,10 @@ import org.exoplatform.services.jcr.RepositoryService;
 import org.exoplatform.services.jcr.core.ManageableRepository;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.exoplatform.services.organization.Group;
+import org.exoplatform.services.organization.OrganizationService;
+import org.exoplatform.services.organization.User;
+import org.exoplatform.social.core.identity.model.GlobalId;
 import org.staxnav.Naming;
 import org.staxnav.StaxNavigator;
 import org.staxnav.StaxNavigatorImpl;
@@ -47,9 +51,18 @@ public class DataLoader {
 
   private final StaxNavigator<QName> navigator;
 
+  private OrganizationService organizationService;
+
   private Session session;
 
   private final String DATA_PACKAGE = "org.exoplatform.social.extras.migration";
+  private final String EXO_NS = "http://www.exoplatform.com/jcr/exo/1.0";
+  private final String LOADER_NS = "loader";
+
+  private final String TYPE_NODE = "type";
+  private final String PROVIDER_ID_NODE = "providerId";
+  private final String REMOTE_ID_NODE = "remoteId";
+  private final String GROUP_ID_NODE = "groupId";
 
   private static final Log LOG = ExoLogger.getLogger(DataLoader.class);
 
@@ -57,6 +70,7 @@ public class DataLoader {
     if (session == null) {
       PortalContainer container = PortalContainer.getInstance();
       RepositoryService repositoryService = (RepositoryService) container.getComponentInstance(RepositoryService.class);
+      organizationService = (OrganizationService) container.getComponentInstance(OrganizationService.class);
       ManageableRepository repository = repositoryService.getCurrentRepository();
       session = repository.getSystemSession("portal-test");
     }
@@ -84,15 +98,15 @@ public class DataLoader {
 
   }
 
-  public void load() throws RepositoryException {
+  public void load() throws Exception {
 
     Node rootNode = getSession().getRootNode();
 
     writeNode(rootNode, navigator);
-    
+
   }
 
-  private void writeNode(Node node, StaxNavigator<QName> nav) throws RepositoryException {
+  private void writeNode(Node node, StaxNavigator<QName> nav) throws Exception {
 
     QName current = nav.child();
 
@@ -108,7 +122,7 @@ public class DataLoader {
         name = current.getPrefix() + ":" + name;
       }
 
-      String type = nav.getAttribute(new QName("loader", "type"));
+      String type = nav.getAttribute(new QName(LOADER_NS, TYPE_NODE));
       Node created;
       if (type == null) {
         created = node.addNode(name);
@@ -117,6 +131,9 @@ public class DataLoader {
         created = node.addNode(name, type);
       }
       LOG.info("Create node : " + created.getPath());
+
+      handleUser(type, nav);
+      handleGroup(type, nav);
 
       writeNode(created, nav.fork());
       handleMixins(created, nav.fork());
@@ -171,6 +188,30 @@ public class DataLoader {
 
     }
 
+  }
+
+  private void handleUser(String type, StaxNavigator<QName> nav) throws Exception {
+    if ("exo:identity".equals(type)) {
+      if (nav.getAttribute(new QName(EXO_NS, PROVIDER_ID_NODE)).equals("organization")) {
+        String username = nav.getAttribute(new QName(EXO_NS, REMOTE_ID_NODE));
+        User u = organizationService.getUserHandler().createUserInstance(username);
+        organizationService.getUserHandler().createUser(u, true);
+        LOG.info("Create user : " + u.getUserName());
+      }
+    }
+  }
+
+  private void handleGroup(String type, StaxNavigator<QName> nav) throws Exception {
+    if ("exo:space".equals(type)) {
+      Group g = organizationService.getGroupHandler().createGroupInstance();
+      String groupId = nav.getAttribute(new QName(EXO_NS, GROUP_ID_NODE));
+      String title = nav.getAttribute(new QName(EXO_NS, "name"));
+      g.setGroupName(groupId.substring(groupId.lastIndexOf("/")));
+      g.setLabel(title);
+      System.out.println(new GlobalId(g.getId()));
+      Group spaces = organizationService.getGroupHandler().findGroupById("/spaces");
+      organizationService.getGroupHandler().addChild(spaces, g, true);
+    }
   }
 
   private String resolvePropertyValue(String value) throws RepositoryException {

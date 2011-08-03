@@ -25,7 +25,6 @@ import org.exoplatform.services.log.Log;
 import org.exoplatform.services.organization.Group;
 import org.exoplatform.services.organization.OrganizationService;
 import org.exoplatform.services.organization.User;
-import org.exoplatform.social.core.identity.model.GlobalId;
 import org.staxnav.Naming;
 import org.staxnav.StaxNavigator;
 import org.staxnav.StaxNavigatorImpl;
@@ -208,7 +207,6 @@ public class DataLoader {
       String title = nav.getAttribute(new QName(EXO_NS, "name"));
       g.setGroupName(groupId.substring(groupId.lastIndexOf("/")));
       g.setLabel(title);
-      System.out.println(new GlobalId(g.getId()));
       Group spaces = organizationService.getGroupHandler().findGroupById("/spaces");
       organizationService.getGroupHandler().addChild(spaces, g, true);
     }

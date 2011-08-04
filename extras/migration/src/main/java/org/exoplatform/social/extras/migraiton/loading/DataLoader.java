@@ -123,15 +123,23 @@ public class DataLoader {
       }
 
       String type = nav.getAttribute(new QName(LOADER_NS, TYPE_NODE));
+      String reuse = nav.getAttribute(new QName(LOADER_NS, "reuse"));
 
       Node created;
-      if (type == null) {
-        created = node.addNode(name);
+
+      if (!"true".equals(reuse)) {
+
+        if (type == null) {
+          created = node.addNode(name);
+        }
+        else {
+          created = node.addNode(name, type);
+        }
+        LOG.info("Create node : " + created.getPath());
       }
       else {
-        created = node.addNode(name, type);
+        created = node.getNode(name);
       }
-      LOG.info("Create node : " + created.getPath());
 
       //
       handleUser(type, nav);

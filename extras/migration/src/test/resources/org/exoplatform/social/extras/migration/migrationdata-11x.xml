@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <data xmlns:exo="http://www.exoplatform.com/jcr/exo/1.0" xmlns:loader="loader">
   <exo:applications>
+
+    <!-- User identity -->
     <Social_Identity>
       
       <exo:identity loader:type="exo:identity"
@@ -68,6 +70,7 @@
 
     </Social_Identity>
 
+    <!-- Spaces -->
     <Social_Space>
       <Space>
         <exo:space loader:type="exo:space"
@@ -80,7 +83,9 @@
             exo:type="classic"
             exo:url="namea"
             exo:visibility="private"
-        />
+        >
+          <loader:mixin>mix:referenceable</loader:mixin>
+        </exo:space>
         <exo:space loader:type="exo:space"
             exo:description="foo B"
             exo:name="Name B"
@@ -93,6 +98,7 @@
         >
           <image loader:type="nt:file"/>
           <loader:membership members="user_a,user_b" managers="user_c"/>
+          <loader:mixin>mix:referenceable</loader:mixin>
         </exo:space>
         <exo:space loader:type="exo:space"
             exo:description="foo C"
@@ -104,7 +110,9 @@
             exo:type="classic"
             exo:url="namec"
             exo:visibility="private"
-        />
+        >
+          <loader:mixin>mix:referenceable</loader:mixin>
+        </exo:space>
         <exo:space loader:type="exo:space"
             exo:description="foo D"
             exo:name="Name D"
@@ -115,7 +123,9 @@
             exo:type="classic"
             exo:url="named"
             exo:visibility="private"
-        />
+        >
+          <loader:mixin>mix:referenceable</loader:mixin>
+        </exo:space>
         <exo:space loader:type="exo:space"
             exo:description="foo E"
             exo:name="Name E"
@@ -127,10 +137,35 @@
             exo:type="classic"
             exo:url="named"
             exo:visibility="private"
-        />
+        >
+          <loader:mixin>mix:referenceable</loader:mixin>
+        </exo:space>
       </Space>
     </Social_Space>
 
+    <!-- Space Identities -->
+    <Social_Identity loader:reuse="true">
+      <exo:identity loader:type="exo:identity"
+          exo:providerId="space"
+          exo:remoteId="#/exo:applications/Social_Space/Space/exo:space"
+          >
+          <loader:mixin>mix:referenceable</loader:mixin>
+        </exo:identity>
+      <exo:identity loader:type="exo:identity"
+          exo:providerId="space"
+          exo:remoteId="#/exo:applications/Social_Space/Space/exo:space[2]"
+          >
+          <loader:mixin>mix:referenceable</loader:mixin>
+        </exo:identity>
+      <exo:identity loader:type="exo:identity"
+          exo:providerId="space"
+          exo:remoteId="#/exo:applications/Social_Space/Space/exo:space[3]"
+          >
+          <loader:mixin>mix:referenceable</loader:mixin>
+        </exo:identity>
+    </Social_Identity>
+
+    <!-- Relationship -->
     <Social_Relationship>
       <exo:relationship loader:type="exo:relationship"
           exo:identity1Id="#/exo:applications/Social_Identity/exo:identity[3]"
@@ -169,6 +204,7 @@
           />
     </Social_Relationship>
 
+    <!-- Profiles -->
     <Social_Profile>
       <exo:profile
           Url="/portal/private/classic/profile/user_a"
@@ -227,6 +263,7 @@
       </exo:profile>
     </Social_Profile>
 
+    <!-- Activities -->
     <Social_Activity>
       <organization>
         <user_a>
@@ -261,6 +298,7 @@
                 exo:updatedTimestamp="1298642872379"
                 exo:userId="#/exo:applications/Social_Identity/user_a"
               />
+            <!-- TODO : add space activity -->
           </published>
         </user_a>
       </organization>

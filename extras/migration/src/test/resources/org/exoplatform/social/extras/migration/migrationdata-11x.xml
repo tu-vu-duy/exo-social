@@ -92,6 +92,7 @@
             exo:visibility="private"
         >
           <image loader:type="nt:file"/>
+          <loader:membership members="user_a,user_b" managers="user_c"/>
         </exo:space>
         <exo:space loader:type="exo:space"
             exo:description="foo C"

@@ -23,6 +23,7 @@ import org.exoplatform.services.jcr.core.ManageableRepository;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.organization.Group;
+import org.exoplatform.services.organization.MembershipType;
 import org.exoplatform.services.organization.OrganizationService;
 import org.exoplatform.services.organization.User;
 import org.staxnav.Naming;
@@ -122,6 +123,7 @@ public class DataLoader {
       }
 
       String type = nav.getAttribute(new QName(LOADER_NS, TYPE_NODE));
+
       Node created;
       if (type == null) {
         created = node.addNode(name);
@@ -131,9 +133,14 @@ public class DataLoader {
       }
       LOG.info("Create node : " + created.getPath());
 
+      //
       handleUser(type, nav);
       handleGroup(type, nav);
+      if ("exo:space".equals(type)) {
+        handleMembership(node, nav.fork());
+      }
 
+      //
       writeNode(created, nav.fork());
       handleMixins(created, nav.fork());
       writeProperty(created, nav.fork());
@@ -189,6 +196,36 @@ public class DataLoader {
 
   }
 
+  private void handleMembership(Node node, StaxNavigator<QName> nav) throws Exception {
+
+    String groupId = nav.getAttribute(new QName(EXO_NS, "groupId"));
+    Group group = organizationService.getGroupHandler().findGroupById(groupId);
+
+    boolean found = nav.child(new QName("loader", "membership"));
+
+    while (found) {
+
+      String members = nav.getAttribute("members");
+      String managers = nav.getAttribute("managers");
+
+      if (members != null) {
+        for (String member : members.split(",")) {
+          writeMembership("member", member, group);
+        }
+      }
+
+      if (managers != null) {
+        for (String manager :  managers.split(",")) {
+          writeMembership("manager", manager, group);
+        }
+      }
+
+      found = nav.sibling(new QName("loader", "membership"));
+
+    }
+
+  }
+
   private void handleUser(String type, StaxNavigator<QName> nav) throws Exception {
     if ("exo:identity".equals(type)) {
       if (nav.getAttribute(new QName(EXO_NS, PROVIDER_ID_NODE)).equals("organization")) {
@@ -205,10 +242,11 @@ public class DataLoader {
       Group g = organizationService.getGroupHandler().createGroupInstance();
       String groupId = nav.getAttribute(new QName(EXO_NS, GROUP_ID_NODE));
       String title = nav.getAttribute(new QName(EXO_NS, "name"));
-      g.setGroupName(groupId.substring(groupId.lastIndexOf("/")));
+      g.setGroupName(groupId.substring(groupId.lastIndexOf("/") + 1));
       g.setLabel(title);
       Group spaces = organizationService.getGroupHandler().findGroupById("/spaces");
       organizationService.getGroupHandler().addChild(spaces, g, true);
+      LOG.info("Create group : " + g.getId());
     }
   }
 
@@ -225,6 +263,13 @@ public class DataLoader {
     // return value
     return value;
 
+  }
+
+  private void writeMembership(String typeName, String memberName, Group group) throws Exception {
+    MembershipType type = organizationService.getMembershipTypeHandler().findMembershipType(typeName);
+    User user = organizationService.getUserHandler().findUserByName(memberName);
+    organizationService.getMembershipHandler().linkMembership(user, group, type, true);
+    LOG.info("Create membership : " + user.getUserName() + " is " + type + " of " + group.getId());
   }
 
   private boolean isMultiple(Node node, String propertyName) throws RepositoryException {

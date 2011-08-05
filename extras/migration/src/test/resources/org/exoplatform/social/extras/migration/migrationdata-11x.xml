@@ -145,19 +145,19 @@
 
     <!-- Space Identities -->
     <Social_Identity loader:reuse="true">
-      <exo:identity loader:type="exo:identity"
+      <exo:identity loader:type="exo:identity" loader:overridename="#/exo:applications/Social_Space/Space/exo:space"
           exo:providerId="space"
           exo:remoteId="#/exo:applications/Social_Space/Space/exo:space"
           >
           <loader:mixin>mix:referenceable</loader:mixin>
         </exo:identity>
-      <exo:identity loader:type="exo:identity"
+      <exo:identity loader:type="exo:identity" loader:overridename="#/exo:applications/Social_Space/Space/exo:space[2]"
           exo:providerId="space"
           exo:remoteId="#/exo:applications/Social_Space/Space/exo:space[2]"
           >
           <loader:mixin>mix:referenceable</loader:mixin>
         </exo:identity>
-      <exo:identity loader:type="exo:identity"
+      <exo:identity loader:type="exo:identity" loader:overridename="#/exo:applications/Social_Space/Space/exo:space[3]"
           exo:providerId="space"
           exo:remoteId="#/exo:applications/Social_Space/Space/exo:space[3]"
           >
@@ -298,11 +298,39 @@
                 exo:updatedTimestamp="1298642872379"
                 exo:userId="#/exo:applications/Social_Identity/user_a"
               />
-            <!-- TODO : add space activity -->
           </published>
         </user_a>
       </organization>
-      <space/>
+      <space>
+        <uuid loader:overridename="#/exo:applications/Social_Space/Space/exo:space">
+          <published>
+            <ad25a8622e8902a9004557b913a2983b loader:type="exo:activity"
+                exo:hidden="false"
+                exo:postedTime="1298642872377"
+                exo:title="@user_a has joined."
+                exo:type="exosocial:spaces"
+                exo:updatedTimestamp="1298642872377"
+                exo:userId="#/exo:applications/Social_Identity/user_a"
+              />
+            <ad25a8622e8902a9004557b913a2983c loader:type="exo:activity"
+                exo:hidden="false"
+                exo:postedTime="1298642872377"
+                exo:title="@user_b has joined."
+                exo:type="exosocial:spaces"
+                exo:updatedTimestamp="1298642872377"
+                exo:userId="#/exo:applications/Social_Identity/user_b"
+              />
+            <ad25a8622e8902a9004557b913a2983d loader:type="exo:activity"
+                exo:hidden="false"
+                exo:postedTime="1298642872377"
+                exo:title="@user_c has joined."
+                exo:type="exosocial:spaces"
+                exo:updatedTimestamp="1298642872377"
+                exo:userId="#/exo:applications/Social_Identity/user_c"
+              />
+          </published>
+        </uuid>
+      </space>
     </Social_Activity>
     
   </exo:applications>

@@ -124,6 +124,11 @@ public class DataLoader {
 
       String type = nav.getAttribute(new QName(LOADER_NS, TYPE_NODE));
       String reuse = nav.getAttribute(new QName(LOADER_NS, "reuse"));
+      String overridename = nav.getAttribute(new QName(LOADER_NS, "overridename"));
+
+      if (overridename != null) {
+        name = resolvePropertyValue(overridename);
+      }
 
       Node created;
 

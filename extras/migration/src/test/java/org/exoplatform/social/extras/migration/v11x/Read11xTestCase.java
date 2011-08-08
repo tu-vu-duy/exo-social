@@ -15,7 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.extras.migration;
+package org.exoplatform.social.extras.migration.v11x;
 
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.services.organization.Group;
@@ -24,6 +24,8 @@ import org.exoplatform.social.extras.migraiton.MigrationConst;
 import org.exoplatform.social.extras.migraiton.loading.DataLoader;
 import org.exoplatform.social.extras.migraiton.reader.NodeReader;
 import org.exoplatform.social.extras.migraiton.reader.NodeReader11x;
+import org.exoplatform.social.extras.migration.AbstractMigrationTestCase;
+import org.exoplatform.social.extras.migration.Utils;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;

@@ -15,17 +15,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.extras.migration;
+package org.exoplatform.social.extras.migration.v11x;
 
+import org.exoplatform.commons.utils.ListAccess;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.services.organization.Group;
 import org.exoplatform.services.organization.OrganizationService;
+import org.exoplatform.services.organization.User;
 import org.exoplatform.social.extras.migraiton.loading.DataLoader;
+import org.exoplatform.social.extras.migration.AbstractMigrationTestCase;
+import org.exoplatform.social.extras.migration.Utils;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Session;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
@@ -83,4 +88,29 @@ public class Load11xTestCase extends AbstractMigrationTestCase {
 
   }
 
+  public void testOrganizationUser() throws Exception {
+
+    assertEquals("user_a", organizationService.getUserHandler().findUserByName("user_a").getUserName());
+    assertEquals("user_b", organizationService.getUserHandler().findUserByName("user_b").getUserName());
+    assertEquals("user_c", organizationService.getUserHandler().findUserByName("user_c").getUserName());
+    assertEquals("user_d", organizationService.getUserHandler().findUserByName("user_d").getUserName());
+    assertEquals("user_e", organizationService.getUserHandler().findUserByName("user_e").getUserName());
+
+    assertEquals("user_idA", organizationService.getUserHandler().findUserByName("user_idA").getUserName());
+    assertEquals("user_idB", organizationService.getUserHandler().findUserByName("user_idB").getUserName());
+    assertEquals("user_idC", organizationService.getUserHandler().findUserByName("user_idC").getUserName());
+    assertEquals("user_idD", organizationService.getUserHandler().findUserByName("user_idD").getUserName());
+    assertEquals("user_idE", organizationService.getUserHandler().findUserByName("user_idE").getUserName());
+
+  }
+
+  public void testOrganizationGroup() throws Exception {
+
+    assertEquals("namea", organizationService.getGroupHandler().findGroupById("/spaces/namea").getGroupName());
+    assertEquals("nameb", organizationService.getGroupHandler().findGroupById("/spaces/nameb").getGroupName());
+    assertEquals("namec", organizationService.getGroupHandler().findGroupById("/spaces/namec").getGroupName());
+    assertEquals("named", organizationService.getGroupHandler().findGroupById("/spaces/named").getGroupName());
+    assertEquals("namee", organizationService.getGroupHandler().findGroupById("/spaces/namee").getGroupName());
+
+  }
 }

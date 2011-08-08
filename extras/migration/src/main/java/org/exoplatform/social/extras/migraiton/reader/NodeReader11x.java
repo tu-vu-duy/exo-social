@@ -47,15 +47,15 @@ public class NodeReader11x implements NodeReader {
   public void readIdentities(OutputStream os) throws RepositoryException, IOException {
 
     Node rootIdentity = rootNode.getNode("exo:applications").getNode("Social_Identity");
-
-    NodeIterator it = rootIdentity.getNodes();
-    while(it.hasNext()) {
-      writer.writeNode((Node) it.next(), os);
-    }
+    readFrom(rootIdentity, os);
 
   }
 
   public void readSpaces(OutputStream os) throws RepositoryException, IOException {
+
+    Node rootSpace = rootNode.getNode("exo:applications").getNode("Social_Space").getNode("Space");
+    readFrom(rootSpace, os);
+    
   }
 
   public void readProfiles(OutputStream os) throws RepositoryException, IOException {
@@ -66,9 +66,14 @@ public class NodeReader11x implements NodeReader {
 
   public void readRelationships(OutputStream os) throws RepositoryException, IOException {
 
-    Node rootIdentity = rootNode.getNode("exo:applications").getNode("Social_Relationship");
+    Node rootRelationship = rootNode.getNode("exo:applications").getNode("Social_Relationship");
+    readFrom(rootRelationship, os);
 
-    NodeIterator it = rootIdentity.getNodes();
+  }
+
+  private void readFrom(Node node, OutputStream os) throws RepositoryException, IOException {
+
+    NodeIterator it = node.getNodes();
     while(it.hasNext()) {
       writer.writeNode((Node) it.next(), os);
     }

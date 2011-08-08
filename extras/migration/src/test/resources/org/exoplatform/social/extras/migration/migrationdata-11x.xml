@@ -74,8 +74,8 @@
     <Social_Space>
       <Space>
         <exo:space loader:type="exo:space"
-            exo:description="foo A"
-            exo:name="Name A"
+            exo:description="foo a"
+            exo:name="Name a"
             exo:groupId="/spaces/namea"
             exo:pendingUsers="user_a,user_b,user_d"
             exo:priority="2"
@@ -87,8 +87,8 @@
           <loader:mixin>mix:referenceable</loader:mixin>
         </exo:space>
         <exo:space loader:type="exo:space"
-            exo:description="foo B"
-            exo:name="Name B"
+            exo:description="foo b"
+            exo:name="Name b"
             exo:groupId="/spaces/nameb"
             exo:priority="2"
             exo:registration="validation"
@@ -101,8 +101,8 @@
           <loader:mixin>mix:referenceable</loader:mixin>
         </exo:space>
         <exo:space loader:type="exo:space"
-            exo:description="foo C"
-            exo:name="Name C"
+            exo:description="foo c"
+            exo:name="Name c"
             exo:groupId="/spaces/namec"
             exo:priority="2"
             exo:invitedUsers="user_a,user_d"
@@ -114,8 +114,8 @@
           <loader:mixin>mix:referenceable</loader:mixin>
         </exo:space>
         <exo:space loader:type="exo:space"
-            exo:description="foo D"
-            exo:name="Name D"
+            exo:description="foo d"
+            exo:name="Name d"
             exo:groupId="/spaces/named"
             exo:priority="2"
             exo:invitedUsers="user_a,user_d"
@@ -127,15 +127,15 @@
           <loader:mixin>mix:referenceable</loader:mixin>
         </exo:space>
         <exo:space loader:type="exo:space"
-            exo:description="foo E"
-            exo:name="Name E"
+            exo:description="foo e"
+            exo:name="Name e"
             exo:groupId="/spaces/namee"
             exo:priority="2"
             exo:pendingUsers="user_c"
             exo:invitedUsers="user_a,user_d"
             exo:registration="validation"
             exo:type="classic"
-            exo:url="named"
+            exo:url="namee"
             exo:visibility="private"
         >
           <loader:mixin>mix:referenceable</loader:mixin>

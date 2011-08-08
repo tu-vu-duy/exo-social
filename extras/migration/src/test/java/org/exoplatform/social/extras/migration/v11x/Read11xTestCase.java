@@ -160,6 +160,26 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
 
   }
 
+  public void testReadSpaces() throws Exception {
+
+    NodeReader reader = new NodeReader11x(session);
+
+    //
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    reader.readSpaces(baos);
+
+    //
+    ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+    DataInputStream dis = new DataInputStream(bais);
+
+    checkSpace(dis, "exo:space", "a", new String[]{"user_a","user_b","user_d"}, null);
+    checkSpace(dis, "exo:space[2]", "b", null, null);
+    checkSpace(dis, "exo:space[3]", "c", null, new String[]{"user_a","user_d"});
+    checkSpace(dis, "exo:space[4]", "d", null, new String[]{"user_a","user_d"});
+    checkSpace(dis, "exo:space[5]", "e", new String[]{"user_c"}, new String[]{"user_a","user_d"});
+
+  }
+
   private void checkIdentity(DataInputStream dis, String nodeName, String remoteId, String providerId) throws IOException, RepositoryException {
 
     String path;
@@ -215,4 +235,76 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
     assertEquals(MigrationConst.END_NODE, dis.readInt());
 
   }
+
+  private void checkSpace(DataInputStream dis, String nodeName, String suffix, String[] pendingUsers, String[] invitedUsers) throws IOException, RepositoryException {
+
+    String path;
+
+    assertEquals(MigrationConst.START_NODE, dis.readInt());
+    assertEquals("/exo:applications/Social_Space/Space/" + nodeName, path = dis.readUTF());
+
+    assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("jcr:primaryType", dis.readUTF());
+    assertEquals("exo:space", dis.readUTF());
+
+    assertEquals(MigrationConst.PROPERTY_MULTI, dis.readInt());
+    assertEquals("jcr:mixinTypes", dis.readUTF());
+    assertEquals("mix:referenceable", dis.readUTF());
+
+    assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("jcr:uuid", dis.readUTF());
+    assertEquals(rootNode.getNode(path.substring(1)).getUUID(), dis.readUTF());
+
+    assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("exo:description", dis.readUTF());
+    assertEquals("foo " + suffix, dis.readUTF());
+    
+    assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("exo:groupId", dis.readUTF());
+    assertEquals("/spaces/name" + suffix, dis.readUTF());
+
+    if (invitedUsers != null) {
+      assertEquals(MigrationConst.PROPERTY_MULTI, dis.readInt());
+      assertEquals("exo:invitedUsers", dis.readUTF());
+      for (String invitedUser : invitedUsers) {
+        assertEquals(invitedUser, dis.readUTF());
+      }
+    }
+
+    assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("exo:name", dis.readUTF());
+    assertEquals("Name " + suffix, dis.readUTF());
+
+    if (pendingUsers != null) {
+      assertEquals(MigrationConst.PROPERTY_MULTI, dis.readInt());
+      assertEquals("exo:pendingUsers", dis.readUTF());
+      for (String pendingUser : pendingUsers) {
+        assertEquals(pendingUser, dis.readUTF());
+      }
+    }
+
+    assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("exo:priority", dis.readUTF());
+    assertEquals("2", dis.readUTF());
+
+    assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("exo:registration", dis.readUTF());
+    assertEquals("validation", dis.readUTF());
+
+    assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("exo:type", dis.readUTF());
+    assertEquals("classic", dis.readUTF());
+
+    assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("exo:url", dis.readUTF());
+    assertEquals("name" + suffix, dis.readUTF());
+
+    assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("exo:visibility", dis.readUTF());
+    assertEquals("private", dis.readUTF());
+
+    assertEquals(MigrationConst.END_NODE, dis.readInt());
+
+  }
+
 }

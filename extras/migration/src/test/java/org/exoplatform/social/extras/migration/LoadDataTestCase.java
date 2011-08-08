@@ -21,6 +21,7 @@ import org.exoplatform.social.extras.migraiton.loading.DataLoader;
 
 import javax.jcr.Node;
 import javax.jcr.Property;
+import javax.jcr.Session;
 import javax.jcr.Value;
 import javax.jcr.nodetype.NodeType;
 
@@ -37,9 +38,10 @@ public class LoadDataTestCase extends AbstractMigrationTestCase {
   public void setUp() throws Exception {
 
     super.setUp();
-    loader = new DataLoader("testLoader.xml");
+    Session session = Utils.getSession();
+    loader = new DataLoader("testLoader.xml", session);
     loader.load();
-    rootNode = loader.getSession().getRootNode();
+    rootNode = session.getRootNode();
 
   }
 

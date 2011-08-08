@@ -17,33 +17,59 @@
 
 package org.exoplatform.social.extras.migration;
 
+import org.exoplatform.container.PortalContainer;
+import org.exoplatform.services.organization.Group;
+import org.exoplatform.services.organization.OrganizationService;
 import org.exoplatform.social.extras.migraiton.loading.DataLoader;
 
 import javax.jcr.Node;
+import javax.jcr.NodeIterator;
+import javax.jcr.Session;
+import java.util.Collection;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class MigrationTestCase extends AbstractMigrationTestCase {
+public class Load11xTestCase extends AbstractMigrationTestCase {
 
   private DataLoader loader;
   private Node rootNode;
+  private Session session;
+  private OrganizationService organizationService;
 
   @Override
   public void setUp() throws Exception {
 
     super.setUp();
-    loader = new DataLoader("migrationdata-11x.xml");
+    session = Utils.getSession();
+    loader = new DataLoader("migrationdata-11x.xml", session);
     loader.load();
-    rootNode = loader.getSession().getRootNode();
+    rootNode = session.getRootNode();
+    
+    PortalContainer container = PortalContainer.getInstance();
+    organizationService = (OrganizationService) container.getComponentInstance(OrganizationService.class);
 
   }
 
   @Override
   public void tearDown() throws Exception {
 
+    NodeIterator it = rootNode.getNode("exo:applications").getNode("Social_Identity").getNodes();
+
+    while(it.hasNext()) {
+      String userName = ((Node) it.next()).getProperty("exo:remoteId").getString();
+      organizationService.getUserHandler().removeUser(userName, true);
+    }
+
+    Group spaces = organizationService.getGroupHandler().findGroupById("/spaces");
+    for (Group group : (Collection<Group>) organizationService.getGroupHandler().findGroups(spaces)) {
+      organizationService.getGroupHandler().removeGroup(group, true);
+    }
+
     rootNode.getNode("exo:applications").remove();
+
+    super.tearDown();
 
   }
 
@@ -56,4 +82,5 @@ public class MigrationTestCase extends AbstractMigrationTestCase {
     assertNotNull(rootNode.getNode("exo:applications").getNode("Social_Activity"));
 
   }
+
 }

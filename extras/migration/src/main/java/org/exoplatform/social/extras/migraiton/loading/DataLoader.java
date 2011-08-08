@@ -66,19 +66,11 @@ public class DataLoader {
 
   private static final Log LOG = ExoLogger.getLogger(DataLoader.class);
 
-  public Session getSession() throws RepositoryException {
-    if (session == null) {
-      PortalContainer container = PortalContainer.getInstance();
-      RepositoryService repositoryService = (RepositoryService) container.getComponentInstance(RepositoryService.class);
-      organizationService = (OrganizationService) container.getComponentInstance(OrganizationService.class);
-      ManageableRepository repository = repositoryService.getCurrentRepository();
-      session = repository.getSystemSession("portal-test");
-    }
-    return session;
-  }
-
-  public DataLoader(final String name) {
+  public DataLoader(final String name, final Session session) {
     
+    this.session = session;
+    PortalContainer container = PortalContainer.getInstance();
+    organizationService = (OrganizationService) container.getComponentInstance(OrganizationService.class);
     String fullName = DATA_PACKAGE.replace('.', '/') + '/' + name;
 
     InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(fullName);
@@ -100,7 +92,7 @@ public class DataLoader {
 
   public void load() throws Exception {
 
-    Node rootNode = getSession().getRootNode();
+    Node rootNode = session.getRootNode();
 
     writeNode(rootNode, navigator);
 
@@ -140,7 +132,7 @@ public class DataLoader {
         else {
           created = node.addNode(name, type);
         }
-        LOG.info("Create node : " + created.getPath());
+        LOG.trace("Create node : " + created.getPath());
       }
       else {
         created = node.getNode(name);
@@ -190,7 +182,7 @@ public class DataLoader {
       else {
         p = node.setProperty(name, propertyValue);
       }
-      LOG.info("Create property : " + p.getPath() + " = " + propertyValue);
+      LOG.trace("Create property : " + p.getPath() + " = " + propertyValue);
     }
 
   }
@@ -245,7 +237,7 @@ public class DataLoader {
         String username = nav.getAttribute(new QName(EXO_NS, REMOTE_ID_NODE));
         User u = organizationService.getUserHandler().createUserInstance(username);
         organizationService.getUserHandler().createUser(u, true);
-        LOG.info("Create user : " + u.getUserName());
+        LOG.trace("Create user : " + u.getUserName());
       }
     }
   }
@@ -259,7 +251,7 @@ public class DataLoader {
       g.setLabel(title);
       Group spaces = organizationService.getGroupHandler().findGroupById("/spaces");
       organizationService.getGroupHandler().addChild(spaces, g, true);
-      LOG.info("Create group : " + g.getId());
+      LOG.trace("Create group : " + g.getId());
     }
   }
 
@@ -282,7 +274,7 @@ public class DataLoader {
     MembershipType type = organizationService.getMembershipTypeHandler().findMembershipType(typeName);
     User user = organizationService.getUserHandler().findUserByName(memberName);
     organizationService.getMembershipHandler().linkMembership(user, group, type, true);
-    LOG.info("Create membership : " + user.getUserName() + " is " + type + " of " + group.getId());
+    LOG.trace("Create membership : " + user.getUserName() + " is " + type + " of " + group.getId());
   }
 
   private boolean isMultiple(Node node, String propertyName) throws RepositoryException {

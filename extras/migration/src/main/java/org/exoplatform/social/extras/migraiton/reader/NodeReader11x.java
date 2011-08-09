@@ -17,7 +17,7 @@
 
 package org.exoplatform.social.extras.migraiton.reader;
 
-import org.exoplatform.social.extras.migraiton.io.NodeOutputStreamWriter;
+import org.exoplatform.social.extras.migraiton.io.NodeStreamHandler;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
@@ -34,12 +34,12 @@ public class NodeReader11x implements NodeReader {
 
   private Session session;
   private Node rootNode;
-  private NodeOutputStreamWriter writer;
+  private NodeStreamHandler writer;
 
   public NodeReader11x(final Session session) throws RepositoryException {
     this.session = session;
     this.rootNode = session.getRootNode();
-    this.writer = new NodeOutputStreamWriter();
+    this.writer = new NodeStreamHandler();
   }
 
   public void readIdentities(OutputStream os) throws RepositoryException, IOException {

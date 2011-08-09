@@ -29,6 +29,8 @@ import javax.jcr.Session;
  * @version $Revision$
  */
 public class Utils {
+
+  public final static String DATA_DIR = "org/exoplatform/social/extras/migration/data";
   
   public static Session getSession() throws RepositoryException {
     PortalContainer container = PortalContainer.getInstance();

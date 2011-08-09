@@ -22,17 +22,20 @@ import org.exoplatform.social.extras.migraiton.MigrationConst;
 import javax.jcr.Node;
 import javax.jcr.Property;
 import javax.jcr.PropertyIterator;
+import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class NodeOutputStreamWriter {
+public class NodeStreamHandler {
 
   public void writeNode(Node node, OutputStream os) throws RepositoryException, IOException {
 
@@ -50,15 +53,24 @@ public class NodeOutputStreamWriter {
 
       if (p.getDefinition().isMultiple()) {
         dos.writeInt(MigrationConst.PROPERTY_MULTI);
+        dos.writeInt(p.getValues().length);
         dos.writeUTF(p.getName());
         for (Value v : p.getValues()) {
           dos.writeUTF(v.getString());
         }
       }
       else {
-        dos.writeInt(MigrationConst.PROPERTY_SINGLE);
-        dos.writeUTF(p.getName());
-        dos.writeUTF(p.getString());
+        if (p.getType() == PropertyType.REFERENCE) {
+          dos.writeInt(MigrationConst.PROPERTY_REF);
+          dos.writeUTF(p.getName());
+          dos.writeUTF(p.getString());
+          dos.writeUTF(node.getSession().getNodeByUUID(p.getString()).getPath());
+        }
+        else {
+          dos.writeInt(MigrationConst.PROPERTY_SINGLE);
+          dos.writeUTF(p.getName());
+          dos.writeUTF(p.getString());
+        }
       }
 
     }
@@ -67,6 +79,58 @@ public class NodeOutputStreamWriter {
 
     dos.flush();
     
+  }
+
+  public NodeData readNode(InputStream is) {
+
+    NodeData data = new NodeData();
+
+    DataInputStream dis = new DataInputStream(is);
+
+    try {
+      while (readData(dis, data) != MigrationConst.END_NODE);
+    }
+    catch (IOException e) {
+      return null;
+    }
+
+    return data;
+  }
+
+  private int readData(DataInputStream dis, NodeData data) throws IOException {
+
+    int type = dis.readInt();
+    switch (type) {
+
+      case MigrationConst.START_NODE :
+        data.setPath(dis.readUTF());
+        break;
+
+      case MigrationConst.PROPERTY_SINGLE :
+        data.getProperties().put(dis.readUTF(), dis.readUTF());
+        break;
+
+      case MigrationConst.PROPERTY_MULTI :
+        int length = dis.readInt();
+        String[] values = new String[length];
+        String propertyName = dis.readUTF();
+        for (int i = 0; i < length; ++i) {
+          values[i] = dis.readUTF();
+        }
+        data.getProperties().put(propertyName, values);
+        break;
+
+      case MigrationConst.PROPERTY_REF :
+        data.getProperties().put(dis.readUTF(), new String[]{dis.readUTF(), dis.readUTF()});
+        break;
+
+      case MigrationConst.END_NODE :
+        break;
+
+    }
+
+    return type;
+
   }
 
 }

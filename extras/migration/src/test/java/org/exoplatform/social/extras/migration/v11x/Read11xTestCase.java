@@ -126,40 +126,20 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
 
     //
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    reader.readIdentities(new FileOutputStream("relationships"));
+    reader.readRelationships(new FileOutputStream("relationships"));
     reader.readRelationships(baos);
 
     //
     ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
     DataInputStream dis = new DataInputStream(bais);
 
-    String identity1Id = rootNode.getNode("exo:applications/Social_Identity/exo:identity[3]").getUUID();
-    String identity2Id = rootNode.getNode("exo:applications/Social_Identity/exo:identity[2]").getUUID();
-    checkRelationship(dis, "exo:relationship", identity1Id, identity2Id, "CONFIRM");
-
-    identity1Id = rootNode.getNode("exo:applications/Social_Identity/exo:identity[3]").getUUID();
-    identity2Id = rootNode.getNode("exo:applications/Social_Identity/exo:identity[4]").getUUID();
-    checkRelationship(dis, "exo:relationship[2]", identity1Id, identity2Id, "PENDING");
-
-    identity1Id = rootNode.getNode("exo:applications/Social_Identity/user_a").getUUID();
-    identity2Id = rootNode.getNode("exo:applications/Social_Identity/exo:identity[4]").getUUID();
-    checkRelationship(dis, "exo:relationship[3]", identity1Id, identity2Id, "CONFIRM");
-
-    identity1Id = rootNode.getNode("exo:applications/Social_Identity/user_d").getUUID();
-    identity2Id = rootNode.getNode("exo:applications/Social_Identity/exo:identity").getUUID();
-    checkRelationship(dis, "exo:relationship[4]", identity1Id, identity2Id, "CONFIRM");
-
-    identity1Id = rootNode.getNode("exo:applications/Social_Identity/user_b").getUUID();
-    identity2Id = rootNode.getNode("exo:applications/Social_Identity/user_a").getUUID();
-    checkRelationship(dis, "exo:relationship[5]", identity1Id, identity2Id, "PENDING");
-
-    identity1Id = rootNode.getNode("exo:applications/Social_Identity/user_c").getUUID();
-    identity2Id = rootNode.getNode("exo:applications/Social_Identity/user_d").getUUID();
-    checkRelationship(dis, "exo:relationship[6]", identity1Id, identity2Id, "CONFIRM");
-
-    identity1Id = rootNode.getNode("exo:applications/Social_Identity/user_c").getUUID();
-    identity2Id = rootNode.getNode("exo:applications/Social_Identity/user_a").getUUID();
-    checkRelationship(dis, "ec1bbdea2e8902a901cf62bd95f0bdc8", identity1Id, identity2Id, "CONFIRM");
+    checkRelationship(dis, "exo:relationship", "exo:identity[3]", "exo:identity[2]", "CONFIRM");
+    checkRelationship(dis, "exo:relationship[2]", "exo:identity[3]", "exo:identity[4]", "PENDING");
+    checkRelationship(dis, "exo:relationship[3]", "user_a", "exo:identity[4]", "CONFIRM");
+    checkRelationship(dis, "exo:relationship[4]", "user_d", "exo:identity", "CONFIRM");
+    checkRelationship(dis, "exo:relationship[5]", "user_b", "user_a", "PENDING");
+    checkRelationship(dis, "exo:relationship[6]", "user_c", "user_d", "CONFIRM");
+    checkRelationship(dis, "ec1bbdea2e8902a901cf62bd95f0bdc8", "user_c", "user_a", "CONFIRM");
 
   }
 
@@ -169,7 +149,7 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
 
     //
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    reader.readIdentities(new FileOutputStream("spaces"));
+    reader.readSpaces(new FileOutputStream("spaces"));
     reader.readSpaces(baos);
 
     //
@@ -196,6 +176,7 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
     assertEquals("exo:identity", dis.readUTF());
 
     assertEquals(MigrationConst.PROPERTY_MULTI, dis.readInt());
+    assertEquals(1, dis.readInt());
     assertEquals("jcr:mixinTypes", dis.readUTF());
     assertEquals("mix:referenceable", dis.readUTF());
 
@@ -215,7 +196,7 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
 
   }
 
-  private void checkRelationship(DataInputStream dis, String nodeName, String identitiy1Id, String identitiy2Id, String status) throws IOException {
+  private void checkRelationship(DataInputStream dis, String nodeName, String identitiy1, String identitiy2, String status) throws IOException, RepositoryException {
 
     assertEquals(MigrationConst.START_NODE, dis.readInt());
     assertEquals("/exo:applications/Social_Relationship/" + nodeName, dis.readUTF());
@@ -224,13 +205,15 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
     assertEquals("jcr:primaryType", dis.readUTF());
     assertEquals("exo:relationship", dis.readUTF());
 
-    assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
+    assertEquals(MigrationConst.PROPERTY_REF, dis.readInt());
     assertEquals("exo:identity1Id", dis.readUTF());
-    assertEquals(identitiy1Id, dis.readUTF());
+    assertEquals(rootNode.getNode("exo:applications/Social_Identity/" + identitiy1).getUUID(), dis.readUTF());
+    assertEquals("/exo:applications/Social_Identity/" + identitiy1, dis.readUTF());
 
-    assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
+    assertEquals(MigrationConst.PROPERTY_REF, dis.readInt());
     assertEquals("exo:identity2Id", dis.readUTF());
-    assertEquals(identitiy2Id, dis.readUTF());
+    assertEquals(rootNode.getNode("exo:applications/Social_Identity/" + identitiy2).getUUID(), dis.readUTF());
+    assertEquals("/exo:applications/Social_Identity/" + identitiy2, dis.readUTF());
 
     assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
     assertEquals("exo:status", dis.readUTF());
@@ -252,6 +235,7 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
     assertEquals("exo:space", dis.readUTF());
 
     assertEquals(MigrationConst.PROPERTY_MULTI, dis.readInt());
+    assertEquals(1, dis.readInt());
     assertEquals("jcr:mixinTypes", dis.readUTF());
     assertEquals("mix:referenceable", dis.readUTF());
 
@@ -269,6 +253,7 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
 
     if (invitedUsers != null) {
       assertEquals(MigrationConst.PROPERTY_MULTI, dis.readInt());
+      assertEquals(invitedUsers.length, dis.readInt());
       assertEquals("exo:invitedUsers", dis.readUTF());
       for (String invitedUser : invitedUsers) {
         assertEquals(invitedUser, dis.readUTF());
@@ -281,6 +266,7 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
 
     if (pendingUsers != null) {
       assertEquals(MigrationConst.PROPERTY_MULTI, dis.readInt());
+      assertEquals(pendingUsers.length, dis.readInt());
       assertEquals("exo:pendingUsers", dis.readUTF());
       for (String pendingUser : pendingUsers) {
         assertEquals(pendingUser, dis.readUTF());

@@ -17,6 +17,18 @@
 
 package org.exoplatform.social.extras.migraiton.writer;
 
+import org.exoplatform.social.core.identity.model.Identity;
+import org.exoplatform.social.core.relationship.model.Relationship;
+import org.exoplatform.social.core.storage.api.ActivityStorage;
+import org.exoplatform.social.core.storage.api.IdentityStorage;
+import org.exoplatform.social.core.storage.api.RelationshipStorage;
+import org.exoplatform.social.core.storage.api.SpaceStorage;
+import org.exoplatform.social.extras.migraiton.io.NodeData;
+import org.exoplatform.social.extras.migraiton.io.NodeStreamHandler;
+
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 import java.io.InputStream;
 
 /**
@@ -25,7 +37,31 @@ import java.io.InputStream;
  */
 public class NodeWriter12x implements NodeWriter {
 
+  private final IdentityStorage identityStorage;
+  private final RelationshipStorage relationshipStorage;
+  private final SpaceStorage spaceStorage;
+  private final ActivityStorage activityStorage;
+
+  private final Session session;
+
+  public NodeWriter12x(final IdentityStorage identityStorage, final RelationshipStorage relationshipStorage, final SpaceStorage spaceStorage, final ActivityStorage activityStorage, final Session session) {
+    this.identityStorage = identityStorage;
+    this.relationshipStorage = relationshipStorage;
+    this.spaceStorage = spaceStorage;
+    this.activityStorage = activityStorage;
+    this.session = session;
+  }
+
   public void writeIdentities(final InputStream is) {
+
+    NodeStreamHandler handler = new NodeStreamHandler();
+    NodeData currentData;
+    while ((currentData = handler.readNode(is)) != null) {
+      String provider = (String) currentData.getProperties().get("exo:providerId");
+      String remote = (String) currentData.getProperties().get("exo:remoteId");
+      Identity identity = new Identity(provider, remote);
+      identityStorage.saveIdentity(identity);
+    }
     
   }
 
@@ -42,6 +78,38 @@ public class NodeWriter12x implements NodeWriter {
   }
 
   public void writeRelationships(final InputStream is) {
+
+    NodeStreamHandler handler = new NodeStreamHandler();
+    NodeData currentData;
+    while ((currentData = handler.readNode(is)) != null) {
+
+      String path1 = ((String[]) currentData.getProperties().get("exo:identity1Id"))[1];
+      String path2 = ((String[]) currentData.getProperties().get("exo:identity2Id"))[1];
+      String status = (String) currentData.getProperties().get("exo:status");
+
+      try {
+
+        String remoteId1 = session.getRootNode().getNode(path1.substring(1)).getProperty("exo:remoteId").getString();
+        String remoteId2 = session.getRootNode().getNode(path2.substring(1)).getProperty("exo:remoteId").getString();
+
+        Identity i1 = identityStorage.findIdentity("organization", remoteId1);
+        Identity i2 = identityStorage.findIdentity("organization", remoteId2);
+
+        Relationship.Type type = null;
+        if ("CONFIRM".equals(status)) {
+          type = Relationship.Type.CONFIRMED;
+        }
+        else if ("PENDING".equals(status)) {
+          type = Relationship.Type.PENDING;
+        }
+
+        Relationship relationship = new Relationship(i1, i2, type);
+        relationshipStorage.saveRelationship(relationship);
+      }
+      catch (RepositoryException e) {
+        throw new RuntimeException(e); // TODO : manage
+      }
+    }
 
   }
 

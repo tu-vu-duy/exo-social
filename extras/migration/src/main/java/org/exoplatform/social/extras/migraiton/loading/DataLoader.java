@@ -180,7 +180,12 @@ public class DataLoader {
         p = node.setProperty(name, propertyValue.split(","));
       }
       else {
-        p = node.setProperty(name, propertyValue);
+        if (propertyValue.equals(attributes.get(key))) {
+          p = node.setProperty(name, propertyValue);
+        }
+        else {
+          p = node.setProperty(name, session.getNodeByUUID(propertyValue));
+        }
       }
       LOG.trace("Create property : " + p.getPath() + " = " + propertyValue);
     }

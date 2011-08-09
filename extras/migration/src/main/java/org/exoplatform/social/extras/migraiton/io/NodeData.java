@@ -15,18 +15,42 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.extras.migraiton;
+package org.exoplatform.social.extras.migraiton.io;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class MigrationConst {
+public class NodeData {
 
-  public static final int START_NODE        = 1;
-  public static final int PROPERTY_SINGLE   = 2;
-  public static final int PROPERTY_MULTI    = 3;
-  public static final int END_NODE          = 4;
-  public static final int PROPERTY_REF      = 5;
+  private String path;
+  private final List<NodeData> childs;
+  private final Map<String, Object> properties;
+
+  public NodeData() {
+    childs = new ArrayList<NodeData>();
+    properties = new HashMap<String, Object>();
+  }
+
+  public String getPath() {
+    return path;
+  }
+
+  public void setPath(final String path) {
+    this.path = path;
+  }
+
+  public List<NodeData> getChilds() {
+    return childs;
+  }
+
+  public Map<String, Object> getProperties() {
+    return properties;
+  }
 
 }

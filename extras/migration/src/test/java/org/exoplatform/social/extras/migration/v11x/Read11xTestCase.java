@@ -34,6 +34,7 @@ import javax.jcr.Session;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 
@@ -89,6 +90,7 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
 
     //
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    reader.readIdentities(new FileOutputStream("identities"));
     reader.readIdentities(baos);
 
     //
@@ -124,6 +126,7 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
 
     //
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    reader.readIdentities(new FileOutputStream("relationships"));
     reader.readRelationships(baos);
 
     //
@@ -166,6 +169,7 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
 
     //
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    reader.readIdentities(new FileOutputStream("spaces"));
     reader.readSpaces(baos);
 
     //

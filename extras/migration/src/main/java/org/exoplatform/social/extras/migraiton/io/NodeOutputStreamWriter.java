@@ -64,6 +64,8 @@ public class NodeOutputStreamWriter {
     }
 
     dos.writeInt(MigrationConst.END_NODE);
+
+    dos.flush();
     
   }
 

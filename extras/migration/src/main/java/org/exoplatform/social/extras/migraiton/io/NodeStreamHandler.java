@@ -60,17 +60,9 @@ public class NodeStreamHandler {
         }
       }
       else {
-        if (p.getType() == PropertyType.REFERENCE) {
-          dos.writeInt(MigrationConst.PROPERTY_REF);
-          dos.writeUTF(p.getName());
-          dos.writeUTF(p.getString());
-          dos.writeUTF(node.getSession().getNodeByUUID(p.getString()).getPath());
-        }
-        else {
-          dos.writeInt(MigrationConst.PROPERTY_SINGLE);
-          dos.writeUTF(p.getName());
-          dos.writeUTF(p.getString());
-        }
+        dos.writeInt(MigrationConst.PROPERTY_SINGLE);
+        dos.writeUTF(p.getName());
+        dos.writeUTF(p.getString());
       }
 
     }
@@ -118,10 +110,6 @@ public class NodeStreamHandler {
           values[i] = dis.readUTF();
         }
         data.getProperties().put(propertyName, values);
-        break;
-
-      case MigrationConst.PROPERTY_REF :
-        data.getProperties().put(dis.readUTF(), new String[]{dis.readUTF(), dis.readUTF()});
         break;
 
       case MigrationConst.END_NODE :

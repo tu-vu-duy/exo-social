@@ -205,15 +205,13 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
     assertEquals("jcr:primaryType", dis.readUTF());
     assertEquals("exo:relationship", dis.readUTF());
 
-    assertEquals(MigrationConst.PROPERTY_REF, dis.readInt());
+    assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
     assertEquals("exo:identity1Id", dis.readUTF());
     assertEquals(rootNode.getNode("exo:applications/Social_Identity/" + identitiy1).getUUID(), dis.readUTF());
-    assertEquals("/exo:applications/Social_Identity/" + identitiy1, dis.readUTF());
 
-    assertEquals(MigrationConst.PROPERTY_REF, dis.readInt());
+    assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
     assertEquals("exo:identity2Id", dis.readUTF());
     assertEquals(rootNode.getNode("exo:applications/Social_Identity/" + identitiy2).getUUID(), dis.readUTF());
-    assertEquals("/exo:applications/Social_Identity/" + identitiy2, dis.readUTF());
 
     assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
     assertEquals("exo:status", dis.readUTF());

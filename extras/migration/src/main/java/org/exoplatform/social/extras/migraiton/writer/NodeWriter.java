@@ -17,6 +17,8 @@
 
 package org.exoplatform.social.extras.migraiton.writer;
 
+import org.exoplatform.social.extras.migraiton.io.WriterContext;
+
 import java.io.InputStream;
 
 /**
@@ -25,14 +27,14 @@ import java.io.InputStream;
  */
 public interface NodeWriter {
   
-  void writeIdentities(InputStream is);
+  void writeIdentities(InputStream is, WriterContext ctx);
 
-  void writeSpaces(InputStream is);
+  void writeSpaces(InputStream is, WriterContext ctx);
 
-  void writeProfiles(InputStream is);
+  void writeProfiles(InputStream is, WriterContext ctx);
 
-  void writeActivities(InputStream is);
+  void writeActivities(InputStream is, WriterContext ctx);
   
-  void writeRelationships(InputStream is);
+  void writeRelationships(InputStream is, WriterContext ctx);
 
 }

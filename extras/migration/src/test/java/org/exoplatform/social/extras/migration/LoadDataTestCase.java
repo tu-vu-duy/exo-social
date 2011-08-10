@@ -64,53 +64,53 @@ public class LoadDataTestCase extends AbstractMigrationTestCase {
 
   public void testChildBar() throws Exception {
 
-    assertNotNull(rootNode.getNode("fooA").getNode("barAA"));
-    assertNotNull(rootNode.getNode("fooA").getNode("barAB"));
-    assertNotNull(rootNode.getNode("fooA").getNode("barAC"));
-    assertNotNull(rootNode.getNode("fooB").getNode("barBA"));
-    assertNotNull(rootNode.getNode("fooB").getNode("barBB"));
-    assertNotNull(rootNode.getNode("fooB").getNode("barBC"));
-    assertNotNull(rootNode.getNode("fooC").getNode("barCA"));
-    assertNotNull(rootNode.getNode("fooC").getNode("barCB"));
-    assertNotNull(rootNode.getNode("fooC").getNode("barCC"));
+    assertNotNull(rootNode.getNode("fooA/barAA"));
+    assertNotNull(rootNode.getNode("fooA/barAB"));
+    assertNotNull(rootNode.getNode("fooA/barAC"));
+    assertNotNull(rootNode.getNode("fooB/barBA"));
+    assertNotNull(rootNode.getNode("fooB/barBB"));
+    assertNotNull(rootNode.getNode("fooB/barBC"));
+    assertNotNull(rootNode.getNode("fooC/barCA"));
+    assertNotNull(rootNode.getNode("fooC/barCB"));
+    assertNotNull(rootNode.getNode("fooC/barCC"));
 
   }
 
   public void testChildFooBar() throws Exception {
 
-    assertNotNull(rootNode.getNode("fooA").getNode("barAA").getNode("foobarAAA"));
-    assertNotNull(rootNode.getNode("fooA").getNode("barAA").getNode("foobarAAB"));
-    assertNotNull(rootNode.getNode("fooA").getNode("barAA").getNode("foobarAAC"));
-    assertNotNull(rootNode.getNode("fooA").getNode("barAB").getNode("foobarABA"));
-    assertNotNull(rootNode.getNode("fooA").getNode("barAB").getNode("foobarABB"));
-    assertNotNull(rootNode.getNode("fooA").getNode("barAB").getNode("foobarABC"));
-    assertNotNull(rootNode.getNode("fooA").getNode("barAC").getNode("foobarACA"));
-    assertNotNull(rootNode.getNode("fooA").getNode("barAC").getNode("foobarACB"));
-    assertNotNull(rootNode.getNode("fooA").getNode("barAC").getNode("foobarACC"));
+    assertNotNull(rootNode.getNode("fooA/barAA/foobarAAA"));
+    assertNotNull(rootNode.getNode("fooA/barAA/foobarAAB"));
+    assertNotNull(rootNode.getNode("fooA/barAA/foobarAAC"));
+    assertNotNull(rootNode.getNode("fooA/barAB/foobarABA"));
+    assertNotNull(rootNode.getNode("fooA/barAB/foobarABB"));
+    assertNotNull(rootNode.getNode("fooA/barAB/foobarABC"));
+    assertNotNull(rootNode.getNode("fooA/barAC/foobarACA"));
+    assertNotNull(rootNode.getNode("fooA/barAC/foobarACB"));
+    assertNotNull(rootNode.getNode("fooA/barAC/foobarACC"));
 
   }
 
   public void testSibling() throws Exception {
 
-    assertNotNull(rootNode.getNode("fooC").getNode("barCA").getNode("sibling"));
-    assertNotNull(rootNode.getNode("fooC").getNode("barCA").getNode("sibling[2]"));
-    assertNotNull(rootNode.getNode("fooC").getNode("barCA").getNode("sibling[3]"));
+    assertNotNull(rootNode.getNode("fooC/barCA/sibling"));
+    assertNotNull(rootNode.getNode("fooC/barCA/sibling[2]"));
+    assertNotNull(rootNode.getNode("fooC/barCA/sibling[3]"));
 
   }
 
   public void testProperties() throws Exception {
 
-    assertNotNull(rootNode.getNode("fooB").getNode("barBB").getProperty("nameBBA"));
-    assertEquals("valueBBA", rootNode.getNode("fooB").getNode("barBB").getProperty("nameBBA").getString());
+    assertNotNull(rootNode.getNode("fooB/barBB").getProperty("nameBBA"));
+    assertEquals("valueBBA", rootNode.getNode("fooB/barBB").getProperty("nameBBA").getString());
 
-    assertNotNull(rootNode.getNode("fooB").getNode("barBB").getProperty("nameBBB"));
-    assertEquals("valueBBB", rootNode.getNode("fooB").getNode("barBB").getProperty("nameBBB").getString());
+    assertNotNull(rootNode.getNode("fooB/barBB").getProperty("nameBBB"));
+    assertEquals("valueBBB", rootNode.getNode("fooB/barBB").getProperty("nameBBB").getString());
 
-    assertNotNull(rootNode.getNode("fooB").getNode("barBB").getProperty("nameBBC"));
-    assertEquals("valueBBC", rootNode.getNode("fooB").getNode("barBB").getProperty("nameBBC").getString());
+    assertNotNull(rootNode.getNode("fooB/barBB").getProperty("nameBBC"));
+    assertEquals("valueBBC", rootNode.getNode("fooB/barBB").getProperty("nameBBC").getString());
 
-    assertNotNull(rootNode.getNode("fooA").getNode("barAB").getProperty("somewhere"));
-    assertEquals("somewhereValue", rootNode.getNode("fooA").getNode("barAB").getProperty("somewhere").getString());
+    assertNotNull(rootNode.getNode("fooA/barAB").getProperty("somewhere"));
+    assertEquals("somewhereValue", rootNode.getNode("fooA/barAB").getProperty("somewhere").getString());
     
   }
 
@@ -123,8 +123,8 @@ public class LoadDataTestCase extends AbstractMigrationTestCase {
 
   public void testRef() throws Exception {
 
-    Property p = rootNode.getNode("fooC").getNode("barCB").getProperty("ref");
-    String id = rootNode.getNode("fooA").getNode("barAB").getNode("foobarABC").getUUID();
+    Property p = rootNode.getNode("fooC/barCB").getProperty("ref");
+    String id = rootNode.getNode("fooA/barAB/foobarABC").getUUID();
 
     assertNotNull(p.getString());
     assertEquals(id, p.getString());
@@ -133,7 +133,7 @@ public class LoadDataTestCase extends AbstractMigrationTestCase {
 
   public void testMixin() throws Exception {
 
-    NodeType[] mixins = rootNode.getNode("fooA").getNode("barAB").getNode("foobarABC").getMixinNodeTypes();
+    NodeType[] mixins = rootNode.getNode("fooA/barAB/foobarABC").getMixinNodeTypes();
 
     assertEquals(1, mixins.length);
     assertEquals("mix:referenceable", mixins[0].getName());

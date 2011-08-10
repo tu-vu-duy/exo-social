@@ -25,6 +25,7 @@ import org.exoplatform.social.core.storage.api.RelationshipStorage;
 import org.exoplatform.social.core.storage.api.SpaceStorage;
 import org.exoplatform.social.extras.migraiton.io.NodeData;
 import org.exoplatform.social.extras.migraiton.io.NodeStreamHandler;
+import org.exoplatform.social.extras.migraiton.io.WriterContext;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
@@ -52,7 +53,7 @@ public class NodeWriter12x implements NodeWriter {
     this.session = session;
   }
 
-  public void writeIdentities(final InputStream is) {
+  public void writeIdentities(final InputStream is, final WriterContext ctx) {
 
     NodeStreamHandler handler = new NodeStreamHandler();
     NodeData currentData;
@@ -61,54 +62,52 @@ public class NodeWriter12x implements NodeWriter {
       String remote = (String) currentData.getProperties().get("exo:remoteId");
       Identity identity = new Identity(provider, remote);
       identityStorage.saveIdentity(identity);
+
+      ctx.put((String) currentData.getProperties().get("jcr:uuid"), (String) currentData.getProperties().get("exo:remoteId"));
+      
     }
     
   }
 
-  public void writeSpaces(final InputStream is) {
+  public void writeSpaces(final InputStream is, final WriterContext ctx) {
 
   }
 
-  public void writeProfiles(final InputStream is) {
+  public void writeProfiles(final InputStream is, final WriterContext ctx) {
 
   }
 
-  public void writeActivities(final InputStream is) {
+  public void writeActivities(final InputStream is, final WriterContext ctx) {
 
   }
 
-  public void writeRelationships(final InputStream is) {
+  public void writeRelationships(final InputStream is, final WriterContext ctx) {
 
     NodeStreamHandler handler = new NodeStreamHandler();
     NodeData currentData;
     while ((currentData = handler.readNode(is)) != null) {
 
-      String path1 = ((String[]) currentData.getProperties().get("exo:identity1Id"))[1];
-      String path2 = ((String[]) currentData.getProperties().get("exo:identity2Id"))[1];
+      String id1 = ((String) currentData.getProperties().get("exo:identity1Id"));
+      String id2 = ((String) currentData.getProperties().get("exo:identity2Id"));
       String status = (String) currentData.getProperties().get("exo:status");
 
-      try {
+      String remoteId1 = ctx.get(id1);
+      String remoteId2 = ctx.get(id2);
 
-        String remoteId1 = session.getRootNode().getNode(path1.substring(1)).getProperty("exo:remoteId").getString();
-        String remoteId2 = session.getRootNode().getNode(path2.substring(1)).getProperty("exo:remoteId").getString();
+      Identity i1 = identityStorage.findIdentity("organization", remoteId1);
+      Identity i2 = identityStorage.findIdentity("organization", remoteId2);
 
-        Identity i1 = identityStorage.findIdentity("organization", remoteId1);
-        Identity i2 = identityStorage.findIdentity("organization", remoteId2);
-
-        Relationship.Type type = null;
-        if ("CONFIRM".equals(status)) {
-          type = Relationship.Type.CONFIRMED;
-        }
-        else if ("PENDING".equals(status)) {
-          type = Relationship.Type.PENDING;
-        }
-
-        Relationship relationship = new Relationship(i1, i2, type);
-        relationshipStorage.saveRelationship(relationship);
+      Relationship.Type type = null;
+      if ("CONFIRM".equals(status)) {
+        type = Relationship.Type.CONFIRMED;
       }
-      catch (RepositoryException e) {
-        throw new RuntimeException(e); // TODO : manage
+      else if ("PENDING".equals(status)) {
+        type = Relationship.Type.PENDING;
       }
+
+      Relationship relationship = new Relationship(i1, i2, type);
+      relationshipStorage.saveRelationship(relationship);
+
     }
 
   }

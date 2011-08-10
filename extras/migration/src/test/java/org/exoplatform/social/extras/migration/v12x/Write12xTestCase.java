@@ -28,7 +28,10 @@ import org.exoplatform.social.core.storage.impl.ActivityStorageImpl;
 import org.exoplatform.social.core.storage.impl.IdentityStorageImpl;
 import org.exoplatform.social.core.storage.impl.RelationshipStorageImpl;
 import org.exoplatform.social.core.storage.impl.SpaceStorageImpl;
+import org.exoplatform.social.extras.migraiton.io.WriterContext;
 import org.exoplatform.social.extras.migraiton.loading.DataLoader;
+import org.exoplatform.social.extras.migraiton.reader.NodeReader;
+import org.exoplatform.social.extras.migraiton.reader.NodeReader11x;
 import org.exoplatform.social.extras.migraiton.writer.NodeWriter;
 import org.exoplatform.social.extras.migraiton.writer.NodeWriter12x;
 import org.exoplatform.social.extras.migration.AbstractMigrationTestCase;
@@ -38,7 +41,10 @@ import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collection;
 
 /**
@@ -80,7 +86,7 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
   @Override
   public void tearDown() throws Exception {
 
-    NodeIterator it = rootNode.getNode("exo:applications").getNode("Social_Identity").getNodes();
+    NodeIterator it = rootNode.getNode("exo:applications/Social_Identity").getNodes();
 
     while(it.hasNext()) {
       String userName = ((Node) it.next()).getProperty("exo:remoteId").getString();
@@ -93,10 +99,12 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
     }
 
     rootNode.getNode("exo:applications").remove();
-    NodeIterator providers = rootNode.getNode("production").getNode("soc:providers").getNodes();
+    NodeIterator providers = rootNode.getNode("production/soc:providers").getNodes();
     while(providers.hasNext()) {
       providers.nextNode().remove();
     }
+
+    session.save();
 
     super.tearDown();
 
@@ -107,7 +115,7 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
     InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(Utils.DATA_DIR + "/identities");
     
     NodeWriter writer = new NodeWriter12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, session);
-    writer.writeIdentities(is);
+    writer.writeIdentities(is, new WriterContext());
 
     checkIdentity("organization", "user_idA");
     checkIdentity("organization", "user_idB");
@@ -131,10 +139,18 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
 
   public void testWriteRelationships() throws Exception {
 
-    InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(Utils.DATA_DIR + "/relationships");
+    ByteArrayOutputStream osIdentity = new ByteArrayOutputStream();
+    ByteArrayOutputStream osRelationship = new ByteArrayOutputStream();
+
+    NodeReader reader = new NodeReader11x(session);
+    reader.readIdentities(osIdentity);
+    reader.readRelationships(osRelationship);
 
     NodeWriter writer = new NodeWriter12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, session);
-    writer.writeRelationships(is);
+    WriterContext ctx = new WriterContext();
+    
+    writer.writeIdentities(new ByteArrayInputStream(osIdentity.toByteArray()), ctx);
+    writer.writeRelationships(new ByteArrayInputStream(osRelationship.toByteArray()), ctx);
 
     checkRelationship("organization", "user_idC", "user_idB", "relationship");
     checkRelationship("organization", "user_idB", "user_idC", "relationship");

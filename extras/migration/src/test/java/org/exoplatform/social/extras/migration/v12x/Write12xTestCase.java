@@ -39,8 +39,10 @@ import org.exoplatform.social.extras.migration.Utils;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
+import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.jcr.Value;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -95,7 +97,7 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
 
     Group spaces = organizationService.getGroupHandler().findGroupById("/spaces");
     for (Group group : (Collection<Group>) organizationService.getGroupHandler().findGroups(spaces)) {
-      organizationService.getGroupHandler().removeGroup(group, true);
+      organizationService.getGroupHandler().removeGroup(group, false);
     }
 
     rootNode.getNode("exo:applications").remove();
@@ -112,10 +114,13 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
 
   public void testWriteIdentities() throws Exception {
 
-    InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(Utils.DATA_DIR + "/identities");
-    
-    NodeWriter writer = new NodeWriter12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, session);
-    writer.writeIdentities(is, new WriterContext());
+    ByteArrayOutputStream osIdentity = new ByteArrayOutputStream();
+
+    NodeReader reader = new NodeReader11x(session);
+    reader.readIdentities(osIdentity);
+
+    NodeWriter writer = new NodeWriter12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
+    writer.writeIdentities(new ByteArrayInputStream(osIdentity.toByteArray()), new WriterContext());
 
     checkIdentity("organization", "user_idA");
     checkIdentity("organization", "user_idB");
@@ -129,11 +134,13 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
     checkIdentity("organization", "user_d");
     checkIdentity("organization", "user_e");
 
-    // TODO : fix spaces identity
-
-    /*checkIdentity("space", "namea");
-    checkIdentity("space", "nameb");
-    checkIdentity("space", "namec");*/
+    try {
+      rootNode.getNode("production/soc:providers/soc:space");
+      fail();
+    }
+    catch (PathNotFoundException e) {
+      // ok
+    }
 
   }
 
@@ -146,7 +153,7 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
     reader.readIdentities(osIdentity);
     reader.readRelationships(osRelationship);
 
-    NodeWriter writer = new NodeWriter12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, session);
+    NodeWriter writer = new NodeWriter12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
     WriterContext ctx = new WriterContext();
     
     writer.writeIdentities(new ByteArrayInputStream(osIdentity.toByteArray()), ctx);
@@ -172,15 +179,89 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
 
   }
 
+  public void testWriteSpaces() throws Exception {
+
+    ByteArrayOutputStream osIdentities = new ByteArrayOutputStream();
+    ByteArrayOutputStream osSpaces = new ByteArrayOutputStream();
+
+    NodeReader reader = new NodeReader11x(session);
+    reader.readIdentities(osIdentities);
+    reader.readSpaces(osSpaces);
+
+    NodeWriter writer = new NodeWriter12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
+    WriterContext ctx = new WriterContext();
+
+    writer.writeIdentities(new ByteArrayInputStream(osIdentities.toByteArray()), ctx);
+    writer.writeSpaces(new ByteArrayInputStream(osSpaces.toByteArray()), ctx);
+
+    checkSpace("a", null, null, new String[]{"user_a","user_b","user_d"}, null);
+    checkSpace("b", new String[]{"user_a","user_b"}, new String[]{"user_c"}, null, null);
+    checkSpace("c", null, null, null, new String[]{"user_a","user_d"});
+    checkSpace("d", null, null, null, new String[]{"user_a","user_d"});
+    checkSpace("e", null, null, new String[]{"user_c"}, new String[]{"user_a","user_d"});
+
+  }
+
   private void checkIdentity(String providerId, String remoteId) throws RepositoryException {
 
-    rootNode.getNode("production/soc:providers/soc:" + providerId + "/soc:" + remoteId);
+    Node identityNode = rootNode.getNode("production/soc:providers/soc:" + providerId + "/soc:" + remoteId);
+    assertEquals(providerId, identityNode.getProperty("soc:providerId").getString());
+    assertEquals(remoteId, identityNode.getProperty("soc:remoteId").getString());
 
   }
 
   private void checkRelationship(String providerId, String remoteId, String contactId, String type) throws RepositoryException {
 
-    rootNode.getNode("production/soc:providers/soc:" + providerId + "/soc:" + remoteId + "/soc:" + type + "/soc:" + contactId);
+    Node relationshipNode = rootNode.getNode("production/soc:providers/soc:" + providerId + "/soc:" + remoteId + "/soc:" + type + "/soc:" + contactId);
+    if ("relationship".equals(type)) {
+      assertEquals("CONFIRMED", relationshipNode.getProperty("soc:status").getString());
+    }
+    else {
+      assertEquals("PENDING", relationshipNode.getProperty("soc:status").getString());
+    }
+
+  }
+
+  private void checkSpace(String suffix, String[] members, String[] managers, String[] pending, String[] invited) throws RepositoryException {
+
+    checkIdentity("space", "name_" + suffix);
+    Node spaceNode = rootNode.getNode("production/soc:spaces/soc:name_" + suffix);
+
+    assertEquals("foo " + suffix, spaceNode.getProperty("soc:description").getString());
+    assertEquals("name_" + suffix, spaceNode.getProperty("soc:name").getString());
+    assertEquals("Name " + suffix, spaceNode.getProperty("soc:displayName").getString());
+    assertEquals("/spaces/name" + suffix, spaceNode.getProperty("soc:groupId").getString());
+    assertEquals("2", spaceNode.getProperty("soc:priority").getString());
+    assertEquals("validation", spaceNode.getProperty("soc:registration").getString());
+    assertEquals("classic", spaceNode.getProperty("soc:type").getString());
+    assertEquals("name" + suffix, spaceNode.getProperty("soc:url").getString());
+    assertEquals("private", spaceNode.getProperty("soc:visibility").getString());
+    assertEquals("validation", spaceNode.getProperty("soc:registration").getString());
+
+    checkMembership(spaceNode, "soc:membersId", members);
+    checkMembership(spaceNode, "soc:managerMembersId", managers);
+    checkMembership(spaceNode, "soc:pendingMembersId", pending);
+    checkMembership(spaceNode, "soc:invitedMembersId", invited);
+
+  }
+
+  private void checkMembership(Node spaceNode, String propertyName, String[] values) throws RepositoryException {
+
+    if (values != null) {
+      Value[] propertyValues = spaceNode.getProperty(propertyName).getValues();
+      for (int i = 0; i < values.length; ++i) {
+        assertEquals(values[i], propertyValues[i].getString());
+      }
+    }
+    else {
+      try {
+        spaceNode.getProperty(propertyName);
+        fail();
+      }
+      catch (PathNotFoundException e) {
+        // ok
+      }
+    }
 
   }
 

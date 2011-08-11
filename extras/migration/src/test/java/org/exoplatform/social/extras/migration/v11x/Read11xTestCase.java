@@ -177,6 +177,11 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
     checkActivity(dis, "ad25a8622e8902a9004557b913a2982c", "organization", "user_a", "user_a", new String[]{"SENDER=user_c", "RECEIVER=user_a"}, "@user_c has invited @user_a to connect", "CONNECTION_REQUESTED", "exosocial:relationship");
     checkActivity(dis, "ad25a8622e8902a9004557b913a2982d", "organization", "user_a", "user_a", new String[]{"SENDER=user_d", "RECEIVER=user_a"}, "@user_d has invited @user_a to connect", "CONNECTION_REQUESTED", "exosocial:relationship");
 
+    String spaceId = rootNode.getNode("exo:applications/Social_Space/Space/exo:space").getUUID();
+    checkActivity(dis, "ad25a8622e8902a9004557b913a2983b", "space", spaceId, "user_a", null, "@user_a has joined.", null, "exosocial:spaces");
+    checkActivity(dis, "ad25a8622e8902a9004557b913a2983c", "space", spaceId, "user_b", null, "@user_b has joined.", null, "exosocial:spaces");
+    checkActivity(dis, "ad25a8622e8902a9004557b913a2983d", "space", spaceId, "user_c", null, "@user_c has joined.", null, "exosocial:spaces");
+
   }
 
   private void checkIdentity(DataInputStream dis, String nodeName, String remoteId, String providerId) throws IOException, RepositoryException {
@@ -323,11 +328,13 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
     assertEquals("exo:hidden", dis.readUTF());
     assertEquals("false", dis.readUTF());
 
-    assertEquals(MigrationConst.PROPERTY_MULTI, dis.readInt());
-    assertEquals(params.length, dis.readInt());
-    assertEquals("exo:params", dis.readUTF());
-    for (String param : params) {
-      assertEquals(param, dis.readUTF());
+    if (params != null) {
+      assertEquals(MigrationConst.PROPERTY_MULTI, dis.readInt());
+      assertEquals(params.length, dis.readInt());
+      assertEquals("exo:params", dis.readUTF());
+      for (String param : params) {
+        assertEquals(param, dis.readUTF());
+      }
     }
 
     assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
@@ -338,9 +345,11 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
     assertEquals("exo:title", dis.readUTF());
     assertEquals(title, dis.readUTF());
 
-    assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
-    assertEquals("exo:titleTemplate", dis.readUTF());
-    assertEquals(titleTemplate, dis.readUTF());
+    if (titleTemplate != null) {
+      assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
+      assertEquals("exo:titleTemplate", dis.readUTF());
+      assertEquals(titleTemplate, dis.readUTF());
+    }
 
     assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
     assertEquals("exo:type", dis.readUTF());

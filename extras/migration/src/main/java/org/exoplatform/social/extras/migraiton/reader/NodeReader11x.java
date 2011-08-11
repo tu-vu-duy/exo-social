@@ -62,9 +62,17 @@ public class NodeReader11x implements NodeReader {
   public void readActivities(OutputStream os) throws RepositoryException, IOException {
 
     Node rootOrganizationActivity = rootNode.getNode("exo:applications/Social_Activity/organization");
-    NodeIterator userIt = rootOrganizationActivity.getNodes();
-    while (userIt.hasNext()) {
-      Node currentUser = userIt.nextNode();
+    NodeIterator userItOrganization = rootOrganizationActivity.getNodes();
+    while (userItOrganization.hasNext()) {
+      Node currentUser = userItOrganization.nextNode();
+      Node publishedNode = currentUser.getNode("published");
+      readFrom(publishedNode, os);
+    }
+
+    Node rootSpaceActivity = rootNode.getNode("exo:applications/Social_Activity/space");
+    NodeIterator userItSpace = rootSpaceActivity.getNodes();
+    while(userItSpace.hasNext()) {
+      Node currentUser = userItSpace.nextNode();
       Node publishedNode = currentUser.getNode("published");
       readFrom(publishedNode, os);
     }

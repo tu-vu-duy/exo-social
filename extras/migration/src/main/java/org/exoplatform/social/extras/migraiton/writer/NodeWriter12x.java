@@ -20,6 +20,8 @@ package org.exoplatform.social.extras.migraiton.writer;
 import org.exoplatform.services.organization.Group;
 import org.exoplatform.services.organization.Membership;
 import org.exoplatform.services.organization.OrganizationService;
+import org.exoplatform.social.core.activity.model.ExoSocialActivity;
+import org.exoplatform.social.core.activity.model.ExoSocialActivityImpl;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.relationship.model.Relationship;
 import org.exoplatform.social.core.space.model.Space;
@@ -35,7 +37,10 @@ import javax.jcr.Session;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
@@ -68,6 +73,7 @@ public class NodeWriter12x implements NodeWriter {
       String provider = (String) currentData.getProperties().get("exo:providerId");
 
       if ("space".equals(provider)) {
+        ctx.put((String) currentData.getProperties().get("jcr:uuid"), (String) currentData.getProperties().get("exo:remoteId"));
         continue;
       }
 
@@ -144,6 +150,8 @@ public class NodeWriter12x implements NodeWriter {
 
       identityStorage.saveIdentity(identity);
       spaceStorage.saveSpace(space, true);
+
+      ctx.put((String) currentData.getProperties().get("jcr:uuid"), space.getPrettyName());
       
     }
 
@@ -154,6 +162,61 @@ public class NodeWriter12x implements NodeWriter {
   }
 
   public void writeActivities(final InputStream is, final WriterContext ctx) {
+
+
+    NodeStreamHandler handler = new NodeStreamHandler();
+    NodeData currentData;
+    while ((currentData = handler.readNode(is)) != null) {
+
+      String ownerId = extractOwner(currentData);
+      Identity owner;
+
+      if (isOrganizationActivity(currentData)) {
+        owner = identityStorage.findIdentity("organization", ownerId);
+      }
+      else if (isSpaceActivity(currentData)) {
+        String spaceName = ctx.get(ownerId);
+        owner = identityStorage.findIdentity("space", spaceName);
+      }
+      else {
+        continue;
+      }
+
+      ExoSocialActivity activity = new ExoSocialActivityImpl();
+
+      String title = (String) currentData.getProperties().get("exo:title");
+      String titleTemplate = (String) currentData.getProperties().get("exo:titleTemplate");
+      String type = (String) currentData.getProperties().get("exo:type");
+      String userId = (String) currentData.getProperties().get("exo:userId");
+      String postedTime = (String) currentData.getProperties().get("exo:postedTime");
+      String updatedTimestamp = (String) currentData.getProperties().get("exo:updatedTimestamp");
+
+      String[] params = (String[]) currentData.getProperties().get("exo:params");
+      if (params != null) {
+        Map<String, String> paramMap = new HashMap<String, String>();
+        for(String param : params) {
+          String[] keyValue = param.split("=");
+          paramMap.put(keyValue[0], keyValue[1]);
+        }
+        if (paramMap.size() > 0) {
+          activity.setTemplateParams(paramMap);
+        }
+      }
+
+      activity.setTitle(title);
+      activity.setTitleId(titleTemplate);
+      activity.setType(type);
+      activity.setPostedTime(Long.parseLong(postedTime));
+      activity.setUpdated(new Date(Long.parseLong(updatedTimestamp)));
+
+
+      String userName = ctx.get(userId);
+      Identity userIdentity = identityStorage.findIdentity("organization", userName);
+      activity.setUserId(userIdentity.getId());
+
+      activityStorage.saveActivity(owner, activity);
+
+    }
 
   }
 
@@ -186,6 +249,18 @@ public class NodeWriter12x implements NodeWriter {
 
     }
 
+  }
+
+  private boolean isOrganizationActivity(NodeData data) {
+    return data.getPath().startsWith("/exo:applications/Social_Activity/organization");
+  }
+
+  private boolean isSpaceActivity(NodeData data) {
+    return data.getPath().startsWith("/exo:applications/Social_Activity/space");
+  }
+
+  private String extractOwner(NodeData data) {
+    return data.getPath().split("/")[4];
   }
 
 }

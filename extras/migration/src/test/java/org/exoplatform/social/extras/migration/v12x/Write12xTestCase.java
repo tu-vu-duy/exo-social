@@ -202,6 +202,28 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
 
   }
 
+  public void testWriteActivities() throws Exception {
+
+    ByteArrayOutputStream osIdentities = new ByteArrayOutputStream();
+    ByteArrayOutputStream osSpaces = new ByteArrayOutputStream();
+    ByteArrayOutputStream osActivities = new ByteArrayOutputStream();
+
+    NodeReader reader = new NodeReader11x(session);
+    reader.readIdentities(osIdentities);
+    reader.readSpaces(osSpaces);
+    reader.readActivities(osActivities);
+
+    NodeWriter writer = new NodeWriter12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
+    WriterContext ctx = new WriterContext();
+
+    writer.writeIdentities(new ByteArrayInputStream(osIdentities.toByteArray()), ctx);
+    writer.writeSpaces(new ByteArrayInputStream(osSpaces.toByteArray()), ctx);
+    writer.writeActivities(new ByteArrayInputStream(osActivities.toByteArray()), ctx);
+
+    System.out.println("pouet");
+
+  }
+
   private void checkIdentity(String providerId, String remoteId) throws RepositoryException {
 
     Node identityNode = rootNode.getNode("production/soc:providers/soc:" + providerId + "/soc:" + remoteId);

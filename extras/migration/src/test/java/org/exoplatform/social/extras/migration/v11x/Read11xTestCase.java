@@ -90,7 +90,6 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
 
     //
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    reader.readIdentities(new FileOutputStream("identities"));
     reader.readIdentities(baos);
 
     //
@@ -126,7 +125,6 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
 
     //
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    reader.readRelationships(new FileOutputStream("relationships"));
     reader.readRelationships(baos);
 
     //
@@ -149,7 +147,6 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
 
     //
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    reader.readSpaces(new FileOutputStream("spaces"));
     reader.readSpaces(baos);
 
     //
@@ -161,6 +158,24 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
     checkSpace(dis, "exo:space[3]", "c", null, new String[]{"user_a","user_d"});
     checkSpace(dis, "exo:space[4]", "d", null, new String[]{"user_a","user_d"});
     checkSpace(dis, "exo:space[5]", "e", new String[]{"user_c"}, new String[]{"user_a","user_d"});
+
+  }
+
+  public void testReadActivity() throws Exception {
+
+    NodeReader reader = new NodeReader11x(session);
+
+    //
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    reader.readActivities(baos);
+
+    //
+    ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+    DataInputStream dis = new DataInputStream(bais);
+
+    checkActivity(dis, "ad25a8622e8902a9004557b913a2982b", "organization", "user_a", "user_a", new String[]{"SENDER=user_b", "RECEIVER=user_a"}, "@user_b has invited @user_a to connect", "CONNECTION_REQUESTED", "exosocial:relationship");
+    checkActivity(dis, "ad25a8622e8902a9004557b913a2982c", "organization", "user_a", "user_a", new String[]{"SENDER=user_c", "RECEIVER=user_a"}, "@user_c has invited @user_a to connect", "CONNECTION_REQUESTED", "exosocial:relationship");
+    checkActivity(dis, "ad25a8622e8902a9004557b913a2982d", "organization", "user_a", "user_a", new String[]{"SENDER=user_d", "RECEIVER=user_a"}, "@user_d has invited @user_a to connect", "CONNECTION_REQUESTED", "exosocial:relationship");
 
   }
 
@@ -290,6 +305,54 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
     assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
     assertEquals("exo:visibility", dis.readUTF());
     assertEquals("private", dis.readUTF());
+
+    assertEquals(MigrationConst.END_NODE, dis.readInt());
+
+  }
+
+  private void checkActivity(DataInputStream dis, String nodeName, String provider, String owner, String poster, String[] params, String title, String titleTemplate, String type) throws IOException, RepositoryException {
+
+    assertEquals(MigrationConst.START_NODE, dis.readInt());
+    assertEquals("/exo:applications/Social_Activity/" + provider + "/" + owner + "/published/" + nodeName, dis.readUTF());
+
+    assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("jcr:primaryType", dis.readUTF());
+    assertEquals("exo:activity", dis.readUTF());
+
+    assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("exo:hidden", dis.readUTF());
+    assertEquals("false", dis.readUTF());
+
+    assertEquals(MigrationConst.PROPERTY_MULTI, dis.readInt());
+    assertEquals(params.length, dis.readInt());
+    assertEquals("exo:params", dis.readUTF());
+    for (String param : params) {
+      assertEquals(param, dis.readUTF());
+    }
+
+    assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("exo:postedTime", dis.readUTF());
+    assertEquals("1298642872377", dis.readUTF());
+
+    assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("exo:title", dis.readUTF());
+    assertEquals(title, dis.readUTF());
+
+    assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("exo:titleTemplate", dis.readUTF());
+    assertEquals(titleTemplate, dis.readUTF());
+
+    assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("exo:type", dis.readUTF());
+    assertEquals(type, dis.readUTF());
+
+    assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("exo:updatedTimestamp", dis.readUTF());
+    assertEquals("1298642872377", dis.readUTF());
+
+    assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("exo:userId", dis.readUTF());
+    assertEquals(rootNode.getNode("exo:applications/Social_Identity/" + poster).getUUID(), dis.readUTF());
 
     assertEquals(MigrationConst.END_NODE, dis.readInt());
 

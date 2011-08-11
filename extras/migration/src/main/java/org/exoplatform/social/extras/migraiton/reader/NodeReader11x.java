@@ -60,6 +60,15 @@ public class NodeReader11x implements NodeReader {
   }
 
   public void readActivities(OutputStream os) throws RepositoryException, IOException {
+
+    Node rootOrganizationActivity = rootNode.getNode("exo:applications/Social_Activity/organization");
+    NodeIterator userIt = rootOrganizationActivity.getNodes();
+    while (userIt.hasNext()) {
+      Node currentUser = userIt.nextNode();
+      Node publishedNode = currentUser.getNode("published");
+      readFrom(publishedNode, os);
+    }
+
   }
 
   public void readRelationships(OutputStream os) throws RepositoryException, IOException {

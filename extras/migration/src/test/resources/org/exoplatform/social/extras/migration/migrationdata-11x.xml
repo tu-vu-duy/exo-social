@@ -277,7 +277,9 @@
                 exo:type="exosocial:relationship"
                 exo:updatedTimestamp="1298642872377"
                 exo:userId="#/exo:applications/Social_Identity/user_a"
-              />
+              >
+                <loader:mixin>mix:referenceable</loader:mixin>
+            </ad25a8622e8902a9004557b913a2982b>
             <ad25a8622e8902a9004557b913a2982c loader:type="exo:activity"
                 exo:hidden="false"
                 exo:params="SENDER=user_c,RECEIVER=user_a"
@@ -287,7 +289,20 @@
                 exo:type="exosocial:relationship"
                 exo:updatedTimestamp="1298642872378"
                 exo:userId="#/exo:applications/Social_Identity/user_a"
-              />
+              >
+                <loader:mixin>mix:referenceable</loader:mixin>
+            </ad25a8622e8902a9004557b913a2982c>
+            <ad25a8622e8902a9004557b913a2982e loader:type="exo:activity"
+                exo:hidden="false"
+                exo:postedTime="1298642872380"
+                exo:title="foo"
+                exo:type="exosocial:relationship"
+                exo:replyToId="IS_COMMENT"
+                exo:updatedTimestamp="1298642872380"
+                exo:userId="#/exo:applications/Social_Identity/user_a"
+              >
+                <loader:mixin>mix:referenceable</loader:mixin>
+            </ad25a8622e8902a9004557b913a2982e>
             <ad25a8622e8902a9004557b913a2982d loader:type="exo:activity"
                 exo:hidden="false"
                 exo:params="SENDER=user_d,RECEIVER=user_a"
@@ -295,9 +310,12 @@
                 exo:title="@user_d has invited @user_a to connect"
                 exo:titleTemplate="CONNECTION_REQUESTED"
                 exo:type="exosocial:relationship"
+                exo:replyToId="#/exo:applications/Social_Activity/organization/user_a/published/ad25a8622e8902a9004557b913a2982e"
                 exo:updatedTimestamp="1298642872379"
                 exo:userId="#/exo:applications/Social_Identity/user_a"
-              />
+              >
+                <loader:mixin>mix:referenceable</loader:mixin>
+            </ad25a8622e8902a9004557b913a2982d>
           </published>
         </user_a>
       </organization>
@@ -311,7 +329,9 @@
                 exo:type="exosocial:spaces"
                 exo:updatedTimestamp="1298642872387"
                 exo:userId="#/exo:applications/Social_Identity/user_a"
-              />
+              >
+                <loader:mixin>mix:referenceable</loader:mixin>
+            </ad25a8622e8902a9004557b913a2983b>
             <ad25a8622e8902a9004557b913a2983c loader:type="exo:activity"
                 exo:hidden="false"
                 exo:postedTime="1298642872388"
@@ -319,7 +339,9 @@
                 exo:type="exosocial:spaces"
                 exo:updatedTimestamp="1298642872388"
                 exo:userId="#/exo:applications/Social_Identity/user_b"
-              />
+              >
+                <loader:mixin>mix:referenceable</loader:mixin>
+            </ad25a8622e8902a9004557b913a2983c>
             <ad25a8622e8902a9004557b913a2983d loader:type="exo:activity"
                 exo:hidden="false"
                 exo:postedTime="1298642872389"
@@ -327,7 +349,9 @@
                 exo:type="exosocial:spaces"
                 exo:updatedTimestamp="1298642872389"
                 exo:userId="#/exo:applications/Social_Identity/user_c"
-              />
+              >
+                <loader:mixin>mix:referenceable</loader:mixin>
+            </ad25a8622e8902a9004557b913a2983d>
           </published>
         </uuid>
       </space>

@@ -220,7 +220,13 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
     writer.writeSpaces(new ByteArrayInputStream(osSpaces.toByteArray()), ctx);
     writer.writeActivities(new ByteArrayInputStream(osActivities.toByteArray()), ctx);
 
-    System.out.println("pouet");
+    checkActivity("organization", "user_a", "1298642872377");
+    checkActivity("organization", "user_a", "1298642872378");
+    checkActivity("organization", "user_a", "1298642872379");
+
+    checkActivity("space", "name_a", "1298642872387");
+    checkActivity("space", "name_a", "1298642872388");
+    checkActivity("space", "name_a", "1298642872389");
 
   }
 
@@ -284,6 +290,12 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
         // ok
       }
     }
+
+  }
+
+  private void checkActivity(String providerId, String remoteId, String timestamp) throws RepositoryException {
+    
+    Node identityNode = rootNode.getNode("production/soc:providers/soc:" + providerId + "/soc:" + remoteId + "/soc:activities/soc:2011/soc:February/soc:25/soc:" + timestamp);
 
   }
 

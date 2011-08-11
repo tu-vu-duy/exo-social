@@ -163,6 +163,9 @@ public class NodeWriter12x implements NodeWriter {
 
   public void writeActivities(final InputStream is, final WriterContext ctx) {
 
+    // TODO : space as poster
+    // TODO : comment
+    // TODO : like
 
     NodeStreamHandler handler = new NodeStreamHandler();
     NodeData currentData;

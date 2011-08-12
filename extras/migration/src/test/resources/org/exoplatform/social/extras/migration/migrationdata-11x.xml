@@ -287,6 +287,7 @@
                 exo:title="@user_c has invited @user_a to connect"
                 exo:titleTemplate="CONNECTION_REQUESTED"
                 exo:type="exosocial:relationship"
+                exo:like="#/exo:applications/Social_Identity/user_a,#/exo:applications/Social_Identity/user_b"
                 exo:updatedTimestamp="1298642872378"
                 exo:userId="#/exo:applications/Social_Identity/user_a"
               >

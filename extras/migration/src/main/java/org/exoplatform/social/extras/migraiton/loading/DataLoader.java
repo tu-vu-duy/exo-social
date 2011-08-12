@@ -174,20 +174,22 @@ public class DataLoader {
         name = key.getPrefix() + ":" + name;
       }
 
-      String propertyValue = resolvePropertyValue(attributes.get(key));
+      String unresolvedValue = attributes.get(key);
+
       Property p;
       if (isMultiple(node, name)) {
-        p = node.setProperty(name, propertyValue.split(","));
+        p = node.setProperty(name, resolvePropertyValue(unresolvedValue.split(",")));
       }
       else {
+        String propertyValue = resolvePropertyValue(unresolvedValue);
         if (propertyValue.equals(attributes.get(key))) {
           p = node.setProperty(name, propertyValue);
         }
         else {
           p = node.setProperty(name, session.getNodeByUUID(propertyValue));
         }
+        LOG.trace("Create property : " + p.getPath() + " = " + propertyValue);
       }
-      LOG.trace("Create property : " + p.getPath() + " = " + propertyValue);
     }
 
   }
@@ -272,6 +274,18 @@ public class DataLoader {
 
     // return value
     return value;
+
+  }
+
+  private String[] resolvePropertyValue(String[] values) throws RepositoryException {
+
+    String[] resolvedValues = new String[values.length];
+
+    for(int i = 0; i < values.length; ++i) {
+      resolvedValues[i] = resolvePropertyValue(values[i]);
+    }
+
+    return resolvedValues;
 
   }
 

@@ -25,6 +25,7 @@ import org.exoplatform.social.core.activity.model.ExoSocialActivityImpl;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.relationship.model.Relationship;
 import org.exoplatform.social.core.space.model.Space;
+import org.exoplatform.social.core.storage.IdentityStorageException;
 import org.exoplatform.social.core.storage.api.ActivityStorage;
 import org.exoplatform.social.core.storage.api.IdentityStorage;
 import org.exoplatform.social.core.storage.api.RelationshipStorage;
@@ -33,6 +34,8 @@ import org.exoplatform.social.extras.migraiton.io.NodeData;
 import org.exoplatform.social.extras.migraiton.io.NodeStreamHandler;
 import org.exoplatform.social.extras.migraiton.io.WriterContext;
 
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -82,7 +85,8 @@ public class NodeWriter12x implements NodeWriter {
       identityStorage.saveIdentity(identity);
 
       ctx.put((String) currentData.getProperties().get("jcr:uuid"), (String) currentData.getProperties().get("exo:remoteId"));
-      
+      ctx.put(currentData.getProperties().get("jcr:uuid") + "-newId", identity.getId());
+
     }
     
   }
@@ -163,13 +167,15 @@ public class NodeWriter12x implements NodeWriter {
 
   public void writeActivities(final InputStream is, final WriterContext ctx) {
 
-    // TODO : space as poster
-    // TODO : comment
-    // TODO : like
-
     NodeStreamHandler handler = new NodeStreamHandler();
     NodeData currentData;
     while ((currentData = handler.readNode(is)) != null) {
+
+      String replyToId = (String) currentData.getProperties().get("exo:replyToId");
+
+      if ("IS_COMMENT".equals(replyToId)) {
+        continue;
+      }
 
       String ownerId = extractOwner(currentData);
       Identity owner;
@@ -195,16 +201,13 @@ public class NodeWriter12x implements NodeWriter {
       String updatedTimestamp = (String) currentData.getProperties().get("exo:updatedTimestamp");
 
       String[] params = (String[]) currentData.getProperties().get("exo:params");
-      if (params != null) {
-        Map<String, String> paramMap = new HashMap<String, String>();
-        for(String param : params) {
-          String[] keyValue = param.split("=");
-          paramMap.put(keyValue[0], keyValue[1]);
-        }
-        if (paramMap.size() > 0) {
-          activity.setTemplateParams(paramMap);
-        }
+      String[] likes = (String[]) currentData.getProperties().get("exo:like");
+
+      Map<String, String> paramMap = readParams(params);
+      if (paramMap != null) {
+        activity.setTemplateParams(paramMap);
       }
+
 
       activity.setTitle(title);
       activity.setTitleId(titleTemplate);
@@ -212,12 +215,49 @@ public class NodeWriter12x implements NodeWriter {
       activity.setPostedTime(Long.parseLong(postedTime));
       activity.setUpdated(new Date(Long.parseLong(updatedTimestamp)));
 
+      if (likes != null) {
+        String[] newLikes = new String[likes.length];
+        for (int i = 0; i < likes.length; ++i) {
+          newLikes[i] = ctx.get(likes[i] + "-newId");
+        }
+        activity.setLikeIdentityIds(newLikes);
+      }
 
-      String userName = ctx.get(userId);
-      Identity userIdentity = identityStorage.findIdentity("organization", userName);
-      activity.setUserId(userIdentity.getId());
+      try {
+        String userName = ctx.get(userId);
+        Identity userIdentity = identityStorage.findIdentity("organization", userName);
+        activity.setUserId(userIdentity.getId());
+      }
+      catch (IdentityStorageException e) {
+        try {
+          Node oldSpaceIdentity = session.getNodeByUUID(userId);
+          String oldSpaceId = oldSpaceIdentity.getProperty("exo:remoteId").getString();
+          String spaceName = ctx.get(oldSpaceId);
+          Identity spaceIdentity = identityStorage.findIdentity("space", spaceName);
+          activity.setUserId(spaceIdentity.getId());
+        }
+        catch (RepositoryException e1) {
+          e1.printStackTrace();
+        }
+      }
 
       activityStorage.saveActivity(owner, activity);
+      
+      if (replyToId != null) {
+        String[] ids = replyToId.split(",");
+
+        for (String id : ids) {
+
+          try {
+            Node node = session.getNodeByUUID(id);
+            ExoSocialActivity comment = buildActivityFromNode(node, ctx);
+            activityStorage.saveComment(activity, comment);
+          }
+          catch (RepositoryException e) {
+            e.printStackTrace();
+          }
+        }
+      }
 
     }
 
@@ -264,6 +304,54 @@ public class NodeWriter12x implements NodeWriter {
 
   private String extractOwner(NodeData data) {
     return data.getPath().split("/")[4];
+  }
+
+  private Map<String, String> readParams(String[] params) {
+
+    if (params != null) {
+      Map<String, String> paramMap = new HashMap<String, String>();
+      for(String param : params) {
+        String[] keyValue = param.split("=");
+        paramMap.put(keyValue[0], keyValue[1]);
+      }
+      if (paramMap.size() > 0) {
+        return paramMap;
+      }
+    }
+    return null;
+  }
+
+  private ExoSocialActivity buildActivityFromNode(Node node, WriterContext ctx) {
+
+    ExoSocialActivity comment = new ExoSocialActivityImpl();
+
+    String title = getPropertyValye(node, "exo:title");
+    String titleTemplate = getPropertyValye(node, "exo:titleTemplate");
+    String type = getPropertyValye(node, "exo:type");
+    String userId = getPropertyValye(node, "exo:userId");
+    String postedTime = getPropertyValye(node, "exo:postedTime");
+    String updatedTimestamp = getPropertyValye(node, "exo:updatedTimestamp");
+
+    comment.setTitle(title);
+    comment.setTitleId(titleTemplate);
+    comment.setType(type);
+    comment.setPostedTime(Long.parseLong(postedTime));
+    comment.setUpdated(new Date(Long.parseLong(updatedTimestamp)));
+
+    String userName = ctx.get(userId);
+    String newUserId = identityStorage.findIdentity("organization", userName).getId();
+    comment.setUserId(newUserId);
+
+    return comment;
+  }
+
+  private String getPropertyValye(Node node, String propertyName) {
+    try {
+      return node.getProperty(propertyName).getString();
+    }
+    catch (RepositoryException e) {
+      return null;
+    }
   }
 
 }

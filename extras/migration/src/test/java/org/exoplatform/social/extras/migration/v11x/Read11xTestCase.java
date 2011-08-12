@@ -173,17 +173,19 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
     ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
     DataInputStream dis = new DataInputStream(bais);
 
-    checkActivity(dis, "ad25a8622e8902a9004557b913a2982b", "organization", "user_a", "user_a", new String[]{"SENDER=user_b", "RECEIVER=user_a"}, "@user_b has invited @user_a to connect", "CONNECTION_REQUESTED", "exosocial:relationship", "1298642872377", null);
-    checkActivity(dis, "ad25a8622e8902a9004557b913a2982c", "organization", "user_a", "user_a", new String[]{"SENDER=user_c", "RECEIVER=user_a"}, "@user_c has invited @user_a to connect", "CONNECTION_REQUESTED", "exosocial:relationship", "1298642872378", null);
-    checkActivity(dis, "ad25a8622e8902a9004557b913a2982e", "organization", "user_a", "user_a", null, "foo", null, "exosocial:relationship", "1298642872380", "IS_COMMENT");
-
+    String like1 = rootNode.getNode("exo:applications/Social_Identity/user_a").getUUID();
+    String like2 = rootNode.getNode("exo:applications/Social_Identity/user_b").getUUID();
     String replyToId = rootNode.getNode("exo:applications/Social_Activity/organization/user_a/published/ad25a8622e8902a9004557b913a2982e").getUUID();
-    checkActivity(dis, "ad25a8622e8902a9004557b913a2982d", "organization", "user_a", "user_a", new String[]{"SENDER=user_d", "RECEIVER=user_a"}, "@user_d has invited @user_a to connect", "CONNECTION_REQUESTED", "exosocial:relationship", "1298642872379", replyToId);
-
     String spaceId = rootNode.getNode("exo:applications/Social_Space/Space/exo:space").getUUID();
-    checkActivity(dis, "ad25a8622e8902a9004557b913a2983b", "space", spaceId, "user_a", null, "@user_a has joined.", null, "exosocial:spaces", "1298642872387", null);
-    checkActivity(dis, "ad25a8622e8902a9004557b913a2983c", "space", spaceId, "user_b", null, "@user_b has joined.", null, "exosocial:spaces", "1298642872388", null);
-    checkActivity(dis, "ad25a8622e8902a9004557b913a2983d", "space", spaceId, "user_c", null, "@user_c has joined.", null, "exosocial:spaces", "1298642872389", null);
+
+    checkActivity(dis, "ad25a8622e8902a9004557b913a2982b", "organization", "user_a", "user_a", new String[]{"SENDER=user_b", "RECEIVER=user_a"}, "@user_b has invited @user_a to connect", "CONNECTION_REQUESTED", "exosocial:relationship", "1298642872377", null, null);
+    checkActivity(dis, "ad25a8622e8902a9004557b913a2982c", "organization", "user_a", "user_a", new String[]{"SENDER=user_c", "RECEIVER=user_a"}, "@user_c has invited @user_a to connect", "CONNECTION_REQUESTED", "exosocial:relationship", "1298642872378", null, new String[]{like1, like2});
+    checkActivity(dis, "ad25a8622e8902a9004557b913a2982e", "organization", "user_a", "user_a", null, "foo", null, "exosocial:relationship", "1298642872380", "IS_COMMENT", null);
+    checkActivity(dis, "ad25a8622e8902a9004557b913a2982d", "organization", "user_a", "user_a", new String[]{"SENDER=user_d", "RECEIVER=user_a"}, "@user_d has invited @user_a to connect", "CONNECTION_REQUESTED", "exosocial:relationship", "1298642872379", replyToId, null);
+
+    checkActivity(dis, "ad25a8622e8902a9004557b913a2983b", "space", spaceId, "user_a", null, "@user_a has joined.", null, "exosocial:spaces", "1298642872387", null, null);
+    checkActivity(dis, "ad25a8622e8902a9004557b913a2983c", "space", spaceId, "user_b", null, "@user_b has joined.", null, "exosocial:spaces", "1298642872388", null, null);
+    checkActivity(dis, "ad25a8622e8902a9004557b913a2983d", "space", spaceId, "user_c", null, "@user_c has joined.", null, "exosocial:spaces", "1298642872389", null, null);
 
   }
 
@@ -318,7 +320,7 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
 
   }
 
-  private void checkActivity(DataInputStream dis, String nodeName, String provider, String owner, String poster, String[] params, String title, String titleTemplate, String type, String timestamp, String replyToId) throws IOException, RepositoryException {
+  private void checkActivity(DataInputStream dis, String nodeName, String provider, String owner, String poster, String[] params, String title, String titleTemplate, String type, String timestamp, String replyToId, String[] likes) throws IOException, RepositoryException {
 
     String path;
     assertEquals(MigrationConst.START_NODE, dis.readInt());
@@ -340,6 +342,15 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
     assertEquals(MigrationConst.PROPERTY_SINGLE, dis.readInt());
     assertEquals("exo:hidden", dis.readUTF());
     assertEquals("false", dis.readUTF());
+
+    if (likes != null) {
+      assertEquals(MigrationConst.PROPERTY_MULTI, dis.readInt());
+      assertEquals(params.length, dis.readInt());
+      assertEquals("exo:like", dis.readUTF());
+      for (String like : likes) {
+        assertEquals(like, dis.readUTF());
+      }
+    }
 
     if (params != null) {
       assertEquals(MigrationConst.PROPERTY_MULTI, dis.readInt());

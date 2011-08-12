@@ -45,8 +45,6 @@ import javax.jcr.Session;
 import javax.jcr.Value;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Collection;
 
 /**
@@ -194,11 +192,11 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
     writer.writeIdentities(new ByteArrayInputStream(osIdentities.toByteArray()), ctx);
     writer.writeSpaces(new ByteArrayInputStream(osSpaces.toByteArray()), ctx);
 
-    checkSpace("a", null, null, new String[]{"user_a","user_b","user_d"}, null);
-    checkSpace("b", new String[]{"user_a","user_b"}, new String[]{"user_c"}, null, null);
-    checkSpace("c", null, null, null, new String[]{"user_a","user_d"});
-    checkSpace("d", null, null, null, new String[]{"user_a","user_d"});
-    checkSpace("e", null, null, new String[]{"user_c"}, new String[]{"user_a","user_d"});
+    checkSpace("a", null, null, new String[]{"user_a", "user_b", "user_d"}, null);
+    checkSpace("b", new String[]{"user_a", "user_b"}, new String[]{"user_c"}, null, null);
+    checkSpace("c", null, null, null, new String[]{"user_a", "user_d"});
+    checkSpace("d", null, null, null, new String[]{"user_a", "user_d"});
+    checkSpace("e", null, null, new String[]{"user_c"}, new String[]{"user_a", "user_d"});
 
   }
 
@@ -220,13 +218,26 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
     writer.writeSpaces(new ByteArrayInputStream(osSpaces.toByteArray()), ctx);
     writer.writeActivities(new ByteArrayInputStream(osActivities.toByteArray()), ctx);
 
-    checkActivity("organization", "user_a", "1298642872377");
-    checkActivity("organization", "user_a", "1298642872378");
-    checkActivity("organization", "user_a", "1298642872379");
+    String user_aId = rootNode.getNode("production/soc:providers/soc:organization/soc:user_a").getUUID();
+    String user_bId = rootNode.getNode("production/soc:providers/soc:organization/soc:user_b").getUUID();
 
-    checkActivity("space", "name_a", "1298642872387");
-    checkActivity("space", "name_a", "1298642872388");
-    checkActivity("space", "name_a", "1298642872389");
+    checkActivity("organization", "user_a", "1298642872377", null, "@user_b has invited @user_a to connect", "CONNECTION_REQUESTED", null);
+    checkActivity("organization", "user_a", "1298642872378", null, "@user_c has invited @user_a to connect", "CONNECTION_REQUESTED", new String[]{user_aId, user_bId});
+    checkActivity("organization", "user_a", "1298642872379", null, "@user_d has invited @user_a to connect", "CONNECTION_REQUESTED", null);
+
+    try {
+      checkActivity("organization", "user_a", "1298642872380", null, null, null, null);
+      fail();
+    }
+    catch (PathNotFoundException e) {
+      // ok
+    }
+
+    checkActivity("space", "name_a", "1298642872387", null, "@user_a has joined.", null, null);
+    checkActivity("space", "name_a", "1298642872388", null, "@user_b has joined.", null, null);
+    checkActivity("space", "name_a", "1298642872389", null, "@user_c has joined.", null, null);
+
+    checkActivity("organization", "user_a", "1298642872379", "1298642872380", "foo", null, null);
 
   }
 
@@ -293,9 +304,19 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
 
   }
 
-  private void checkActivity(String providerId, String remoteId, String timestamp) throws RepositoryException {
-    
-    Node identityNode = rootNode.getNode("production/soc:providers/soc:" + providerId + "/soc:" + remoteId + "/soc:activities/soc:2011/soc:February/soc:25/soc:" + timestamp);
+  private void checkActivity(String providerId, String remoteId, String activityTimestamp, String commentTimestamp, String title, String titleId, String[] likes) throws RepositoryException {
+
+    String path = "production/soc:providers/soc:" + providerId + "/soc:" + remoteId + "/soc:activities/soc:2011/soc:February/soc:25/soc:" + activityTimestamp;
+
+    if (commentTimestamp != null) {
+      path += "/soc:" + commentTimestamp;
+    }
+
+    Node activityNode = rootNode.getNode(path);
+
+    if (likes != null) assertEquals(likes.length, activityNode.getProperty("soc:likes").getValues().length);
+    assertEquals(title, activityNode.getProperty("soc:title").getString());
+    if (titleId != null) assertEquals(titleId, activityNode.getProperty("soc:titleId").getString());
 
   }
 

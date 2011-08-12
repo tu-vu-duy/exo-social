@@ -44,6 +44,7 @@ import org.exoplatform.social.core.space.SpaceException;
 import org.exoplatform.social.core.space.SpaceUtils;
 import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.space.spi.SpaceService;
+import org.exoplatform.social.webui.Utils;
 import org.exoplatform.webui.application.WebuiRequestContext;
 import org.exoplatform.webui.application.portlet.PortletRequestContext;
 import org.exoplatform.webui.config.annotation.ComponentConfig;
@@ -93,7 +94,7 @@ public class UISpacesToolBarPortlet extends UIPortletApplication {
     
     
     UserNodeFilterConfig.Builder builder = UserNodeFilterConfig.builder();
-    builder.withAuthorizationCheck().withVisibility(Visibility.DISPLAYED, Visibility.TEMPORAL);
+    builder.withReadWriteCheck().withVisibility(Visibility.DISPLAYED, Visibility.TEMPORAL);
     builder.withTemporalCheck();
     toolbarFilterConfig = builder.build();     
   }
@@ -321,7 +322,7 @@ public class UISpacesToolBarPortlet extends UIPortletApplication {
     ResourceURL rsURL = res.createResourceURL();
     rsURL.setResourceID(res.encodeURL(getResourceIdFromNode(node, navId)));
     json.put("getNodeURL", rsURL.toString());
-    json.put("actionLink", Util.getPortalRequestContext().getPortalURI() + node.getURI());
+    json.put("actionLink", Utils.getSpaceURL(node));
 
     JSONArray childs = new JSONArray();
     for (UserNode child : node.getChildren()) {

@@ -17,9 +17,20 @@
 
 package org.exoplatform.social.extras.migraiton.writer;
 
+import org.exoplatform.container.PortalContainer;
+import org.exoplatform.container.component.RequestLifeCycle;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 import org.exoplatform.services.organization.Group;
+import org.exoplatform.services.organization.GroupHandler;
 import org.exoplatform.services.organization.Membership;
+import org.exoplatform.services.organization.MembershipHandler;
+import org.exoplatform.services.organization.MembershipType;
+import org.exoplatform.services.organization.MembershipTypeHandler;
+import org.exoplatform.services.organization.OrganizationConfig;
 import org.exoplatform.services.organization.OrganizationService;
+import org.exoplatform.services.organization.User;
+import org.exoplatform.services.organization.UserHandler;
 import org.exoplatform.social.core.activity.model.ExoSocialActivity;
 import org.exoplatform.social.core.activity.model.ExoSocialActivityImpl;
 import org.exoplatform.social.core.identity.model.Identity;
@@ -35,6 +46,7 @@ import org.exoplatform.social.extras.migraiton.io.NodeStreamHandler;
 import org.exoplatform.social.extras.migraiton.io.WriterContext;
 
 import javax.jcr.Node;
+import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.InputStream;
@@ -59,6 +71,8 @@ public class NodeWriter12x implements NodeWriter {
 
   private final Session session;
 
+  private static final Log LOG = ExoLogger.getLogger(NodeWriter12x.class);
+
   public NodeWriter12x(final IdentityStorage identityStorage, final RelationshipStorage relationshipStorage, final SpaceStorage spaceStorage, final ActivityStorage activityStorage, final OrganizationService organizationService, final Session session) {
     this.identityStorage = identityStorage;
     this.relationshipStorage = relationshipStorage;
@@ -82,12 +96,12 @@ public class NodeWriter12x implements NodeWriter {
 
       String remote = (String) currentData.getProperties().get("exo:remoteId");
       Identity identity = new Identity(provider, remote);
-      System.out.println("Write " + provider + "/" + remote);
       try {
+        LOG.info("Write identity " + provider + "/" + remote);
         identityStorage.saveIdentity(identity);
       }
       catch (Exception e) {
-        System.out.println("ERROR");
+        LOG.error(e.getMessage());
       }
 
       ctx.put((String) currentData.getProperties().get("jcr:uuid"), (String) currentData.getProperties().get("exo:remoteId"));
@@ -328,6 +342,37 @@ public class NodeWriter12x implements NodeWriter {
       }
 
     }
+
+  }
+
+  public void generateOrganization() {
+
+    RequestLifeCycle.begin(PortalContainer.getInstance());
+    try {
+      Node identities = session.getRootNode().getNode("production/soc:providers/soc:organization");
+      NodeIterator it = identities.getNodes();
+      UserHandler userHandler = organizationService.getUserHandler();
+      GroupHandler groupHandler = organizationService.getGroupHandler();
+      MembershipHandler membershipHandler = organizationService.getMembershipHandler();
+      MembershipTypeHandler membershipTypeHandler = organizationService.getMembershipTypeHandler();
+
+      Group group = groupHandler.findGroupById("/platform/users");
+      MembershipType type = membershipTypeHandler.findMembershipType("member");
+      while (it.hasNext()) {
+        Node currentNode = it.nextNode();
+        User user = userHandler.createUserInstance(currentNode.getProperty("soc:remoteId").getString());
+        user.setPassword("gtn");
+
+        userHandler.createUser(user, false);
+        membershipHandler.linkMembership(user, group, type, false);
+        LOG.info("Create user " + user.getUserName());
+
+      }
+    }
+    catch (Exception e) {
+      LOG.error(e.getMessage());
+    }
+    RequestLifeCycle.end();
 
   }
 

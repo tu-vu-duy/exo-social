@@ -40,6 +40,6 @@ public interface NodeReader {
 
   void readRelationships(OutputStream os) throws RepositoryException, IOException;
 
-  void checkData(String oldVersion) throws MigrationException;
+  void checkData() throws MigrationException;
 
 }

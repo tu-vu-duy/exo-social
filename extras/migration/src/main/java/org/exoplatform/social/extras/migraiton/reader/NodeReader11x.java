@@ -71,13 +71,13 @@ public class NodeReader11x implements NodeReader {
 
   }
 
-  public void checkData(String oldVersion) throws MigrationException {
+  public void checkData() throws MigrationException {
 
     try {
       rootNode.getNode("exo:applications");
     }
     catch (RepositoryException e) {
-      throw new MigrationException("No data found for " + oldVersion);
+      throw new MigrationException("No data found for this version");
     }
 
   }

@@ -78,39 +78,82 @@ public class MigrationTool {
 
   }
 
-  private void run(String oldVersion, String newVersion, Session session) throws IOException, RepositoryException {
+  private void runAll(String oldVersion, String newVersion, Session session) throws IOException, RepositoryException {
 
-    NodeReader reader = new NodeReader11x(session);
-    reader.checkData(oldVersion);
+    NodeReader reader = createReader(oldVersion, session);
+    reader.checkData();
 
-    PipedOutputStream osIdentity = new PipedOutputStream();
-    PipedInputStream isIdentity = new PipedInputStream(osIdentity);
-
-    PipedOutputStream osSpace = new PipedOutputStream();
-    PipedInputStream isSpace = new PipedInputStream(osSpace);
-
-    PipedOutputStream osRelationship = new PipedOutputStream();
-    PipedInputStream isRelationship = new PipedInputStream(osRelationship);
-
-    PipedOutputStream osActivity = new PipedOutputStream();
-    PipedInputStream isActivity = new PipedInputStream(osActivity);
-
-    NodeWriter writer = new NodeWriter12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
+    NodeWriter writer = createWriter(newVersion, session);
     WriterContext ctx = new WriterContext();
 
-    reader.readIdentities(osIdentity);
-    writer.writeIdentities(isIdentity, ctx);
-
-    reader.readSpaces(osSpace);
-    writer.writeSpaces(isSpace, ctx);
-
-    reader.readRelationships(osRelationship);
-    writer.writeRelationships(isRelationship, ctx);
-
-    reader.readActivities(osActivity);
-    writer.writeActivities(isActivity, ctx);
+    runIdentities(reader, writer, ctx);
+    runSpaces(reader, writer, ctx);
+    runRelationships(reader, writer, ctx);
+    runActivities(reader, writer, ctx);
 
   }
+
+  public void runIdentities(NodeReader reader, NodeWriter writer, WriterContext ctx) throws IOException, RepositoryException {
+
+    reader.checkData();
+
+    PipedOutputStream os = new PipedOutputStream();
+    PipedInputStream is = new PipedInputStream(os);
+
+    reader.readIdentities(os);
+    writer.writeIdentities(is, ctx);
+
+  }
+
+  public void runSpaces(NodeReader reader, NodeWriter writer, WriterContext ctx) throws IOException, RepositoryException {
+
+    reader.checkData();
+
+    PipedOutputStream os = new PipedOutputStream();
+    PipedInputStream is = new PipedInputStream(os);
+
+    reader.readSpaces(os);
+    writer.writeSpaces(is, ctx);
+
+  }
+
+  public void runRelationships(NodeReader reader, NodeWriter writer, WriterContext ctx) throws IOException, RepositoryException {
+
+    reader.checkData();
+
+    PipedOutputStream os = new PipedOutputStream();
+    PipedInputStream is = new PipedInputStream(os);
+
+    reader.readRelationships(os);
+    writer.writeRelationships(is, ctx);
+
+  }
+
+  public void runActivities(NodeReader reader, NodeWriter writer, WriterContext ctx) throws IOException, RepositoryException {
+
+    reader.checkData();
+
+    PipedOutputStream os = new PipedOutputStream();
+    PipedInputStream is = new PipedInputStream(os);
+
+    reader.readActivities(os);
+    writer.writeActivities(is, ctx);
+
+  }
+
+  public NodeReader createReader(String version, Session session) throws RepositoryException {
+
+    // TODO : use version
+    return new NodeReader11x(session);
+  }
+
+  public NodeWriter createWriter(String version, Session session) throws RepositoryException {
+
+    // TODO : use version
+    return new NodeWriter12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
+  }
+
+
 
   /*public void exportToStream(Session session, String version, String fileName) {
 

@@ -21,11 +21,20 @@ package org.exoplatform.social.extras.migraiton;
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class MigrationConst {
+public class MigrationException extends RuntimeException {
+  public MigrationException() {
+  }
 
-  public static final int START_NODE        = 1;
-  public static final int PROPERTY_SINGLE   = 2;
-  public static final int PROPERTY_MULTI    = 3;
-  public static final int END_NODE          = 4;
+  public MigrationException(final String s) {
+    super(s);
+  }
+
+  public MigrationException(final String s, final Throwable throwable) {
+    super(s, throwable);
+  }
+
+  public MigrationException(final Throwable throwable) {
+    super(throwable);
+  }
 
 }

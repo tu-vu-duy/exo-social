@@ -45,6 +45,9 @@ import javax.jcr.Session;
 import javax.jcr.Value;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.util.Collection;
 
 /**
@@ -112,13 +115,14 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
 
   public void testWriteIdentities() throws Exception {
 
-    ByteArrayOutputStream osIdentity = new ByteArrayOutputStream();
+    PipedOutputStream osIdentity = new PipedOutputStream();
+    PipedInputStream isIdentity = new PipedInputStream(osIdentity);
 
     NodeReader reader = new NodeReader11x(session);
     reader.readIdentities(osIdentity);
 
     NodeWriter writer = new NodeWriter12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
-    writer.writeIdentities(new ByteArrayInputStream(osIdentity.toByteArray()), new WriterContext());
+    writer.writeIdentities(isIdentity, new WriterContext());
 
     checkIdentity("organization", "user_idA");
     checkIdentity("organization", "user_idB");
@@ -144,18 +148,21 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
 
   public void testWriteRelationships() throws Exception {
 
-    ByteArrayOutputStream osIdentity = new ByteArrayOutputStream();
-    ByteArrayOutputStream osRelationship = new ByteArrayOutputStream();
+    PipedOutputStream osIdentity = new PipedOutputStream();
+    PipedInputStream isIdentity = new PipedInputStream(osIdentity);
+
+    PipedOutputStream osRelationship = new PipedOutputStream();
+    PipedInputStream isRelationship = new PipedInputStream(osRelationship);
 
     NodeReader reader = new NodeReader11x(session);
-    reader.readIdentities(osIdentity);
-    reader.readRelationships(osRelationship);
-
     NodeWriter writer = new NodeWriter12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
     WriterContext ctx = new WriterContext();
-    
-    writer.writeIdentities(new ByteArrayInputStream(osIdentity.toByteArray()), ctx);
-    writer.writeRelationships(new ByteArrayInputStream(osRelationship.toByteArray()), ctx);
+
+    reader.readIdentities(osIdentity);
+    writer.writeIdentities(isIdentity, ctx);
+
+    reader.readRelationships(osRelationship);
+    writer.writeRelationships(isRelationship, ctx);
 
     checkRelationship("organization", "user_idC", "user_idB", "relationship");
     checkRelationship("organization", "user_idB", "user_idC", "relationship");
@@ -179,18 +186,21 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
 
   public void testWriteSpaces() throws Exception {
 
-    ByteArrayOutputStream osIdentities = new ByteArrayOutputStream();
-    ByteArrayOutputStream osSpaces = new ByteArrayOutputStream();
+    PipedOutputStream osIdentity = new PipedOutputStream();
+    PipedInputStream isIdentity = new PipedInputStream(osIdentity);
+
+    PipedOutputStream osSpace = new PipedOutputStream();
+    PipedInputStream isSpace = new PipedInputStream(osSpace);
 
     NodeReader reader = new NodeReader11x(session);
-    reader.readIdentities(osIdentities);
-    reader.readSpaces(osSpaces);
-
     NodeWriter writer = new NodeWriter12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
     WriterContext ctx = new WriterContext();
 
-    writer.writeIdentities(new ByteArrayInputStream(osIdentities.toByteArray()), ctx);
-    writer.writeSpaces(new ByteArrayInputStream(osSpaces.toByteArray()), ctx);
+    reader.readIdentities(osIdentity);
+    writer.writeIdentities(isIdentity, ctx);
+
+    reader.readSpaces(osSpace);
+    writer.writeSpaces(isSpace, ctx);
 
     checkSpace("a", null, null, new String[]{"user_a", "user_b", "user_d"}, null);
     checkSpace("b", new String[]{"user_a", "user_b"}, new String[]{"user_c"}, null, null);
@@ -202,21 +212,27 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
 
   public void testWriteActivities() throws Exception {
 
-    ByteArrayOutputStream osIdentities = new ByteArrayOutputStream();
-    ByteArrayOutputStream osSpaces = new ByteArrayOutputStream();
-    ByteArrayOutputStream osActivities = new ByteArrayOutputStream();
+    PipedOutputStream osIdentity = new PipedOutputStream();
+    PipedInputStream isIdentity = new PipedInputStream(osIdentity);
+
+    PipedOutputStream osSpace = new PipedOutputStream();
+    PipedInputStream isSpace = new PipedInputStream(osSpace);
+
+    PipedOutputStream osActivity = new PipedOutputStream();
+    PipedInputStream isActivity = new PipedInputStream(osActivity);
 
     NodeReader reader = new NodeReader11x(session);
-    reader.readIdentities(osIdentities);
-    reader.readSpaces(osSpaces);
-    reader.readActivities(osActivities);
-
     NodeWriter writer = new NodeWriter12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
     WriterContext ctx = new WriterContext();
 
-    writer.writeIdentities(new ByteArrayInputStream(osIdentities.toByteArray()), ctx);
-    writer.writeSpaces(new ByteArrayInputStream(osSpaces.toByteArray()), ctx);
-    writer.writeActivities(new ByteArrayInputStream(osActivities.toByteArray()), ctx);
+    reader.readIdentities(osIdentity);
+    writer.writeIdentities(isIdentity, ctx);
+
+    reader.readSpaces(osSpace);
+    writer.writeSpaces(isSpace, ctx);
+
+    reader.readActivities(osActivity);
+    writer.writeActivities(isActivity, ctx);
 
     String user_aId = rootNode.getNode("production/soc:providers/soc:organization/soc:user_a").getUUID();
     String user_bId = rootNode.getNode("production/soc:providers/soc:organization/soc:user_b").getUUID();

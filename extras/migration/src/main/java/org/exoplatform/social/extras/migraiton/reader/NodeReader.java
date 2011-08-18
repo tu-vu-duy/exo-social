@@ -17,6 +17,8 @@
 
 package org.exoplatform.social.extras.migraiton.reader;
 
+import org.exoplatform.social.extras.migraiton.MigrationException;
+
 import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
 import java.io.IOException;
@@ -37,5 +39,7 @@ public interface NodeReader {
   void readActivities(OutputStream os) throws RepositoryException, IOException;
 
   void readRelationships(OutputStream os) throws RepositoryException, IOException;
+
+  void checkData(String oldVersion) throws MigrationException;
 
 }

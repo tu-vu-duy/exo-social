@@ -17,12 +17,11 @@
 
 package org.exoplatform.social.extras.migraiton.io;
 
-import org.exoplatform.social.extras.migraiton.MigrationConst;
+import org.exoplatform.social.extras.migraiton.MigrationTool;
 
 import javax.jcr.Node;
 import javax.jcr.Property;
 import javax.jcr.PropertyIterator;
-import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
 import java.io.DataInputStream;
@@ -43,7 +42,7 @@ public class NodeStreamHandler {
     DataOutputStream dos = new DataOutputStream(os);
 
     // Write node data.
-    dos.writeInt(MigrationConst.START_NODE);
+    dos.writeInt(MigrationTool.START_NODE);
     dos.writeUTF(node.getPath());
 
     // Write properties.
@@ -52,7 +51,7 @@ public class NodeStreamHandler {
       Property p = it.nextProperty();
 
       if (p.getDefinition().isMultiple()) {
-        dos.writeInt(MigrationConst.PROPERTY_MULTI);
+        dos.writeInt(MigrationTool.PROPERTY_MULTI);
         dos.writeInt(p.getValues().length);
         dos.writeUTF(p.getName());
         for (Value v : p.getValues()) {
@@ -60,14 +59,14 @@ public class NodeStreamHandler {
         }
       }
       else {
-        dos.writeInt(MigrationConst.PROPERTY_SINGLE);
+        dos.writeInt(MigrationTool.PROPERTY_SINGLE);
         dos.writeUTF(p.getName());
         dos.writeUTF(p.getString());
       }
 
     }
 
-    dos.writeInt(MigrationConst.END_NODE);
+    dos.writeInt(MigrationTool.END_NODE);
 
     dos.flush();
     
@@ -80,7 +79,7 @@ public class NodeStreamHandler {
     DataInputStream dis = new DataInputStream(is);
 
     try {
-      while (readData(dis, data) != MigrationConst.END_NODE);
+      while (readData(dis, data) != MigrationTool.END_NODE);
     }
     catch (IOException e) {
       return null;
@@ -94,15 +93,15 @@ public class NodeStreamHandler {
     int type = dis.readInt();
     switch (type) {
 
-      case MigrationConst.START_NODE :
+      case MigrationTool.START_NODE :
         data.setPath(dis.readUTF());
         break;
 
-      case MigrationConst.PROPERTY_SINGLE :
+      case MigrationTool.PROPERTY_SINGLE :
         data.getProperties().put(dis.readUTF(), dis.readUTF());
         break;
 
-      case MigrationConst.PROPERTY_MULTI :
+      case MigrationTool.PROPERTY_MULTI :
         int length = dis.readInt();
         String[] values = new String[length];
         String propertyName = dis.readUTF();
@@ -112,7 +111,7 @@ public class NodeStreamHandler {
         data.getProperties().put(propertyName, values);
         break;
 
-      case MigrationConst.END_NODE :
+      case MigrationTool.END_NODE :
         break;
 
     }

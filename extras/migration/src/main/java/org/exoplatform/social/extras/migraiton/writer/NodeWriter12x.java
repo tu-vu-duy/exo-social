@@ -82,7 +82,13 @@ public class NodeWriter12x implements NodeWriter {
 
       String remote = (String) currentData.getProperties().get("exo:remoteId");
       Identity identity = new Identity(provider, remote);
-      identityStorage.saveIdentity(identity);
+      System.out.println("Write " + provider + "/" + remote);
+      try {
+        identityStorage.saveIdentity(identity);
+      }
+      catch (Exception e) {
+        System.out.println("ERROR");
+      }
 
       ctx.put((String) currentData.getProperties().get("jcr:uuid"), (String) currentData.getProperties().get("exo:remoteId"));
       ctx.put(currentData.getProperties().get("jcr:uuid") + "-newId", identity.getId());
@@ -152,8 +158,17 @@ public class NodeWriter12x implements NodeWriter {
 
       Identity identity = new Identity("space", space.getPrettyName());
 
-      identityStorage.saveIdentity(identity);
-      spaceStorage.saveSpace(space, true);
+
+
+      System.out.println("Write space/" + space.getPrettyName());
+      try {
+        identityStorage.saveIdentity(identity);
+        System.out.println("Write space " + space.getPrettyName());
+        spaceStorage.saveSpace(space, true);
+      }
+      catch (Exception e) {
+        System.out.println("ERROR");
+      }
 
       ctx.put((String) currentData.getProperties().get("jcr:uuid"), space.getPrettyName());
       
@@ -241,7 +256,14 @@ public class NodeWriter12x implements NodeWriter {
         }
       }
 
-      activityStorage.saveActivity(owner, activity);
+
+      System.out.println("Write activity " + owner.getRemoteId() + " - " + activity.getPostedTime() + " - " + type);
+      try {
+        activityStorage.saveActivity(owner, activity);
+      }
+      catch (Exception e) {
+        System.out.println("ERROR");
+      }
       
       if (replyToId != null) {
         String[] ids = replyToId.split(",");
@@ -251,7 +273,14 @@ public class NodeWriter12x implements NodeWriter {
           try {
             Node node = session.getNodeByUUID(id);
             ExoSocialActivity comment = buildActivityFromNode(node, ctx);
-            activityStorage.saveComment(activity, comment);
+
+            System.out.println("Write comment " + activity.getPostedTime() + " - " + comment.getPostedTime() + " - " + type);
+            try {
+              activityStorage.saveComment(activity, comment);
+            }
+            catch (Exception e) {
+              System.out.println("ERROR");
+            }
           }
           catch (RepositoryException e) {
             e.printStackTrace();
@@ -288,7 +317,15 @@ public class NodeWriter12x implements NodeWriter {
       }
 
       Relationship relationship = new Relationship(i1, i2, type);
-      relationshipStorage.saveRelationship(relationship);
+
+      
+      System.out.println("Write relationship " + i1.getRemoteId() + " - " + i2.getRemoteId() + " - " + type);
+      try {
+        relationshipStorage.saveRelationship(relationship);
+      }
+      catch (Exception e) {
+        System.out.println("ERROR");
+      }
 
     }
 

@@ -17,6 +17,7 @@
 
 package org.exoplatform.social.extras.migraiton.reader;
 
+import org.exoplatform.social.extras.migraiton.MigrationException;
 import org.exoplatform.social.extras.migraiton.io.NodeStreamHandler;
 
 import javax.jcr.Node;
@@ -43,47 +44,22 @@ public class NodeReader11x implements NodeReader {
   }
 
   public void readIdentities(OutputStream os) throws RepositoryException, IOException {
-
-    Node rootIdentity = rootNode.getNode("exo:applications/Social_Identity");
-    readFrom(rootIdentity, os);
-
+    run(new IdentityRunnable(os));
   }
 
   public void readSpaces(OutputStream os) throws RepositoryException, IOException {
-
-    Node rootSpace = rootNode.getNode("exo:applications/Social_Space/Space");
-    readFrom(rootSpace, os);
-    
+    run(new SpaceRunnable(os));
   }
 
   public void readProfiles(OutputStream os) throws RepositoryException, IOException {
   }
 
   public void readActivities(OutputStream os) throws RepositoryException, IOException {
-
-    Node rootOrganizationActivity = rootNode.getNode("exo:applications/Social_Activity/organization");
-    NodeIterator userItOrganization = rootOrganizationActivity.getNodes();
-    while (userItOrganization.hasNext()) {
-      Node currentUser = userItOrganization.nextNode();
-      Node publishedNode = currentUser.getNode("published");
-      readFrom(publishedNode, os);
-    }
-
-    Node rootSpaceActivity = rootNode.getNode("exo:applications/Social_Activity/space");
-    NodeIterator userItSpace = rootSpaceActivity.getNodes();
-    while(userItSpace.hasNext()) {
-      Node currentUser = userItSpace.nextNode();
-      Node publishedNode = currentUser.getNode("published");
-      readFrom(publishedNode, os);
-    }
-
+    run(new ActivityRunnable(os));
   }
 
   public void readRelationships(OutputStream os) throws RepositoryException, IOException {
-
-    Node rootRelationship = rootNode.getNode("exo:applications/Social_Relationship");
-    readFrom(rootRelationship, os);
-
+    run(new RelationshipRunnable(os));
   }
 
   private void readFrom(Node node, OutputStream os) throws RepositoryException, IOException {
@@ -94,5 +70,116 @@ public class NodeReader11x implements NodeReader {
     }
 
   }
-  
+
+  public void checkData(String oldVersion) throws MigrationException {
+
+    try {
+      rootNode.getNode("exo:applications");
+    }
+    catch (RepositoryException e) {
+      throw new MigrationException("No data found for " + oldVersion);
+    }
+
+  }
+
+  private void run(Runnable r) {
+    new Thread(r).start();
+  }
+
+  class IdentityRunnable implements Runnable {
+    
+    private OutputStream os;
+
+    IdentityRunnable(final OutputStream os) {
+      this.os = os;
+    }
+
+    public void run() {
+      try {
+        Node rootIdentity = rootNode.getNode("exo:applications/Social_Identity");
+        readFrom(rootIdentity, os);
+        os.close();
+      }
+      catch (Exception e) {
+        throw new MigrationException(e);
+      }
+    }
+
+  }
+
+  class RelationshipRunnable implements Runnable {
+
+    private OutputStream os;
+
+    RelationshipRunnable(final OutputStream os) {
+      this.os = os;
+    }
+
+    public void run() {
+      try {
+        Node rootRelationship = rootNode.getNode("exo:applications/Social_Relationship");
+        readFrom(rootRelationship, os);
+        os.close();
+      }
+      catch (Exception e) {
+        throw new MigrationException(e);
+      }
+    }
+
+  }
+
+  class SpaceRunnable implements Runnable {
+
+    private OutputStream os;
+
+    SpaceRunnable(final OutputStream os) {
+      this.os = os;
+    }
+
+    public void run() {
+      try {
+        Node rootSpace = rootNode.getNode("exo:applications/Social_Space/Space");
+        readFrom(rootSpace, os);
+        os.close();
+      }
+      catch (Exception e) {
+        throw new MigrationException(e);
+      }
+    }
+  }
+
+  class ActivityRunnable implements Runnable {
+
+    private OutputStream os;
+
+    ActivityRunnable(final OutputStream os) {
+      this.os = os;
+    }
+
+    public void run() {
+      try {
+        Node rootOrganizationActivity = rootNode.getNode("exo:applications/Social_Activity/organization");
+        NodeIterator userItOrganization = rootOrganizationActivity.getNodes();
+        while (userItOrganization.hasNext()) {
+          Node currentUser = userItOrganization.nextNode();
+          Node publishedNode = currentUser.getNode("published");
+          readFrom(publishedNode, os);
+        }
+
+        Node rootSpaceActivity = rootNode.getNode("exo:applications/Social_Activity/space");
+        NodeIterator userItSpace = rootSpaceActivity.getNodes();
+        while(userItSpace.hasNext()) {
+          Node currentUser = userItSpace.nextNode();
+          Node publishedNode = currentUser.getNode("published");
+          readFrom(publishedNode, os);
+        }
+        os.close();
+      }
+      catch (Exception e) {
+        throw new MigrationException(e);
+      }
+    }
+
+  }
+
 }

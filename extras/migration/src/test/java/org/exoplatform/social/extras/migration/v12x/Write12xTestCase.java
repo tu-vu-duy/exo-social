@@ -40,6 +40,7 @@ import org.exoplatform.social.extras.migration.Utils;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.PathNotFoundException;
+import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.Value;
@@ -257,6 +258,29 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
 
   }
 
+  public void testWriteProfile() throws Exception {
+
+    PipedOutputStream osIdentity = new PipedOutputStream();
+    PipedInputStream isIdentity = new PipedInputStream(osIdentity);
+    
+    PipedOutputStream osProfile = new PipedOutputStream();
+    PipedInputStream isProfile = new PipedInputStream(osProfile);
+
+    NodeReader reader = new NodeReader11x(session);
+    NodeWriter writer = new NodeWriter12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
+    WriterContext ctx = new WriterContext();
+
+    reader.readIdentities(osIdentity);
+    writer.writeIdentities(isIdentity, ctx);
+
+    reader.readProfiles(osProfile);
+    writer.writeProfiles(isProfile, ctx);
+
+    checkProfile("a");
+    checkProfile("b");
+
+  }
+
   private void checkIdentity(String providerId, String remoteId) throws RepositoryException {
 
     Node identityNode = rootNode.getNode("production/soc:providers/soc:" + providerId + "/soc:" + remoteId);
@@ -333,6 +357,20 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
     if (likes != null) assertEquals(likes.length, activityNode.getProperty("soc:likes").getValues().length);
     assertEquals(title, activityNode.getProperty("soc:title").getString());
     if (titleId != null) assertEquals(titleId, activityNode.getProperty("soc:titleId").getString());
+
+  }
+
+  private void checkProfile(String suffix) throws RepositoryException {
+
+    String parentId = rootNode.getNode("production/soc:providers/soc:organization/soc:user_" + suffix).getUUID();
+
+    Node profileNode = rootNode.getNode("production/soc:providers/soc:organization/soc:user_" + suffix + "/soc:profile");
+    assertEquals("/portal/private/classic/profile/user_" + suffix, profileNode.getProperty("void-Url").getValues()[0].getString());
+    assertEquals("User " + suffix, profileNode.getProperty("void-firstName").getValues()[0].getString());
+    assertEquals("Foobar", profileNode.getProperty("void-lastName").getValues()[0].getString());
+    assertEquals("My position", profileNode.getProperty("void-position").getValues()[0].getString());
+    assertEquals("user_" + suffix, profileNode.getProperty("void-username").getValues()[0].getString());
+    assertEquals(parentId, profileNode.getProperty("soc:parentId").getString());
 
   }
 

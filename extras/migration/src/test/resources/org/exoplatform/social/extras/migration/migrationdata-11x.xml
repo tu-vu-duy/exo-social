@@ -165,6 +165,29 @@
         </exo:identity>
     </Social_Identity>
 
+    <Social_Profile>
+      <exo:profile loader:type="exo:profile"
+          Url="/portal/private/classic/profile/user_a"
+          firstName="User a"
+          lastName="Foobar"
+          position="My position"
+          username="user_a"
+          exo:identity="#/exo:applications/Social_Identity/user_a"
+          >
+        <loader:mixin>mix:referenceable</loader:mixin>
+      </exo:profile>
+      <exo:profile loader:type="exo:profile"
+          Url="/portal/private/classic/profile/user_b"
+          firstName="User b"
+          lastName="Foobar"
+          position="My position"
+          username="user_b"
+          exo:identity="#/exo:applications/Social_Identity/user_b"
+          >
+        <loader:mixin>mix:referenceable</loader:mixin>
+      </exo:profile>
+    </Social_Profile>
+
     <!-- Relationship -->
     <Social_Relationship>
       <exo:relationship loader:type="exo:relationship"

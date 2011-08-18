@@ -31,10 +31,36 @@ class migration extends org.crsh.jcr.command.JCRCommand
     try {
       NodeReader reader = migrationTool.createReader("11x", session)
       NodeWriter writer = migrationTool.createWriter("12x", session)
-      migrationTool.runIdentities(reader, writer, new WriterContext());
+      migrationTool.runIdentities(reader, writer, migrationContext);
     }
     catch (MigrationException e) {
       return e.getMessage();
+    }
+  }
+
+  @Usage("run migration")
+  @Man("run")
+  @Command
+  public Object runprofiles() throws ScriptException {
+
+    MigrationTool migrationTool = new MigrationTool();
+
+    try {
+      NodeReader reader = migrationTool.createReader("11x", session)
+      NodeWriter writer = migrationTool.createWriter("12x", session)
+      migrationTool.runProfiles(reader, writer, migrationContext);
+    }
+    catch (MigrationException e) {
+      return e.getMessage();
+    }
+  }
+
+  @Usage("run migration")
+  @Man("run")
+  @Command
+  public Object initctx() {
+    if (migrationContext == null) {
+      migrationContext = new WriterContext();
     }
   }
 

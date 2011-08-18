@@ -105,6 +105,18 @@ public class MigrationTool {
 
   }
 
+  public void runProfiles(NodeReader reader, NodeWriter writer, WriterContext ctx) throws IOException, RepositoryException {
+
+    reader.checkData();
+
+    PipedOutputStream os = new PipedOutputStream();
+    PipedInputStream is = new PipedInputStream(os);
+
+    reader.readProfiles(os);
+    writer.writeProfiles(is, ctx);
+
+  }
+
   public void runSpaces(NodeReader reader, NodeWriter writer, WriterContext ctx) throws IOException, RepositoryException {
 
     reader.checkData();

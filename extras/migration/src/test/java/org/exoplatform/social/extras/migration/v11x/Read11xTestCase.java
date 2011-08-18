@@ -190,6 +190,23 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
 
   }
 
+  public void testReadProfiles() throws Exception {
+
+    NodeReader reader = new NodeReader11x(session);
+
+    //
+    PipedOutputStream out = new PipedOutputStream();
+    PipedInputStream in = new PipedInputStream(out);
+
+    //
+    reader.readProfiles(out);
+    DataInputStream dis = new DataInputStream(in);
+
+    checkProfile(dis, "exo:profile", "a");
+    checkProfile(dis, "exo:profile[2]", "b");
+
+  }
+
   private void checkIdentity(DataInputStream dis, String nodeName, String remoteId, String providerId) throws IOException, RepositoryException {
 
     String path;
@@ -393,6 +410,53 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
     assertEquals(MigrationTool.PROPERTY_SINGLE, dis.readInt());
     assertEquals("exo:userId", dis.readUTF());
     assertEquals(rootNode.getNode("exo:applications/Social_Identity/" + poster).getUUID(), dis.readUTF());
+
+    assertEquals(MigrationTool.END_NODE, dis.readInt());
+
+  }
+
+  private void checkProfile(DataInputStream dis, String name, String suffix) throws IOException, RepositoryException {
+
+    String path;
+    assertEquals(MigrationTool.START_NODE, dis.readInt());
+    assertEquals("/exo:applications/Social_Profile/" + name, path = dis.readUTF());
+
+    assertEquals(MigrationTool.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("jcr:primaryType", dis.readUTF());
+    assertEquals("exo:profile", dis.readUTF());
+
+    assertEquals(MigrationTool.PROPERTY_MULTI, dis.readInt());
+    assertEquals(1, dis.readInt());
+    assertEquals("jcr:mixinTypes", dis.readUTF());
+    assertEquals("mix:referenceable", dis.readUTF());
+
+    assertEquals(MigrationTool.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("jcr:uuid", dis.readUTF());
+    assertEquals(rootNode.getNode(path.substring(1)).getUUID(), dis.readUTF());
+
+    assertEquals(MigrationTool.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("Url", dis.readUTF());
+    assertEquals("/portal/private/classic/profile/user_" + suffix, dis.readUTF());
+
+    assertEquals(MigrationTool.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("firstName", dis.readUTF());
+    assertEquals("User " + suffix, dis.readUTF());
+
+    assertEquals(MigrationTool.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("lastName", dis.readUTF());
+    assertEquals("Foobar", dis.readUTF());
+
+    assertEquals(MigrationTool.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("position", dis.readUTF());
+    assertEquals("My position", dis.readUTF());
+
+    assertEquals(MigrationTool.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("username", dis.readUTF());
+    assertEquals("user_" + suffix, dis.readUTF());
+
+    assertEquals(MigrationTool.PROPERTY_SINGLE, dis.readInt());
+    assertEquals("exo:identity", dis.readUTF());
+    assertEquals(rootNode.getNode("exo:applications/Social_Identity/user_" + suffix).getUUID(), dis.readUTF());
 
     assertEquals(MigrationTool.END_NODE, dis.readInt());
 

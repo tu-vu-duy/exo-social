@@ -52,6 +52,7 @@ public class NodeReader11x implements NodeReader {
   }
 
   public void readProfiles(OutputStream os) throws RepositoryException, IOException {
+    run(new ProfileRunnable(os));
   }
 
   public void readActivities(OutputStream os) throws RepositoryException, IOException {
@@ -173,6 +174,27 @@ public class NodeReader11x implements NodeReader {
           Node publishedNode = currentUser.getNode("published");
           readFrom(publishedNode, os);
         }
+        os.close();
+      }
+      catch (Exception e) {
+        throw new MigrationException(e);
+      }
+    }
+
+  }
+
+  class ProfileRunnable implements Runnable {
+
+    private OutputStream os;
+
+    ProfileRunnable(final OutputStream os) {
+      this.os = os;
+    }
+
+    public void run() {
+      try {
+        Node rootSpace = rootNode.getNode("exo:applications/Social_Profile");
+        readFrom(rootSpace, os);
         os.close();
       }
       catch (Exception e) {

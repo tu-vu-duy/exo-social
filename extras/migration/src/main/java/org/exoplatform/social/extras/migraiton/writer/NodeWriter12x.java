@@ -27,13 +27,13 @@ import org.exoplatform.services.organization.Membership;
 import org.exoplatform.services.organization.MembershipHandler;
 import org.exoplatform.services.organization.MembershipType;
 import org.exoplatform.services.organization.MembershipTypeHandler;
-import org.exoplatform.services.organization.OrganizationConfig;
 import org.exoplatform.services.organization.OrganizationService;
 import org.exoplatform.services.organization.User;
 import org.exoplatform.services.organization.UserHandler;
 import org.exoplatform.social.core.activity.model.ExoSocialActivity;
 import org.exoplatform.social.core.activity.model.ExoSocialActivityImpl;
 import org.exoplatform.social.core.identity.model.Identity;
+import org.exoplatform.social.core.identity.model.Profile;
 import org.exoplatform.social.core.relationship.model.Relationship;
 import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.storage.IdentityStorageException;
@@ -185,12 +185,47 @@ public class NodeWriter12x implements NodeWriter {
       }
 
       ctx.put((String) currentData.getProperties().get("jcr:uuid"), space.getPrettyName());
+      ctx.put(currentData.getProperties().get("jcr:uuid") + "-newId", identity.getId());
       
     }
 
   }
 
   public void writeProfiles(final InputStream is, final WriterContext ctx) {
+
+    NodeStreamHandler handler = new NodeStreamHandler();
+    NodeData currentData;
+    while ((currentData = handler.readNode(is)) != null) {
+
+      String url = (String) currentData.getProperties().get("Url");
+      String firstName = (String) currentData.getProperties().get("firstName");
+      String lastName = (String) currentData.getProperties().get("lastName");
+      String position = (String) currentData.getProperties().get("position");
+      String username = (String) currentData.getProperties().get("username");
+      String identityOld = (String) currentData.getProperties().get("exo:identity");
+
+      String identityId = ctx.get(identityOld + "-newId");
+      if (identityId != null) {
+        Identity i = identityStorage.findIdentityById(identityId);
+
+        Profile profile = new Profile(i);
+        profile.setProperty(Profile.URL, url);
+        profile.setProperty(Profile.FIRST_NAME, firstName);
+        profile.setProperty(Profile.LAST_NAME, lastName);
+        profile.setProperty(Profile.POSITION, position);
+        profile.setProperty(Profile.USERNAME, username);
+        i.setProfile(profile);
+
+        try {
+          LOG.info("Write profile " + i.getProviderId() + "/" + i.getRemoteId());
+          identityStorage.saveProfile(profile);
+        }
+        catch (Exception e) {
+          LOG.error(e.getMessage());
+        }
+      }
+
+    }
 
   }
 

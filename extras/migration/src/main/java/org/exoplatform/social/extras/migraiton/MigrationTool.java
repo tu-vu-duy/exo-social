@@ -18,6 +18,7 @@
 package org.exoplatform.social.extras.migraiton;
 
 import org.exoplatform.container.PortalContainer;
+import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.organization.OrganizationService;
 import org.exoplatform.social.core.storage.api.ActivityStorage;
 import org.exoplatform.social.core.storage.api.IdentityStorage;
@@ -125,7 +126,10 @@ public class MigrationTool {
     PipedInputStream is = new PipedInputStream(os);
 
     reader.readSpaces(os);
+
+    RequestLifeCycle.begin(PortalContainer.getInstance());
     writer.writeSpaces(is, ctx);
+    RequestLifeCycle.end();
 
   }
 

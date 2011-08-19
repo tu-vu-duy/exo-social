@@ -172,16 +172,14 @@ public class NodeWriter12x implements NodeWriter {
 
       Identity identity = new Identity("space", space.getPrettyName());
 
-
-
-      System.out.println("Write space/" + space.getPrettyName());
       try {
+        LOG.info("Write space identity " + identity.getProviderId() + "/" + identity.getRemoteId());
         identityStorage.saveIdentity(identity);
-        System.out.println("Write space " + space.getPrettyName());
+        LOG.info("Write space " + space.getGroupId());
         spaceStorage.saveSpace(space, true);
       }
       catch (Exception e) {
-        System.out.println("ERROR");
+        LOG.error(e.getMessage());
       }
 
       ctx.put((String) currentData.getProperties().get("jcr:uuid"), space.getPrettyName());

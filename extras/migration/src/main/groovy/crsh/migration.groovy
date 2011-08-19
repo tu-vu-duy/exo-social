@@ -58,6 +58,57 @@ class migration extends org.crsh.jcr.command.JCRCommand
   @Usage("run migration")
   @Man("run")
   @Command
+  public Object runspaces() throws ScriptException {
+
+    MigrationTool migrationTool = new MigrationTool();
+
+    try {
+      NodeReader reader = migrationTool.createReader("11x", session)
+      NodeWriter writer = migrationTool.createWriter("12x", session)
+      migrationTool.runSpaces(reader, writer, migrationContext);
+    }
+    catch (MigrationException e) {
+      return e.getMessage();
+    }
+  }
+
+  @Usage("run migration")
+  @Man("run")
+  @Command
+  public Object runrelations() throws ScriptException {
+
+    MigrationTool migrationTool = new MigrationTool();
+
+    try {
+      NodeReader reader = migrationTool.createReader("11x", session)
+      NodeWriter writer = migrationTool.createWriter("12x", session)
+      migrationTool.runRelationships(reader, writer, migrationContext);
+    }
+    catch (MigrationException e) {
+      return e.getMessage();
+    }
+  }
+
+  @Usage("run migration")
+  @Man("run")
+  @Command
+  public Object runactivities() throws ScriptException {
+
+    MigrationTool migrationTool = new MigrationTool();
+
+    try {
+      NodeReader reader = migrationTool.createReader("11x", session)
+      NodeWriter writer = migrationTool.createWriter("12x", session)
+      migrationTool.runActivities(reader, writer, migrationContext);
+    }
+    catch (MigrationException e) {
+      return e.getMessage();
+    }
+  }
+
+  @Usage("run migration")
+  @Man("run")
+  @Command
   public Object initctx() {
     if (migrationContext == null) {
       migrationContext = new WriterContext();

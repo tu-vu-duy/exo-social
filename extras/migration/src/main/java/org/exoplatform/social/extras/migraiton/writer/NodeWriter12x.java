@@ -97,8 +97,8 @@ public class NodeWriter12x implements NodeWriter {
       String remote = (String) currentData.getProperties().get("exo:remoteId");
       Identity identity = new Identity(provider, remote);
       try {
-        LOG.info("Write identity " + provider + "/" + remote);
         identityStorage.saveIdentity(identity);
+        LOG.info("Write identity " + provider + "/" + remote);
       }
       catch (Exception e) {
         LOG.error(e.getMessage());
@@ -173,10 +173,10 @@ public class NodeWriter12x implements NodeWriter {
       Identity identity = new Identity("space", space.getPrettyName());
 
       try {
-        LOG.info("Write space identity " + identity.getProviderId() + "/" + identity.getRemoteId());
         identityStorage.saveIdentity(identity);
-        LOG.info("Write space " + space.getGroupId());
+        LOG.info("Write space identity " + identity.getProviderId() + "/" + identity.getRemoteId());
         spaceStorage.saveSpace(space, true);
+        LOG.info("Write space " + space.getGroupId());
       }
       catch (Exception e) {
         LOG.error(e.getMessage());
@@ -215,8 +215,8 @@ public class NodeWriter12x implements NodeWriter {
         i.setProfile(profile);
 
         try {
-          LOG.info("Write profile " + i.getProviderId() + "/" + i.getRemoteId());
           identityStorage.saveProfile(profile);
+          LOG.info("Write profile " + i.getProviderId() + "/" + i.getRemoteId());
         }
         catch (Exception e) {
           LOG.error(e.getMessage());
@@ -304,12 +304,12 @@ public class NodeWriter12x implements NodeWriter {
       }
 
 
-      System.out.println("Write activity " + owner.getRemoteId() + " - " + activity.getPostedTime() + " - " + type);
       try {
         activityStorage.saveActivity(owner, activity);
+        LOG.info("Write comment " + owner.getRemoteId() + " : " + activity.getPostedTime());
       }
       catch (Exception e) {
-        System.out.println("ERROR");
+        LOG.error(e.getMessage());
       }
       
       if (replyToId != null) {
@@ -321,12 +321,12 @@ public class NodeWriter12x implements NodeWriter {
             Node node = session.getNodeByUUID(id);
             ExoSocialActivity comment = buildActivityFromNode(node, ctx);
 
-            System.out.println("Write comment " + activity.getPostedTime() + " - " + comment.getPostedTime() + " - " + type);
             try {
               activityStorage.saveComment(activity, comment);
+              LOG.info("Write comment " + owner.getRemoteId() + " : " + activity.getPostedTime() + "/" + comment.getPostedTime());
             }
             catch (Exception e) {
-              System.out.println("ERROR");
+              LOG.error(e.getMessage());
             }
           }
           catch (RepositoryException e) {
@@ -366,46 +366,15 @@ public class NodeWriter12x implements NodeWriter {
       Relationship relationship = new Relationship(i1, i2, type);
 
       
-      System.out.println("Write relationship " + i1.getRemoteId() + " - " + i2.getRemoteId() + " - " + type);
       try {
         relationshipStorage.saveRelationship(relationship);
+        LOG.info("Write relationship " + i1.getRemoteId() + " -> " + i2.getRemoteId() + " : " + type);
       }
       catch (Exception e) {
-        System.out.println("ERROR");
+        LOG.error(e.getMessage());
       }
 
     }
-
-  }
-
-  public void generateOrganization() {
-
-    RequestLifeCycle.begin(PortalContainer.getInstance());
-    try {
-      Node identities = session.getRootNode().getNode("production/soc:providers/soc:organization");
-      NodeIterator it = identities.getNodes();
-      UserHandler userHandler = organizationService.getUserHandler();
-      GroupHandler groupHandler = organizationService.getGroupHandler();
-      MembershipHandler membershipHandler = organizationService.getMembershipHandler();
-      MembershipTypeHandler membershipTypeHandler = organizationService.getMembershipTypeHandler();
-
-      Group group = groupHandler.findGroupById("/platform/users");
-      MembershipType type = membershipTypeHandler.findMembershipType("member");
-      while (it.hasNext()) {
-        Node currentNode = it.nextNode();
-        User user = userHandler.createUserInstance(currentNode.getProperty("soc:remoteId").getString());
-        user.setPassword("gtn");
-
-        userHandler.createUser(user, false);
-        membershipHandler.linkMembership(user, group, type, false);
-        LOG.info("Create user " + user.getUserName());
-
-      }
-    }
-    catch (Exception e) {
-      LOG.error(e.getMessage());
-    }
-    RequestLifeCycle.end();
 
   }
 

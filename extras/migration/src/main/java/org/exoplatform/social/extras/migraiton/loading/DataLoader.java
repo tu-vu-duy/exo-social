@@ -67,7 +67,7 @@ public class DataLoader {
   private static final Log LOG = ExoLogger.getLogger(DataLoader.class);
 
   public DataLoader(final String name, final Session session) {
-    
+
     this.session = session;
     PortalContainer container = PortalContainer.getInstance();
     organizationService = (OrganizationService) container.getComponentInstance(OrganizationService.class);

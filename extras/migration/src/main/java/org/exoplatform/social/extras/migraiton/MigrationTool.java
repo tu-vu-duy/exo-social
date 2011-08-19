@@ -82,8 +82,6 @@ public class MigrationTool {
   private void runAll(String oldVersion, String newVersion, Session session) throws IOException, RepositoryException {
 
     NodeReader reader = createReader(oldVersion, session);
-    reader.checkData();
-
     NodeWriter writer = createWriter(newVersion, session);
     WriterContext ctx = new WriterContext();
 

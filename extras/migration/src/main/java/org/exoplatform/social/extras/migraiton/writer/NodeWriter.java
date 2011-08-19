@@ -37,6 +37,4 @@ public interface NodeWriter {
   
   void writeRelationships(InputStream is, WriterContext ctx);
 
-  void generateOrganization();
-
 }

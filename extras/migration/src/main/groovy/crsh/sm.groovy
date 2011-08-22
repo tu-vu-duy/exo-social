@@ -40,7 +40,7 @@ class sm extends org.crsh.jcr.command.JCRCommand
     return runCmd(
         {
           m, r, w ->
-          m.runIdentities(r, w, migrationContext)
+          m.runIdentities(r, w, m)
         }
     );
 
@@ -95,6 +95,23 @@ class sm extends org.crsh.jcr.command.JCRCommand
           m.runActivities(r, w, migrationContext)
         }
     );
+  }
+
+
+  @Usage("Rollback migration")
+  @Command
+  public Object rollback() throws ScriptException {
+
+    String done = runCmd(
+        {
+          m, r, w ->
+          m.rollback(r, w, migrationContext)
+        }
+    );
+    
+    migrationContext = null;
+
+    return done;
 
   }
 

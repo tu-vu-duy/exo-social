@@ -19,6 +19,7 @@ package org.exoplatform.social.extras.migraiton.writer;
 
 import org.exoplatform.social.extras.migraiton.io.WriterContext;
 
+import javax.jcr.RepositoryException;
 import java.io.InputStream;
 
 /**
@@ -36,5 +37,7 @@ public interface NodeWriter {
   void writeActivities(InputStream is, WriterContext ctx);
   
   void writeRelationships(InputStream is, WriterContext ctx);
+
+  void rollback() throws RepositoryException;
 
 }

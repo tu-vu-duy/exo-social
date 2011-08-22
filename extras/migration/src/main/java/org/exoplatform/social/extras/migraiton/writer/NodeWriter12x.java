@@ -47,6 +47,8 @@ import org.exoplatform.social.extras.migraiton.io.WriterContext;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
+import javax.jcr.PathNotFoundException;
+import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.InputStream;
@@ -165,8 +167,8 @@ public class NodeWriter12x implements NodeWriter {
       space.setUrl(url);
       space.setVisibility(visibility);
 
-      space.setPendingUsers(pendingUsers);
-      space.setInvitedUsers(invitedUsers);
+      space.setPendingUsers(checkUser(pendingUsers));
+      space.setInvitedUsers(checkUser(invitedUsers));
       space.setMembers(members);
       space.setManagers(managers);
 
@@ -265,12 +267,10 @@ public class NodeWriter12x implements NodeWriter {
       String[] params = (String[]) currentData.getProperties().get("exo:params");
       String[] likes = (String[]) currentData.getProperties().get("exo:like");
 
-      Map<String, String> paramMap = readParams(params);
+      /*Map<String, String> paramMap = readParams(params);
       if (paramMap != null) {
         activity.setTemplateParams(paramMap);
-      }
-
-
+      }*/
       activity.setTitle(title);
       activity.setTitleId(titleTemplate);
       activity.setType(type);
@@ -285,28 +285,35 @@ public class NodeWriter12x implements NodeWriter {
         activity.setLikeIdentityIds(newLikes);
       }
 
-      try {
-        String userName = ctx.get(userId);
-        Identity userIdentity = identityStorage.findIdentity("organization", userName);
-        activity.setUserId(userIdentity.getId());
+      if (userId == null) {
+        activity.setUserId(owner.getId());
       }
-      catch (IdentityStorageException e) {
+      else {
         try {
-          Node oldSpaceIdentity = session.getNodeByUUID(userId);
-          String oldSpaceId = oldSpaceIdentity.getProperty("exo:remoteId").getString();
-          String spaceName = ctx.get(oldSpaceId);
-          Identity spaceIdentity = identityStorage.findIdentity("space", spaceName);
-          activity.setUserId(spaceIdentity.getId());
+          String userName = ctx.get(userId);
+          Identity i = identityStorage.findIdentity("organization", userName);
+          activity.setUserId(i.getId());
         }
-        catch (RepositoryException e1) {
-          e1.printStackTrace();
+        catch (IdentityStorageException e) {
+          try {
+            Node oldSpaceIdentity = session.getNodeByUUID(userId);
+            String oldSpaceId = oldSpaceIdentity.getProperty("exo:remoteId").getString();
+            String spaceName = ctx.get(oldSpaceId);
+            Identity spaceIdentity = identityStorage.findIdentity("space", spaceName);
+            activity.setUserId(spaceIdentity.getId());
+          }
+          catch (RepositoryException e1) {
+            e1.printStackTrace();
+          }
         }
       }
+
+
 
 
       try {
         activityStorage.saveActivity(owner, activity);
-        LOG.info("Write comment " + owner.getRemoteId() + " : " + activity.getPostedTime());
+        LOG.info("Write activity " + owner.getRemoteId() + " : " + activity.getPostedTime());
       }
       catch (Exception e) {
         LOG.error(e.getMessage());
@@ -316,10 +323,17 @@ public class NodeWriter12x implements NodeWriter {
         String[] ids = replyToId.split(",");
 
         for (String id : ids) {
+          
+          if ("".equals(id)) {
+            continue;
+          }
 
           try {
             Node node = session.getNodeByUUID(id);
             ExoSocialActivity comment = buildActivityFromNode(node, ctx);
+            if (comment.getUserId() == null) {
+              comment.setUserId(activity.getUserId());
+            }
 
             try {
               activityStorage.saveComment(activity, comment);
@@ -378,6 +392,100 @@ public class NodeWriter12x implements NodeWriter {
 
   }
 
+  public void rollback() throws RepositoryException {
+
+    NodeIterator itUserActivity = session.getRootNode().getNode("production/soc:providers/soc:organization").getNodes();
+    while (itUserActivity.hasNext()) {
+      NodeIterator itActivities = itUserActivity.nextNode().getNode("soc:activities").getNodes();
+      while(itActivities.hasNext()) {
+        Node activity = itActivities.nextNode();
+        LOG.info("Removing activity " + activity.getPath());
+        activity.remove();
+
+        session.save();
+      }
+    }
+
+    NodeIterator itSpaceActivity = session.getRootNode().getNode("production/soc:providers/soc:space").getNodes();
+    while (itSpaceActivity.hasNext()) {
+      NodeIterator itActivities = itSpaceActivity.nextNode().getNode("soc:activities").getNodes();
+      while(itActivities.hasNext()) {
+        Node activity = itActivities.nextNode();
+        LOG.info("Removing activity " + activity.getPath());
+        activity.remove();
+
+        session.save();
+      }
+    }
+
+    NodeIterator it = session.getRootNode().getNode("production/soc:providers/soc:organization").getNodes();
+    while (it.hasNext()) {
+      Node current = it.nextNode();
+
+      removeRelationNode(current, "soc:relationship");
+      removeRelationNode(current, "soc:sender");
+      removeRelationNode(current, "soc:receiver");
+      
+      LOG.info("Removing relationship for " + current.getPath());
+
+      session.save();
+    }
+
+    NodeIterator itOrganization = session.getRootNode().getNode("production/soc:providers/soc:organization/").getNodes();
+    while (itOrganization.hasNext()) {
+      Node node = itOrganization.nextNode();
+      LOG.info("Removing identity " + node.getPath());
+      node.remove();
+
+      session.save();
+    }
+
+    NodeIterator itSpaceIdentitiy = session.getRootNode().getNode("production/soc:providers/soc:space/").getNodes();
+    while (itSpaceIdentitiy.hasNext()) {
+      Node node = itSpaceIdentitiy.nextNode();
+      LOG.info("Removing space identity " + node.getPath());
+      node.remove();
+
+      session.save();
+    }
+
+    NodeIterator itSpaces = session.getRootNode().getNode("production/soc:spaces/").getNodes();
+    while (itSpaces.hasNext()) {
+      Node node = itSpaces.nextNode();
+      LOG.info("Removing space " + node.getPath());
+      node.remove();
+
+      session.save();
+    }
+
+  }
+
+  private void removeRelationNode(Node current, String nodeName) {
+
+    try {
+      NodeIterator relationships = current.getNode(nodeName).getNodes();
+      while (relationships.hasNext()) {
+        removeRelationship(relationships.nextNode());
+      }
+    }
+    catch (RepositoryException e) {
+      e.printStackTrace();
+    }
+
+  }
+
+  private void removeRelationship(Node relationship) {
+
+    try {
+      relationship.getProperty("soc:reciprocal").getNode().remove();
+      relationship.remove();
+    }
+    catch (RepositoryException e) {
+      e.printStackTrace();
+    }
+
+  }
+
   private boolean isOrganizationActivity(NodeData data) {
     return data.getPath().startsWith("/exo:applications/Social_Activity/organization");
   }
@@ -422,9 +530,11 @@ public class NodeWriter12x implements NodeWriter {
     comment.setPostedTime(Long.parseLong(postedTime));
     comment.setUpdated(new Date(Long.parseLong(updatedTimestamp)));
 
-    String userName = ctx.get(userId);
-    String newUserId = identityStorage.findIdentity("organization", userName).getId();
-    comment.setUserId(newUserId);
+    if (userId != null) {
+      String userName = ctx.get(userId);
+      Identity newUser = identityStorage.findIdentity("organization", userName);
+      comment.setUserId(newUser.getId());
+    }
 
     return comment;
   }
@@ -436,6 +546,25 @@ public class NodeWriter12x implements NodeWriter {
     catch (RepositoryException e) {
       return null;
     }
+  }
+
+  private String[] checkUser(String[] users) {
+
+    if (users == null) {
+      return null;
+    }
+
+    List<String> checked = new ArrayList<String>();
+
+    for (String user : users) {
+        Identity i = identityStorage.findIdentity("organization", user);
+        if (i != null) {
+          checked.add(user);
+        }
+      }
+
+    return checked.toArray(new String[]{});
+
   }
 
 }

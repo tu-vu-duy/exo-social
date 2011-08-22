@@ -79,14 +79,11 @@ public class MigrationTool {
 
   }
 
-  private void runAll(String oldVersion, String newVersion, Session session) throws IOException, RepositoryException {
-
-    NodeReader reader = createReader(oldVersion, session);
-    NodeWriter writer = createWriter(newVersion, session);
-    WriterContext ctx = new WriterContext();
+  public void runAll(NodeReader reader, NodeWriter writer, WriterContext ctx) throws IOException, RepositoryException {
 
     runIdentities(reader, writer, ctx);
     runSpaces(reader, writer, ctx);
+    runProfiles(reader, writer, ctx);
     runRelationships(reader, writer, ctx);
     runActivities(reader, writer, ctx);
 
@@ -152,6 +149,12 @@ public class MigrationTool {
 
     reader.readActivities(os);
     writer.writeActivities(is, ctx);
+
+  }
+
+  public void rollback(NodeReader reader, NodeWriter writer, WriterContext ctx) throws RepositoryException {
+
+    writer.rollback();
 
   }
 

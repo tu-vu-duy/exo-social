@@ -289,27 +289,28 @@ public class NodeWriter12x implements NodeWriter {
         activity.setUserId(owner.getId());
       }
       else {
-        try {
-          String userName = ctx.get(userId);
-          Identity i = identityStorage.findIdentity("organization", userName);
+
+        String userName = ctx.get(userId);
+        Identity i = identityStorage.findIdentity("organization", userName);
+        if (i != null) {
           activity.setUserId(i.getId());
         }
-        catch (IdentityStorageException e) {
+        else {
           try {
             Node oldSpaceIdentity = session.getNodeByUUID(userId);
             String oldSpaceId = oldSpaceIdentity.getProperty("exo:remoteId").getString();
             String spaceName = ctx.get(oldSpaceId);
             Identity spaceIdentity = identityStorage.findIdentity("space", spaceName);
-            activity.setUserId(spaceIdentity.getId());
+            if (spaceIdentity != null) {
+              activity.setUserId(spaceIdentity.getId());
+            }
           }
           catch (RepositoryException e1) {
-            e1.printStackTrace();
+            LOG.info("Ignore activity : " + activity.getPostedTime());
           }
         }
+        
       }
-
-
-
 
       try {
         activityStorage.saveActivity(owner, activity);
@@ -530,9 +531,10 @@ public class NodeWriter12x implements NodeWriter {
     comment.setPostedTime(Long.parseLong(postedTime));
     comment.setUpdated(new Date(Long.parseLong(updatedTimestamp)));
 
-    if (userId != null) {
-      String userName = ctx.get(userId);
-      Identity newUser = identityStorage.findIdentity("organization", userName);
+
+    String userName = ctx.get(userId);
+    Identity newUser = identityStorage.findIdentity("organization", userName);
+    if (newUser != null) {
       comment.setUserId(newUser.getId());
     }
 

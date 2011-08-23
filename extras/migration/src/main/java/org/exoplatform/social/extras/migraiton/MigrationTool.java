@@ -34,18 +34,9 @@ import org.exoplatform.social.extras.migraiton.reader.NodeReader11x;
 import org.exoplatform.social.extras.migraiton.writer.NodeWriter;
 import org.exoplatform.social.extras.migraiton.writer.NodeWriter12x;
 
-import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 

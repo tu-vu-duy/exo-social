@@ -5,6 +5,7 @@ import org.crsh.jcr.command.ContainerOpt;
 import org.crsh.jcr.command.UserNameOpt;
 import org.crsh.jcr.command.PasswordOpt
 import org.crsh.cmdline.annotations.Man
+//import org.crsh.cmdline.annotations.Option;
 import org.crsh.cmdline.annotations.Usage
 import org.crsh.cmdline.annotations.Command
 import org.crsh.cmdline.annotations.Argument
@@ -14,7 +15,24 @@ import org.exoplatform.social.extras.migraiton.MigrationTool;
 import org.exoplatform.social.extras.migraiton.MigrationException
 import org.exoplatform.social.extras.migraiton.reader.NodeReader
 import org.exoplatform.social.extras.migraiton.io.WriterContext
-import org.exoplatform.social.extras.migraiton.writer.NodeWriter;
+import org.exoplatform.social.extras.migraiton.writer.NodeWriter
+import java.lang.annotation.RetentionPolicy
+import java.lang.annotation.Retention;
+
+
+/*@Retention(RetentionPolicy.RUNTIME)
+@Option(names=["f","from"])
+@Usage("the existing version")
+@Man("The existing version")
+@interface FromVersionOpt {
+}
+
+@Retention(RetentionPolicy.RUNTIME)
+@Option(names=["t","to"])
+@Usage("the generated version")
+@Man("The generated version")
+@interface ToVersionOpt {
+}*/
 
 @Usage("Social migration tool")
 class sm extends org.crsh.jcr.command.JCRCommand
@@ -22,9 +40,11 @@ class sm extends org.crsh.jcr.command.JCRCommand
 
   @Usage("Run full migration")
   @Command
-  public Object runall() throws ScriptException {
+  public Object runall(/*@FromVersionOpt String from, @ToVersionOpt String to*/) throws ScriptException {
 
-    return runCmd(
+    return runCmd(/*
+        from,
+        to,*/
         {
           m, r, w ->
           m.runAll(r, w, migrationContext)
@@ -40,7 +60,7 @@ class sm extends org.crsh.jcr.command.JCRCommand
     return runCmd(
         {
           m, r, w ->
-          m.runIdentities(r, w, m)
+          m.runIdentities(r, w, migrationContext)
         }
     );
 
@@ -115,7 +135,7 @@ class sm extends org.crsh.jcr.command.JCRCommand
 
   }
 
-  private String runCmd(def call) {
+  private String runCmd(/*String from, String to, */def call) {
 
     long start = System.currentTimeMillis();
 

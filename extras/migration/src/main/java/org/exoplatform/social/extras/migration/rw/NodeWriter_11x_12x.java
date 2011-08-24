@@ -99,7 +99,9 @@ public class NodeWriter_11x_12x implements NodeWriter {
       ctx.put(currentData.getProperties().get("jcr:uuid") + "-newId", identity.getId());
 
     }
-    
+
+    ctx.setCompleted(WriterContext.DataType.IDENTITIES);
+
   }
 
   public void writeSpaces(final InputStream is, final WriterContext ctx) {
@@ -178,6 +180,8 @@ public class NodeWriter_11x_12x implements NodeWriter {
       
     }
 
+    ctx.setCompleted(WriterContext.DataType.SPACES);
+
   }
 
   public void writeProfiles(final InputStream is, final WriterContext ctx) {
@@ -215,6 +219,8 @@ public class NodeWriter_11x_12x implements NodeWriter {
       }
 
     }
+
+    ctx.setCompleted(WriterContext.DataType.PROFILES);
 
   }
 
@@ -354,6 +360,8 @@ public class NodeWriter_11x_12x implements NodeWriter {
 
     }
 
+    ctx.setCompleted(WriterContext.DataType.ACTIVITIES);
+
   }
 
   public void writeRelationships(final InputStream is, final WriterContext ctx) {
@@ -392,6 +400,8 @@ public class NodeWriter_11x_12x implements NodeWriter {
       }
 
     }
+
+    ctx.setCompleted(WriterContext.DataType.RELATIONSHIPS);
 
   }
 

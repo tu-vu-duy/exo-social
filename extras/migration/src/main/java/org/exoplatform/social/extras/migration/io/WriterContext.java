@@ -28,30 +28,50 @@ import java.util.Map;
  */
 public class WriterContext extends HashMap<String, String> {
 
+  public enum DataType {
+    IDENTITIES,
+    SPACES,
+    PROFILES,
+    RELATIONSHIPS,
+    ACTIVITIES;
+  }
+
   private final String from;
   private final String to;
+
+  private final Map<DataType, Boolean> completion;
+  private final Map<DataType, Long> done;
+
 
   public WriterContext(final int i, final float v, final String from, final String to) {
     super(i, v);
     this.from = from;
     this.to = to;
+    this.completion = new HashMap<DataType, Boolean>();
+    this.done = new HashMap<DataType, Long>();
   }
 
   public WriterContext(final int i, final String from, final String to) {
     super(i);
     this.from = from;
     this.to = to;
+    this.completion = new HashMap<DataType, Boolean>();
+    this.done = new HashMap<DataType, Long>();
   }
 
   public WriterContext(final String from, final String to) {
     this.from = from;
     this.to = to;
+    this.completion = new HashMap<DataType, Boolean>();
+    this.done = new HashMap<DataType, Long>();
   }
 
   public WriterContext(final Map<? extends String, ? extends String> map, final String from, final String to) {
     super(map);
     this.from = from;
     this.to = to;
+    this.completion = new HashMap<DataType, Boolean>();
+    this.done = new HashMap<DataType, Long>();
   }
 
   public void load(InputStream is) {
@@ -69,4 +89,13 @@ public class WriterContext extends HashMap<String, String> {
   public String getTo() {
     return to;
   }
+
+  public boolean isCompleted(DataType type) {
+    return (completion.get(type) != null && completion.get(type));
+  }
+
+  public void setCompleted(DataType type) {
+    completion.put(type, true);
+  }
+  
 }

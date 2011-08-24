@@ -15,9 +15,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.extras.migraiton.io;
+package org.exoplatform.social.extras.migration.io;
 
-import org.exoplatform.social.extras.migraiton.MigrationTool;
+import org.exoplatform.social.extras.migration.MigrationTool;
 
 import javax.jcr.Node;
 import javax.jcr.Property;

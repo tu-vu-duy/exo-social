@@ -17,8 +17,8 @@
 
 package org.exoplatform.social.extras.migration;
 
-import org.exoplatform.social.extras.migraiton.io.NodeData;
-import org.exoplatform.social.extras.migraiton.io.NodeStreamHandler;
+import org.exoplatform.social.extras.migration.io.NodeData;
+import org.exoplatform.social.extras.migration.io.NodeStreamHandler;
 
 import java.io.InputStream;
 import java.util.ArrayList;

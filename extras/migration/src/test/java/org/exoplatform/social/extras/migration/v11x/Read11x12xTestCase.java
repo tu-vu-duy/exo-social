@@ -20,10 +20,10 @@ package org.exoplatform.social.extras.migration.v11x;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.services.organization.Group;
 import org.exoplatform.services.organization.OrganizationService;
-import org.exoplatform.social.extras.migraiton.MigrationTool;
-import org.exoplatform.social.extras.migraiton.loading.DataLoader;
-import org.exoplatform.social.extras.migraiton.reader.NodeReader;
-import org.exoplatform.social.extras.migraiton.reader.NodeReader11x;
+import org.exoplatform.social.extras.migration.MigrationTool;
+import org.exoplatform.social.extras.migration.loading.DataLoader;
+import org.exoplatform.social.extras.migration.rw.NodeReader;
+import org.exoplatform.social.extras.migration.rw.NodeReader_11x_12x;
 import org.exoplatform.social.extras.migration.AbstractMigrationTestCase;
 import org.exoplatform.social.extras.migration.Utils;
 
@@ -31,8 +31,6 @@ import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.PipedInputStream;
@@ -43,7 +41,7 @@ import java.util.Collection;
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class Read11xTestCase extends AbstractMigrationTestCase {
+public class Read11x12xTestCase extends AbstractMigrationTestCase {
 
   private DataLoader loader;
   private Node rootNode;
@@ -87,7 +85,7 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
 
   public void testReadIdentity() throws Exception {
 
-    NodeReader reader = new NodeReader11x(session);
+    NodeReader reader = new NodeReader_11x_12x(session);
 
     //
     PipedOutputStream out = new PipedOutputStream();
@@ -122,7 +120,7 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
 
   public void testReadRelationship() throws Exception {
 
-    NodeReader reader = new NodeReader11x(session);
+    NodeReader reader = new NodeReader_11x_12x(session);
 
     //
     PipedOutputStream out = new PipedOutputStream();
@@ -144,7 +142,7 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
 
   public void testReadSpaces() throws Exception {
 
-    NodeReader reader = new NodeReader11x(session);
+    NodeReader reader = new NodeReader_11x_12x(session);
 
     //
     PipedOutputStream out = new PipedOutputStream();
@@ -164,7 +162,7 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
 
   public void testReadActivity() throws Exception {
 
-    NodeReader reader = new NodeReader11x(session);
+    NodeReader reader = new NodeReader_11x_12x(session);
 
     //
     PipedOutputStream out = new PipedOutputStream();
@@ -179,20 +177,20 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
     String replyToId = rootNode.getNode("exo:applications/Social_Activity/organization/user_a/published/ad25a8622e8902a9004557b913a2982e").getUUID();
     String spaceId = rootNode.getNode("exo:applications/Social_Space/Space/exo:space").getUUID();
 
-    checkActivity(dis, "ad25a8622e8902a9004557b913a2982b", "organization", "user_a", "user_a", new String[]{"SENDER=user_b", "RECEIVER=user_a"}, "@user_b has invited @user_a to connect", "CONNECTION_REQUESTED", "exosocial:relationship", "1298642872377", null, null);
-    checkActivity(dis, "ad25a8622e8902a9004557b913a2982c", "organization", "user_a", "user_a", new String[]{"SENDER=user_c", "RECEIVER=user_a"}, "@user_c has invited @user_a to connect", "CONNECTION_REQUESTED", "exosocial:relationship", "1298642872378", null, new String[]{like1, like2});
-    checkActivity(dis, "ad25a8622e8902a9004557b913a2982e", "organization", "user_a", "user_a", null, "foo", null, "exosocial:relationship", "1298642872380", "IS_COMMENT", null);
-    checkActivity(dis, "ad25a8622e8902a9004557b913a2982d", "organization", "user_a", "user_a", new String[]{"SENDER=user_d", "RECEIVER=user_a"}, "@user_d has invited @user_a to connect", "CONNECTION_REQUESTED", "exosocial:relationship", "1298642872379", replyToId, null);
+    checkActivity(dis, "ad25a8622e8902a9004557b913a2982b", "organization", "user_a", "user_a", new String[]{"SENDER=user_b", "RECEIVER=user_a"}, "@user_b has invited @user_a to connect", "CONNECTION_REQUESTED", "exosocial:relationship", "1298642872377", null, null, null, null, null, null, null);
+    checkActivity(dis, "ad25a8622e8902a9004557b913a2982c", "organization", "user_a", "user_a", new String[]{"SENDER=user_c", "RECEIVER=user_a"}, "@user_c has invited @user_a to connect", "CONNECTION_REQUESTED", "exosocial:relationship", "1298642872378", null, new String[]{like1, like2}, "body", "template", "url", "1", "external id");
+    checkActivity(dis, "ad25a8622e8902a9004557b913a2982e", "organization", "user_a", "user_a", null, "foo", null, "exosocial:relationship", "1298642872380", "IS_COMMENT", null, null, null, null, null, null);
+    checkActivity(dis, "ad25a8622e8902a9004557b913a2982d", "organization", "user_a", "user_a", new String[]{"SENDER=user_d", "RECEIVER=user_a"}, "@user_d has invited @user_a to connect", "CONNECTION_REQUESTED", "exosocial:relationship", "1298642872379", replyToId, null, null, null, null, null, null);
 
-    checkActivity(dis, "ad25a8622e8902a9004557b913a2983b", "space", spaceId, "user_a", null, "@user_a has joined.", null, "exosocial:spaces", "1298642872387", null, null);
-    checkActivity(dis, "ad25a8622e8902a9004557b913a2983c", "space", spaceId, "user_b", null, "@user_b has joined.", null, "exosocial:spaces", "1298642872388", null, null);
-    checkActivity(dis, "ad25a8622e8902a9004557b913a2983d", "space", spaceId, "user_c", null, "@user_c has joined.", null, "exosocial:spaces", "1298642872389", null, null);
+    checkActivity(dis, "ad25a8622e8902a9004557b913a2983b", "space", spaceId, "user_a", null, "@user_a has joined.", null, "exosocial:spaces", "1298642872387", null, null, null, null, null, null, null);
+    checkActivity(dis, "ad25a8622e8902a9004557b913a2983c", "space", spaceId, "user_b", null, "@user_b has joined.", null, "exosocial:spaces", "1298642872388", null, null, null, null, null, null, null);
+    checkActivity(dis, "ad25a8622e8902a9004557b913a2983d", "space", spaceId, "user_c", null, "@user_c has joined.", null, "exosocial:spaces", "1298642872389", null, null, null, null, null, null, null);
 
   }
 
   public void testReadProfiles() throws Exception {
 
-    NodeReader reader = new NodeReader11x(session);
+    NodeReader reader = new NodeReader_11x_12x(session);
 
     //
     PipedOutputStream out = new PipedOutputStream();
@@ -338,7 +336,7 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
 
   }
 
-  private void checkActivity(DataInputStream dis, String nodeName, String provider, String owner, String poster, String[] params, String title, String titleTemplate, String type, String timestamp, String replyToId, String[] likes) throws IOException, RepositoryException {
+  private void checkActivity(DataInputStream dis, String nodeName, String provider, String owner, String poster, String[] params, String title, String titleTemplate, String type, String timestamp, String replyToId, String[] likes, String body, String bodyId, String url, String priority, String externalId) throws IOException, RepositoryException {
 
     String path;
     assertEquals(MigrationTool.START_NODE, dis.readInt());
@@ -357,6 +355,24 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
     assertEquals("jcr:uuid", dis.readUTF());
     assertEquals(rootNode.getNode(path.substring(1)).getUUID(), dis.readUTF());
 
+    if (body != null) {
+      assertEquals(MigrationTool.PROPERTY_SINGLE, dis.readInt());
+      assertEquals("exo:body", dis.readUTF());
+      assertEquals("body", dis.readUTF());
+    }
+
+    if (bodyId != null) {
+      assertEquals(MigrationTool.PROPERTY_SINGLE, dis.readInt());
+      assertEquals("exo:bodyTemplate", dis.readUTF());
+      assertEquals("template", dis.readUTF());
+    }
+
+    if (externalId != null) {
+      assertEquals(MigrationTool.PROPERTY_SINGLE, dis.readInt());
+      assertEquals("exo:externalId", dis.readUTF());
+      assertEquals(externalId, dis.readUTF());
+    }
+    
     assertEquals(MigrationTool.PROPERTY_SINGLE, dis.readInt());
     assertEquals("exo:hidden", dis.readUTF());
     assertEquals("false", dis.readUTF());
@@ -383,12 +399,18 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
     assertEquals("exo:postedTime", dis.readUTF());
     assertEquals(timestamp, dis.readUTF());
 
+    if (priority != null) {
+      assertEquals(MigrationTool.PROPERTY_SINGLE, dis.readInt());
+      assertEquals("exo:priority", dis.readUTF());
+      assertEquals(priority, dis.readUTF());
+    }
+
     if (replyToId != null) {
       assertEquals(MigrationTool.PROPERTY_SINGLE, dis.readInt());
       assertEquals("exo:replyToId", dis.readUTF());
       assertEquals(replyToId, dis.readUTF());
     }
-
+    
     assertEquals(MigrationTool.PROPERTY_SINGLE, dis.readInt());
     assertEquals("exo:title", dis.readUTF());
     assertEquals(title, dis.readUTF());
@@ -406,6 +428,12 @@ public class Read11xTestCase extends AbstractMigrationTestCase {
     assertEquals(MigrationTool.PROPERTY_SINGLE, dis.readInt());
     assertEquals("exo:updatedTimestamp", dis.readUTF());
     assertEquals(timestamp, dis.readUTF());
+    
+    if (url != null) {
+      assertEquals(MigrationTool.PROPERTY_SINGLE, dis.readInt());
+      assertEquals("exo:url", dis.readUTF());
+      assertEquals(url, dis.readUTF());
+    }
 
     assertEquals(MigrationTool.PROPERTY_SINGLE, dis.readInt());
     assertEquals("exo:userId", dis.readUTF());

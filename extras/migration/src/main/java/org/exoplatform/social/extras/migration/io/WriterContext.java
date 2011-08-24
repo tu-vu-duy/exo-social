@@ -15,17 +15,44 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.extras.migraiton.io;
+package org.exoplatform.social.extras.migration.io;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
 public class WriterContext extends HashMap<String, String> {
+
+  private final String from;
+  private final String to;
+
+  public WriterContext(final int i, final float v, final String from, final String to) {
+    super(i, v);
+    this.from = from;
+    this.to = to;
+  }
+
+  public WriterContext(final int i, final String from, final String to) {
+    super(i);
+    this.from = from;
+    this.to = to;
+  }
+
+  public WriterContext(final String from, final String to) {
+    this.from = from;
+    this.to = to;
+  }
+
+  public WriterContext(final Map<? extends String, ? extends String> map, final String from, final String to) {
+    super(map);
+    this.from = from;
+    this.to = to;
+  }
 
   public void load(InputStream is) {
     throw new RuntimeException();
@@ -35,4 +62,11 @@ public class WriterContext extends HashMap<String, String> {
     throw new RuntimeException();
   }
 
+  public String getFrom() {
+    return from;
+  }
+
+  public String getTo() {
+    return to;
+  }
 }

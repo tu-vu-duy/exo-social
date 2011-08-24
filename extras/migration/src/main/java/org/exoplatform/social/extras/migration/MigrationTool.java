@@ -15,7 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.extras.migraiton;
+package org.exoplatform.social.extras.migration;
 
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
@@ -28,17 +28,19 @@ import org.exoplatform.social.core.storage.impl.ActivityStorageImpl;
 import org.exoplatform.social.core.storage.impl.IdentityStorageImpl;
 import org.exoplatform.social.core.storage.impl.RelationshipStorageImpl;
 import org.exoplatform.social.core.storage.impl.SpaceStorageImpl;
-import org.exoplatform.social.extras.migraiton.io.WriterContext;
-import org.exoplatform.social.extras.migraiton.reader.NodeReader;
-import org.exoplatform.social.extras.migraiton.reader.NodeReader11x;
-import org.exoplatform.social.extras.migraiton.writer.NodeWriter;
-import org.exoplatform.social.extras.migraiton.writer.NodeWriter12x;
+import org.exoplatform.social.extras.migration.io.WriterContext;
+import org.exoplatform.social.extras.migration.rw.NodeReader;
+import org.exoplatform.social.extras.migration.rw.NodeReader_11x_12x;
+import org.exoplatform.social.extras.migration.rw.NodeWriter;
+import org.exoplatform.social.extras.migration.rw.NodeWriter_11x_12x;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
@@ -149,107 +151,42 @@ public class MigrationTool {
 
   }
 
-  public NodeReader createReader(String version, Session session) throws RepositoryException {
-
-    // TODO : use version
-    return new NodeReader11x(session);
-  }
-
-  public NodeWriter createWriter(String version, Session session) throws RepositoryException {
-
-    // TODO : use version
-    return new NodeWriter12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
-  }
-
-
-
-  /*public void exportToStream(Session session, String version, String fileName) {
-
-    File file = new File(fileName);
-    if (file.isDirectory()) {
-      throw new RuntimeException();
-    }
-
-    File identitiesFile = new File(file, "identities");
-    File relationshipFile = new File(file, "relationships");
-    File spacesFile = new File(file, "spaces");
-    File activitiesFile = new File(file, "activities");
+  public NodeReader createReader(String from, String to, Session session) throws RepositoryException {
 
     try {
-
-      FileOutputStream identitiesOs = new FileOutputStream(identitiesFile);
-      FileOutputStream relationshipsOs = new FileOutputStream(relationshipFile);
-      FileOutputStream spacesOs = new FileOutputStream(spacesFile);
-      FileOutputStream activitiesOs = new FileOutputStream(activitiesFile);
-      exportToStream(session, version, identitiesOs, relationshipsOs, spacesOs, activitiesOs);
-
+      Class clazz = Class.forName("org.exoplatform.social.extras.migration.rw." + buildName(from, to, "Reader"));
+      Constructor c = clazz.getConstructor(Session.class);
+      return (NodeReader) c.newInstance(session);
     }
-    catch (FileNotFoundException e) {
-      e.printStackTrace();
+    catch (Exception e) {
+      return null;
     }
-
 
   }
 
-  private void exportToStream(Session session, String version, OutputStream identitiesOs, OutputStream relationshipsOs, OutputStream spacesOs, OutputStream activitiesOs) {
+  public NodeWriter createWriter(String from, String to, Session session) throws RepositoryException {
 
     try {
-
-      NodeReader reader = new NodeReader11x(session);
-      reader.readIdentities(identitiesOs);
-      reader.readRelationships(relationshipsOs);
-      reader.readSpaces(spacesOs);
-      reader.readActivities(activitiesOs);
-
+      Class clazz = Class.forName("org.exoplatform.social.extras.migration.rw." + buildName(from, to, "Writer"));
+      Constructor c = clazz.getConstructor(
+          IdentityStorage.class,
+          RelationshipStorage.class,
+          SpaceStorage.class,
+          ActivityStorage.class,
+          OrganizationService.class,
+          Session.class);
+      return (NodeWriter)c.newInstance(
+          identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session
+      );
     }
-    catch (FileNotFoundException e) {
-      e.printStackTrace();
-    }
-    catch (RepositoryException e) {
-      e.printStackTrace();
-    }
-    catch (IOException e) {
-      e.printStackTrace();
+    catch (Exception e) {
+      return null;
     }
 
   }
 
-  private void importFromStream(Session session, String version, String fileName) {
-
-    File file = new File(fileName);
-    if (file.isDirectory()) {
-      throw new RuntimeException();
-    }
-
-    File identitiesFile = new File(file, "identities");
-    File relationshipFile = new File(file, "relationships");
-    File spacesFile = new File(file, "spaces");
-    File activitiesFile = new File(file, "activities");
-
-    try {
-
-      FileInputStream identitiesOs = new FileInputStream(identitiesFile);
-      FileInputStream relationshipsOs = new FileInputStream(relationshipFile);
-      FileInputStream spacesOs = new FileInputStream(spacesFile);
-      FileInputStream activitiesOs = new FileInputStream(activitiesFile);
-      exportFromStream(session, version, identitiesOs, relationshipsOs, spacesOs, activitiesOs);
-
-    }
-    catch (FileNotFoundException e) {
-      e.printStackTrace();
-    }
-    
+  private String buildName(String from, String to, String type) {
+    return String.format("Node%s_%s_%s", type, from, to);
   }
-
-  private void exportFromStream(Session session, String version, InputStream identitiesOs, InputStream relationshipsOs, InputStream spacesOs, InputStream activitiesOs) {
-
-    NodeWriter writer = new NodeWriter12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
-    WriterContext ctx = new WriterContext();
-    writer.writeIdentities(identitiesOs, ctx);
-    writer.writeRelationships(relationshipsOs, ctx);
-    writer.writeSpaces(spacesOs, ctx);
-    writer.writeActivities(activitiesOs, ctx);
-
-  }*/
 
 }

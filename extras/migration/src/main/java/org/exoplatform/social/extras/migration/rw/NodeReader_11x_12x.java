@@ -15,10 +15,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.extras.migraiton.reader;
+package org.exoplatform.social.extras.migration.rw;
 
-import org.exoplatform.social.extras.migraiton.MigrationException;
-import org.exoplatform.social.extras.migraiton.io.NodeStreamHandler;
+import org.exoplatform.social.extras.migration.MigrationException;
+import org.exoplatform.social.extras.migration.io.NodeStreamHandler;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
@@ -31,13 +31,13 @@ import java.io.OutputStream;
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class NodeReader11x implements NodeReader {
+public class NodeReader_11x_12x implements NodeReader {
 
   private Session session;
   private Node rootNode;
   private NodeStreamHandler writer;
 
-  public NodeReader11x(final Session session) throws RepositoryException {
+  public NodeReader_11x_12x(final Session session) throws RepositoryException {
     this.session = session;
     this.rootNode = session.getRootNode();
     this.writer = new NodeStreamHandler();

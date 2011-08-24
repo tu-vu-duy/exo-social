@@ -15,31 +15,29 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.extras.migraiton.reader;
+package org.exoplatform.social.extras.migration.rw;
 
-import org.exoplatform.social.extras.migraiton.MigrationException;
+import org.exoplatform.social.extras.migration.io.WriterContext;
 
-import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStream;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public interface NodeReader {
+public interface NodeWriter {
+  
+  void writeIdentities(InputStream is, WriterContext ctx);
 
-  void readIdentities(OutputStream os) throws RepositoryException, IOException;
+  void writeSpaces(InputStream is, WriterContext ctx);
 
-  void readSpaces(OutputStream os) throws RepositoryException, IOException;
+  void writeProfiles(InputStream is, WriterContext ctx);
 
-  void readProfiles(OutputStream os) throws RepositoryException, IOException;
+  void writeActivities(InputStream is, WriterContext ctx);
+  
+  void writeRelationships(InputStream is, WriterContext ctx);
 
-  void readActivities(OutputStream os) throws RepositoryException, IOException;
-
-  void readRelationships(OutputStream os) throws RepositoryException, IOException;
-
-  void checkData() throws MigrationException;
+  void rollback() throws RepositoryException;
 
 }

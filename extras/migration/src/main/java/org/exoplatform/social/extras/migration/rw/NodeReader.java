@@ -15,26 +15,30 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.extras.migraiton;
+package org.exoplatform.social.extras.migration.rw;
+
+import org.exoplatform.social.extras.migration.MigrationException;
+
+import javax.jcr.RepositoryException;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class MigrationException extends RuntimeException {
-  public MigrationException() {
-  }
+public interface NodeReader {
 
-  public MigrationException(final String s) {
-    super(s);
-  }
+  void readIdentities(OutputStream os) throws RepositoryException, IOException;
 
-  public MigrationException(final String s, final Throwable throwable) {
-    super(s, throwable);
-  }
+  void readSpaces(OutputStream os) throws RepositoryException, IOException;
 
-  public MigrationException(final Throwable throwable) {
-    super(throwable);
-  }
+  void readProfiles(OutputStream os) throws RepositoryException, IOException;
+
+  void readActivities(OutputStream os) throws RepositoryException, IOException;
+
+  void readRelationships(OutputStream os) throws RepositoryException, IOException;
+
+  void checkData() throws MigrationException;
 
 }

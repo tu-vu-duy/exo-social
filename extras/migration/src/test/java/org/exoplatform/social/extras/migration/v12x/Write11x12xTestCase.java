@@ -28,25 +28,21 @@ import org.exoplatform.social.core.storage.impl.ActivityStorageImpl;
 import org.exoplatform.social.core.storage.impl.IdentityStorageImpl;
 import org.exoplatform.social.core.storage.impl.RelationshipStorageImpl;
 import org.exoplatform.social.core.storage.impl.SpaceStorageImpl;
-import org.exoplatform.social.extras.migraiton.io.WriterContext;
-import org.exoplatform.social.extras.migraiton.loading.DataLoader;
-import org.exoplatform.social.extras.migraiton.reader.NodeReader;
-import org.exoplatform.social.extras.migraiton.reader.NodeReader11x;
-import org.exoplatform.social.extras.migraiton.writer.NodeWriter;
-import org.exoplatform.social.extras.migraiton.writer.NodeWriter12x;
+import org.exoplatform.social.extras.migration.io.WriterContext;
+import org.exoplatform.social.extras.migration.loading.DataLoader;
+import org.exoplatform.social.extras.migration.rw.NodeReader;
+import org.exoplatform.social.extras.migration.rw.NodeReader_11x_12x;
+import org.exoplatform.social.extras.migration.rw.NodeWriter;
+import org.exoplatform.social.extras.migration.rw.NodeWriter_11x_12x;
 import org.exoplatform.social.extras.migration.AbstractMigrationTestCase;
 import org.exoplatform.social.extras.migration.Utils;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.PathNotFoundException;
-import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.Value;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.Collection;
@@ -55,7 +51,7 @@ import java.util.Collection;
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class Write12xTestCase extends AbstractMigrationTestCase {
+public class Write11x12xTestCase extends AbstractMigrationTestCase {
 
   private IdentityStorage identityStorage;
   private RelationshipStorage relationshipStorage;
@@ -119,10 +115,10 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
     PipedOutputStream osIdentity = new PipedOutputStream();
     PipedInputStream isIdentity = new PipedInputStream(osIdentity);
 
-    NodeReader reader = new NodeReader11x(session);
+    NodeReader reader = new NodeReader_11x_12x(session);
     reader.readIdentities(osIdentity);
 
-    NodeWriter writer = new NodeWriter12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
+    NodeWriter writer = new NodeWriter_11x_12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
     writer.writeIdentities(isIdentity, new WriterContext());
 
     checkIdentity("organization", "user_idA");
@@ -155,8 +151,8 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
     PipedOutputStream osRelationship = new PipedOutputStream();
     PipedInputStream isRelationship = new PipedInputStream(osRelationship);
 
-    NodeReader reader = new NodeReader11x(session);
-    NodeWriter writer = new NodeWriter12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
+    NodeReader reader = new NodeReader_11x_12x(session);
+    NodeWriter writer = new NodeWriter_11x_12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
     WriterContext ctx = new WriterContext();
 
     reader.readIdentities(osIdentity);
@@ -193,8 +189,8 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
     PipedOutputStream osSpace = new PipedOutputStream();
     PipedInputStream isSpace = new PipedInputStream(osSpace);
 
-    NodeReader reader = new NodeReader11x(session);
-    NodeWriter writer = new NodeWriter12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
+    NodeReader reader = new NodeReader_11x_12x(session);
+    NodeWriter writer = new NodeWriter_11x_12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
     WriterContext ctx = new WriterContext();
 
     reader.readIdentities(osIdentity);
@@ -222,8 +218,8 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
     PipedOutputStream osActivity = new PipedOutputStream();
     PipedInputStream isActivity = new PipedInputStream(osActivity);
 
-    NodeReader reader = new NodeReader11x(session);
-    NodeWriter writer = new NodeWriter12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
+    NodeReader reader = new NodeReader_11x_12x(session);
+    NodeWriter writer = new NodeWriter_11x_12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
     WriterContext ctx = new WriterContext();
 
     reader.readIdentities(osIdentity);
@@ -266,8 +262,8 @@ public class Write12xTestCase extends AbstractMigrationTestCase {
     PipedOutputStream osProfile = new PipedOutputStream();
     PipedInputStream isProfile = new PipedInputStream(osProfile);
 
-    NodeReader reader = new NodeReader11x(session);
-    NodeWriter writer = new NodeWriter12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
+    NodeReader reader = new NodeReader_11x_12x(session);
+    NodeWriter writer = new NodeWriter_11x_12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
     WriterContext ctx = new WriterContext();
 
     reader.readIdentities(osIdentity);

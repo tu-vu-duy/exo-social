@@ -15,40 +15,29 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.extras.migraiton.writer;
+package org.exoplatform.social.extras.migration.rw;
 
-import org.exoplatform.container.PortalContainer;
-import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.organization.Group;
-import org.exoplatform.services.organization.GroupHandler;
 import org.exoplatform.services.organization.Membership;
-import org.exoplatform.services.organization.MembershipHandler;
-import org.exoplatform.services.organization.MembershipType;
-import org.exoplatform.services.organization.MembershipTypeHandler;
 import org.exoplatform.services.organization.OrganizationService;
-import org.exoplatform.services.organization.User;
-import org.exoplatform.services.organization.UserHandler;
 import org.exoplatform.social.core.activity.model.ExoSocialActivity;
 import org.exoplatform.social.core.activity.model.ExoSocialActivityImpl;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.model.Profile;
 import org.exoplatform.social.core.relationship.model.Relationship;
 import org.exoplatform.social.core.space.model.Space;
-import org.exoplatform.social.core.storage.IdentityStorageException;
 import org.exoplatform.social.core.storage.api.ActivityStorage;
 import org.exoplatform.social.core.storage.api.IdentityStorage;
 import org.exoplatform.social.core.storage.api.RelationshipStorage;
 import org.exoplatform.social.core.storage.api.SpaceStorage;
-import org.exoplatform.social.extras.migraiton.io.NodeData;
-import org.exoplatform.social.extras.migraiton.io.NodeStreamHandler;
-import org.exoplatform.social.extras.migraiton.io.WriterContext;
+import org.exoplatform.social.extras.migration.io.NodeData;
+import org.exoplatform.social.extras.migration.io.NodeStreamHandler;
+import org.exoplatform.social.extras.migration.io.WriterContext;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
-import javax.jcr.PathNotFoundException;
-import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.InputStream;
@@ -63,7 +52,7 @@ import java.util.Map;
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class NodeWriter12x implements NodeWriter {
+public class NodeWriter_11x_12x implements NodeWriter {
 
   private final IdentityStorage identityStorage;
   private final RelationshipStorage relationshipStorage;
@@ -73,9 +62,9 @@ public class NodeWriter12x implements NodeWriter {
 
   private final Session session;
 
-  private static final Log LOG = ExoLogger.getLogger(NodeWriter12x.class);
+  private static final Log LOG = ExoLogger.getLogger(NodeWriter_11x_12x.class);
 
-  public NodeWriter12x(final IdentityStorage identityStorage, final RelationshipStorage relationshipStorage, final SpaceStorage spaceStorage, final ActivityStorage activityStorage, final OrganizationService organizationService, final Session session) {
+  public NodeWriter_11x_12x(final IdentityStorage identityStorage, final RelationshipStorage relationshipStorage, final SpaceStorage spaceStorage, final ActivityStorage activityStorage, final OrganizationService organizationService, final Session session) {
     this.identityStorage = identityStorage;
     this.relationshipStorage = relationshipStorage;
     this.spaceStorage = spaceStorage;
@@ -263,16 +252,25 @@ public class NodeWriter12x implements NodeWriter {
       String userId = (String) currentData.getProperties().get("exo:userId");
       String postedTime = (String) currentData.getProperties().get("exo:postedTime");
       String updatedTimestamp = (String) currentData.getProperties().get("exo:updatedTimestamp");
+      String body = (String) currentData.getProperties().get("exo:body");
+      String bodyTemplate = (String) currentData.getProperties().get("exo:bodyTemplate");
+      String url = (String) currentData.getProperties().get("exo:url");
+      String priority = (String) currentData.getProperties().get("exo:priority");
+      String externalId = (String) currentData.getProperties().get("exo:externalId");
 
       String[] params = (String[]) currentData.getProperties().get("exo:params");
       String[] likes = (String[]) currentData.getProperties().get("exo:like");
 
-      /*Map<String, String> paramMap = readParams(params);
+      Map<String, String> paramMap = readParams(params);
       if (paramMap != null) {
         activity.setTemplateParams(paramMap);
-      }*/
+      }
       activity.setTitle(title);
       activity.setTitleId(titleTemplate);
+      activity.setBody(body);
+      activity.setBodyId(bodyTemplate);
+      activity.setUrl(url);
+      activity.setExternalId(externalId);
       activity.setType(type);
       activity.setPostedTime(Long.parseLong(postedTime));
       activity.setUpdated(new Date(Long.parseLong(updatedTimestamp)));
@@ -283,6 +281,10 @@ public class NodeWriter12x implements NodeWriter {
           newLikes[i] = ctx.get(likes[i] + "-newId");
         }
         activity.setLikeIdentityIds(newLikes);
+      }
+      
+      if (priority != null) {
+        activity.setPriority(Float.parseFloat(priority));
       }
 
       if (userId == null) {
@@ -505,7 +507,12 @@ public class NodeWriter12x implements NodeWriter {
       Map<String, String> paramMap = new HashMap<String, String>();
       for(String param : params) {
         String[] keyValue = param.split("=");
-        paramMap.put(keyValue[0], keyValue[1]);
+        if (keyValue.length < 2) {
+          paramMap.put(keyValue[0], null);
+        }
+        else {
+          paramMap.put(keyValue[0], keyValue[1]);
+        }
       }
       if (paramMap.size() > 0) {
         return paramMap;

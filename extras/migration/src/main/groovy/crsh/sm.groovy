@@ -1,50 +1,29 @@
-import javax.jcr.SimpleCredentials;
 
 import org.crsh.jcr.JCR;
 import org.crsh.jcr.command.ContainerOpt;
 import org.crsh.jcr.command.UserNameOpt;
-import org.crsh.jcr.command.PasswordOpt
-import org.crsh.cmdline.annotations.Man
-//import org.crsh.cmdline.annotations.Option;
-import org.crsh.cmdline.annotations.Usage
-import org.crsh.cmdline.annotations.Command
-import org.crsh.cmdline.annotations.Argument
+import org.crsh.jcr.command.PasswordOpt;
+import org.crsh.cmdline.annotations.Man;
+import org.crsh.cmdline.annotations.Usage;
+import org.crsh.cmdline.annotations.Command;
+import org.crsh.cmdline.annotations.Option;
+import org.crsh.cmdline.annotations.Argument;
 import org.crsh.cmdline.annotations.Required;
+import org.crsh.command.InvocationContext;
 
-import org.exoplatform.social.extras.migraiton.MigrationTool;
-import org.exoplatform.social.extras.migraiton.MigrationException
-import org.exoplatform.social.extras.migraiton.reader.NodeReader
-import org.exoplatform.social.extras.migraiton.io.WriterContext
-import org.exoplatform.social.extras.migraiton.writer.NodeWriter
-import java.lang.annotation.RetentionPolicy
-import java.lang.annotation.Retention;
-
-
-/*@Retention(RetentionPolicy.RUNTIME)
-@Option(names=["f","from"])
-@Usage("the existing version")
-@Man("The existing version")
-@interface FromVersionOpt {
-}
-
-@Retention(RetentionPolicy.RUNTIME)
-@Option(names=["t","to"])
-@Usage("the generated version")
-@Man("The generated version")
-@interface ToVersionOpt {
-}*/
+import org.exoplatform.social.extras.migration.MigrationTool;
+import org.exoplatform.social.extras.migration.MigrationException;
+import org.exoplatform.social.extras.migration.io.WriterContext;
 
 @Usage("Social migration tool")
-class sm extends org.crsh.jcr.command.JCRCommand
+public class sm extends org.crsh.jcr.command.JCRCommand
 {
 
   @Usage("Run full migration")
   @Command
-  public Object runall(/*@FromVersionOpt String from, @ToVersionOpt String to*/) throws ScriptException {
+  public Object runall() throws ScriptException {
 
-    return runCmd(/*
-        from,
-        to,*/
+    return runCmd(
         {
           m, r, w ->
           m.runAll(r, w, migrationContext)
@@ -135,7 +114,7 @@ class sm extends org.crsh.jcr.command.JCRCommand
 
   }
 
-  private String runCmd(/*String from, String to, */def call) {
+  private String runCmd(def call) {
 
     long start = System.currentTimeMillis();
 
@@ -143,11 +122,7 @@ class sm extends org.crsh.jcr.command.JCRCommand
       return "Context not initialized, please use 'sm init'.";
     }
 
-    MigrationTool migrationTool = new MigrationTool();
-
     try {
-      NodeReader reader = migrationTool.createReader("11x", session)
-      NodeWriter writer = migrationTool.createWriter("12x", session)
       call(migrationTool, reader, writer);
     }
     catch (MigrationException e) {
@@ -162,9 +137,27 @@ class sm extends org.crsh.jcr.command.JCRCommand
 
   @Usage("Initialize")
   @Command
-  public Object init() {
+  public Object init(InvocationContext<Void, Void> context, @Option(names=["f","from"]) String from, @Option(names=["t","to"]) String to) {
+
+    migrationTool = new MigrationTool();
+    
+    if (from == null || to == null) {
+      return "You must specify --from (-f) and --to (-t) version";
+    }
+
+    reader = migrationTool.createReader(from, to, session)
+    if (reader == null) {
+      return "Unable to find reader for specified version."
+    }
+
+    writer = migrationTool.createWriter(from, to, session)
+
+    if (writer == null) {
+      return "Unable to find writer for specified version."
+    }
+
     if (migrationContext == null) {
-      migrationContext = new WriterContext();
+      migrationContext = new WriterContext(from, to);
     }
     return "Context initialized."
   }

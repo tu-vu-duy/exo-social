@@ -17,7 +17,7 @@
 
 package org.exoplatform.social.extras.migration;
 
-import org.exoplatform.social.extras.migraiton.loading.DataLoader;
+import org.exoplatform.social.extras.migration.loading.DataLoader;
 
 import javax.jcr.Node;
 import javax.jcr.Property;

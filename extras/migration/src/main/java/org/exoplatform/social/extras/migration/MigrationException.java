@@ -15,29 +15,26 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.extras.migraiton.writer;
-
-import org.exoplatform.social.extras.migraiton.io.WriterContext;
-
-import javax.jcr.RepositoryException;
-import java.io.InputStream;
+package org.exoplatform.social.extras.migration;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public interface NodeWriter {
-  
-  void writeIdentities(InputStream is, WriterContext ctx);
+public class MigrationException extends RuntimeException {
+  public MigrationException() {
+  }
 
-  void writeSpaces(InputStream is, WriterContext ctx);
+  public MigrationException(final String s) {
+    super(s);
+  }
 
-  void writeProfiles(InputStream is, WriterContext ctx);
+  public MigrationException(final String s, final Throwable throwable) {
+    super(s, throwable);
+  }
 
-  void writeActivities(InputStream is, WriterContext ctx);
-  
-  void writeRelationships(InputStream is, WriterContext ctx);
-
-  void rollback() throws RepositoryException;
+  public MigrationException(final Throwable throwable) {
+    super(throwable);
+  }
 
 }

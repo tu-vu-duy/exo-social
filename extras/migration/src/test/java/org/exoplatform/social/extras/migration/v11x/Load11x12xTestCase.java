@@ -17,12 +17,10 @@
 
 package org.exoplatform.social.extras.migration.v11x;
 
-import org.exoplatform.commons.utils.ListAccess;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.services.organization.Group;
 import org.exoplatform.services.organization.OrganizationService;
-import org.exoplatform.services.organization.User;
-import org.exoplatform.social.extras.migraiton.loading.DataLoader;
+import org.exoplatform.social.extras.migration.loading.DataLoader;
 import org.exoplatform.social.extras.migration.AbstractMigrationTestCase;
 import org.exoplatform.social.extras.migration.Utils;
 
@@ -30,13 +28,12 @@ import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Session;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class Load11xTestCase extends AbstractMigrationTestCase {
+public class Load11x12xTestCase extends AbstractMigrationTestCase {
 
   private DataLoader loader;
   private Node rootNode;

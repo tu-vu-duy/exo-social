@@ -90,13 +90,17 @@ public class NodeWriter_11x_12x implements NodeWriter {
       try {
         identityStorage.saveIdentity(identity);
         LOG.info("Write identity " + provider + "/" + remote);
+        ctx.incDone(WriterContext.DataType.IDENTITIES);
       }
       catch (Exception e) {
         LOG.error(e.getMessage());
       }
 
-      ctx.put((String) currentData.getProperties().get("jcr:uuid"), (String) currentData.getProperties().get("exo:remoteId"));
-      ctx.put(currentData.getProperties().get("jcr:uuid") + "-newId", identity.getId());
+      String uuid = (String) currentData.getProperties().get("jcr:uuid");
+      if (uuid != null) {
+        ctx.put(uuid, (String) currentData.getProperties().get("exo:remoteId"));
+        ctx.put(uuid + "-newId", identity.getId());
+      }
 
     }
 
@@ -170,6 +174,7 @@ public class NodeWriter_11x_12x implements NodeWriter {
         LOG.info("Write space identity " + identity.getProviderId() + "/" + identity.getRemoteId());
         spaceStorage.saveSpace(space, true);
         LOG.info("Write space " + space.getGroupId());
+        ctx.incDone(WriterContext.DataType.SPACES);
       }
       catch (Exception e) {
         LOG.error(e.getMessage());
@@ -212,6 +217,7 @@ public class NodeWriter_11x_12x implements NodeWriter {
         try {
           identityStorage.saveProfile(profile);
           LOG.info("Write profile " + i.getProviderId() + "/" + i.getRemoteId());
+          ctx.incDone(WriterContext.DataType.PROFILES);
         }
         catch (Exception e) {
           LOG.error(e.getMessage());
@@ -323,6 +329,7 @@ public class NodeWriter_11x_12x implements NodeWriter {
       try {
         activityStorage.saveActivity(owner, activity);
         LOG.info("Write activity " + owner.getRemoteId() + " : " + activity.getPostedTime());
+        ctx.incDone(WriterContext.DataType.ACTIVITIES);
       }
       catch (Exception e) {
         LOG.error(e.getMessage());
@@ -394,6 +401,7 @@ public class NodeWriter_11x_12x implements NodeWriter {
       try {
         relationshipStorage.saveRelationship(relationship);
         LOG.info("Write relationship " + i1.getRemoteId() + " -> " + i2.getRemoteId() + " : " + type);
+        ctx.incDone(WriterContext.DataType.RELATIONSHIPS);
       }
       catch (Exception e) {
         LOG.error(e.getMessage());

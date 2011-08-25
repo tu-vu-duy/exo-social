@@ -26,7 +26,7 @@ public class sm extends org.crsh.jcr.command.JCRCommand
     return runCmd(
         {
           m, r, w ->
-          m.runAll(r, w, migrationContext)
+          m.runAll(r, w, ctx)
         }
     );
 
@@ -37,7 +37,7 @@ public class sm extends org.crsh.jcr.command.JCRCommand
   public Object runidentities() throws ScriptException {
 
     //
-    if (migrationContext?.isCompleted(WriterContext.DataType.IDENTITIES)) {
+    if (ctx?.isCompleted(WriterContext.DataType.IDENTITIES)) {
       return "Identities was already migrated";
     }
 
@@ -45,7 +45,7 @@ public class sm extends org.crsh.jcr.command.JCRCommand
     return runCmd(
         {
           m, r, w ->
-          m.runIdentities(r, w, migrationContext)
+          m.runIdentities(r, w, ctx)
         }
     );
 
@@ -56,7 +56,7 @@ public class sm extends org.crsh.jcr.command.JCRCommand
   public Object runprofiles() throws ScriptException {
 
     //
-    if (migrationContext?.isCompleted(WriterContext.DataType.PROFILES)) {
+    if (ctx?.isCompleted(WriterContext.DataType.PROFILES)) {
       return "Profiles was already migrated";
     }
 
@@ -64,7 +64,7 @@ public class sm extends org.crsh.jcr.command.JCRCommand
     return runCmd(
         {
           m, r, w ->
-          m.runProfiles(r, w, migrationContext)
+          m.runProfiles(r, w, ctx)
         }
     );
 
@@ -75,7 +75,7 @@ public class sm extends org.crsh.jcr.command.JCRCommand
   public Object runspaces() throws ScriptException {
 
     //
-    if (migrationContext?.isCompleted(WriterContext.DataType.SPACES)) {
+    if (ctx?.isCompleted(WriterContext.DataType.SPACES)) {
       return "Spaces was already migrated";
     }
 
@@ -83,7 +83,7 @@ public class sm extends org.crsh.jcr.command.JCRCommand
     return runCmd(
         {
           m, r, w ->
-          m.runSpaces(r, w, migrationContext)
+          m.runSpaces(r, w, ctx)
         }
     );
     
@@ -94,7 +94,7 @@ public class sm extends org.crsh.jcr.command.JCRCommand
   public Object runrelationships() throws ScriptException {
 
     //
-    if (migrationContext?.isCompleted(WriterContext.DataType.RELATIONSHIPS)) {
+    if (ctx?.isCompleted(WriterContext.DataType.RELATIONSHIPS)) {
       return "Relationships was already migrated";
     }
 
@@ -102,7 +102,7 @@ public class sm extends org.crsh.jcr.command.JCRCommand
     return runCmd(
         {
           m, r, w ->
-          m.runRelationships(r, w, migrationContext)
+          m.runRelationships(r, w, ctx)
         }
     );
 
@@ -113,7 +113,7 @@ public class sm extends org.crsh.jcr.command.JCRCommand
   public Object runactivities() throws ScriptException {
 
     //
-    if (migrationContext?.isCompleted(WriterContext.DataType.ACTIVITIES)) {
+    if (ctx?.isCompleted(WriterContext.DataType.ACTIVITIES)) {
       return "Activities was already migrated";
     }
 
@@ -121,7 +121,7 @@ public class sm extends org.crsh.jcr.command.JCRCommand
     return runCmd(
         {
           m, r, w ->
-          m.runActivities(r, w, migrationContext)
+          m.runActivities(r, w, ctx)
         }
     );
   }
@@ -135,12 +135,12 @@ public class sm extends org.crsh.jcr.command.JCRCommand
     String done = runCmd(
         {
           m, r, w ->
-          m.rollback(r, w, migrationContext)
+          m.rollback(r, w, ctx)
         }
     );
 
     //
-    migrationContext = null;
+    ctx = null;
     return done;
 
   }
@@ -149,8 +149,8 @@ public class sm extends org.crsh.jcr.command.JCRCommand
 
     //
     long start = System.currentTimeMillis();
-    if (migrationContext == null) {
-      return "Context not initialized, please use 'sm init'.";
+    if (ctx == null) {
+      return "Context not initialized, please use 'sm init' or 'sm restore'.";
     }
 
     //
@@ -167,7 +167,7 @@ public class sm extends org.crsh.jcr.command.JCRCommand
 
   }
 
-  @Usage("Initialize")
+  @Usage("Initialize context")
   @Command
   public Object init(InvocationContext<Void, Void> context, @Option(names=["f","from"]) String from, @Option(names=["t","to"]) String to) {
 
@@ -192,10 +192,36 @@ public class sm extends org.crsh.jcr.command.JCRCommand
     }
 
     //
-    if (migrationContext == null) {
-      migrationContext = new WriterContext(from, to);
+    try {
+      ctx = new WriterContext(session, from, to);
     }
+    catch(MigrationException e) {
+      return e.getMessage();
+    }
+
     return "Context initialized."
+
+  }
+
+  @Usage("Restore context")
+  @Command
+  public Object restore() {
+
+    //
+    migrationTool = new MigrationTool();
+
+    //
+    try {
+      ctx = new WriterContext(session);
+      reader = migrationTool.createReader(ctx.getFrom(), ctx.getTo(), session);
+      writer = migrationTool.createWriter(ctx.getFrom(), ctx.getTo(), session);
+    }
+    catch(MigrationException e) {
+      return e.getMessage();
+    }
+
+    return "Context restored."
+
   }
 
   @Usage("Print context status")
@@ -203,19 +229,28 @@ public class sm extends org.crsh.jcr.command.JCRCommand
   public Object status() {
 
     //
-    if (migrationContext == null) {
+    if (ctx == null) {
       return "Context not initialized, please use 'sm init'.";
     }
 
     //
-    String status = "Migration status :\n";
-    status += " - From version            : " + migrationContext.getFrom() + "\n";
-    status += " - To version              : " + migrationContext.getTo() + "\n";
-    status += " - Identities completed    : " + migrationContext.isCompleted(WriterContext.DataType.IDENTITIES) + "\n";
-    status += " - Spaces completed        : " + migrationContext.isCompleted(WriterContext.DataType.SPACES) + "\n";
-    status += " - Profiles completed      : " + migrationContext.isCompleted(WriterContext.DataType.PROFILES) + "\n";
-    status += " - Relationships completed : " + migrationContext.isCompleted(WriterContext.DataType.RELATIONSHIPS) + "\n";
-    status += " - Activities completed    : " + migrationContext.isCompleted(WriterContext.DataType.ACTIVITIES) + "\n";
+    String
+    status  = "Migration status :\n";
+    status += "-[Versions]-----------------------\n";
+    status += " - From version            | " + ctx.getFrom() + "\n";
+    status += " - To version              | " + ctx.getTo() + "\n";
+    status += "-[Completion]---------------------\n";
+    status += " - Identities completed    | " + ctx.isCompleted(WriterContext.DataType.IDENTITIES) + "\n";
+    status += " - Spaces completed        | " + ctx.isCompleted(WriterContext.DataType.SPACES) + "\n";
+    status += " - Profiles completed      | " + ctx.isCompleted(WriterContext.DataType.PROFILES) + "\n";
+    status += " - Relationships completed | " + ctx.isCompleted(WriterContext.DataType.RELATIONSHIPS) + "\n";
+    status += " - Activities completed    | " + ctx.isCompleted(WriterContext.DataType.ACTIVITIES) + "\n";
+    status += "-[Migrated]-----------------------\n";
+    status += " - Identities migrated     | " + ctx.getDone(WriterContext.DataType.IDENTITIES) + "\n";
+    status += " - Spaces migrated         | " + ctx.getDone(WriterContext.DataType.SPACES) + "\n";
+    status += " - Profiles migrated       | " + ctx.getDone(WriterContext.DataType.PROFILES) + "\n";
+    status += " - Relationships migrated  | " + ctx.getDone(WriterContext.DataType.RELATIONSHIPS) + "\n";
+    status += " - Activities migrated     | " + ctx.getDone(WriterContext.DataType.ACTIVITIES) + "\n";
 
     //
     return status;

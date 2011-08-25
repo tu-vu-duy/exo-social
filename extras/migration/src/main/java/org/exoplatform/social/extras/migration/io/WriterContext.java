@@ -17,16 +17,18 @@
 
 package org.exoplatform.social.extras.migration.io;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
+import org.exoplatform.social.extras.migration.MigrationException;
+
+import javax.jcr.Node;
+import javax.jcr.NodeIterator;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
-public class WriterContext extends HashMap<String, String> {
+public class WriterContext {
 
   public enum DataType {
     IDENTITIES,
@@ -34,68 +36,235 @@ public class WriterContext extends HashMap<String, String> {
     PROFILES,
     RELATIONSHIPS,
     ACTIVITIES;
+
+    public String nodeName() {
+      return toString().toLowerCase();
+    }
   }
 
-  private final String from;
-  private final String to;
+  private final String CONTEXT_FROM_VERSION = "from";
+  private final String CONTEXT_TO_VERSION = "to";
+  private final String CONTEXT_NODE_NAME = "migration_context";
+  private final String CONTEXT_VALUE_NAME = "value";
+  private final String CONTEXT_COMPLETION_NAME = "completion";
+  private final String CONTEXT_DONE_NAME = "done";
 
-  private final Map<DataType, Boolean> completion;
-  private final Map<DataType, Long> done;
 
+  private final Session session;
 
-  public WriterContext(final int i, final float v, final String from, final String to) {
-    super(i, v);
-    this.from = from;
-    this.to = to;
-    this.completion = new HashMap<DataType, Boolean>();
-    this.done = new HashMap<DataType, Long>();
+  public WriterContext(final Session session, final String from, final String to) {
+
+    this.session = session;
+
+    if (exists()) {
+      throw new MigrationException("Unable to init context because it already exists. Please use rollback command.");
+    }
+
+    set(CONTEXT_FROM_VERSION, from);
+    set(CONTEXT_TO_VERSION, to);
+
   }
 
-  public WriterContext(final int i, final String from, final String to) {
-    super(i);
-    this.from = from;
-    this.to = to;
-    this.completion = new HashMap<DataType, Boolean>();
-    this.done = new HashMap<DataType, Long>();
+  public WriterContext(final Session session) {
+
+    this.session = session;
+
+    if (!exists()) {
+      throw new MigrationException("Unable to restore context because it doesn't exists.");
+    }
+
   }
 
-  public WriterContext(final String from, final String to) {
-    this.from = from;
-    this.to = to;
-    this.completion = new HashMap<DataType, Boolean>();
-    this.done = new HashMap<DataType, Long>();
+  public String get(String key) {
+
+    try {
+      return getContextNode().getNode(key).getProperty(CONTEXT_VALUE_NAME).getString();
+    }
+    catch (RepositoryException e) {
+      return null;
+    }
+
   }
 
-  public WriterContext(final Map<? extends String, ? extends String> map, final String from, final String to) {
-    super(map);
-    this.from = from;
-    this.to = to;
-    this.completion = new HashMap<DataType, Boolean>();
-    this.done = new HashMap<DataType, Long>();
-  }
+  public void put(String key, String value) {
 
-  public void load(InputStream is) {
-    throw new RuntimeException();
-  }
+    if (key == null) {
+      throw new NullPointerException();
+    }
 
-  public void write(OutputStream os) {
-    throw new RuntimeException();
+    Node keyNode;
+
+    try {
+      keyNode = getContextNode().getNode(key);
+    }
+    catch (RepositoryException e) {
+      try {
+        keyNode = getContextNode().addNode(key);
+      }
+      catch (RepositoryException e1) {
+        throw new RuntimeException(e1);
+      }
+    }
+
+    try {
+      keyNode.setProperty(CONTEXT_VALUE_NAME, value);
+    }
+    catch (RepositoryException e) {
+      throw new RuntimeException(e);
+    }
+
   }
 
   public String getFrom() {
-    return from;
+
+    return getString(CONTEXT_FROM_VERSION);
+
   }
 
   public String getTo() {
-    return to;
+
+    return getString(CONTEXT_TO_VERSION);
+
   }
 
   public boolean isCompleted(DataType type) {
-    return (completion.get(type) != null && completion.get(type));
+
+    return getBoolean(CONTEXT_COMPLETION_NAME + "_" + type.nodeName());
+
   }
 
   public void setCompleted(DataType type) {
-    completion.put(type, true);
+
+    set(CONTEXT_COMPLETION_NAME + "_" + type.nodeName(), true);
+
   }
+
+  public Long getDone(DataType type) {
+
+    return getLong(CONTEXT_DONE_NAME + "_" + type.nodeName());
+
+  }
+  
+  public void incDone(DataType type) {
+
+    Long current = getDone(type);
+    set(CONTEXT_DONE_NAME + "_" + type.nodeName(), ++current);
+
+  }
+
+  public void cleanup() {
+
+    try {
+      NodeIterator it = getContextNode().getNodes();
+      while (it.hasNext()) {
+        it.nextNode().remove();
+        session.save();
+      }
+      getContextNode().remove();
+      session.save();
+    }
+    catch (RepositoryException e) {
+      throw new RuntimeException(e);
+    }
+
+  }
+
+  private Node getContextNode() {
+
+    try {
+      return session.getRootNode().getNode(CONTEXT_NODE_NAME);
+    }
+    catch (RepositoryException e) {
+      try {
+        return session.getRootNode().addNode(CONTEXT_NODE_NAME);
+      }
+      catch (RepositoryException e1) {
+        throw new RuntimeException(e1);
+      }
+    }
+
+  }
+
+  private boolean exists() {
+
+    try {
+      session.getRootNode().getNode(CONTEXT_NODE_NAME);
+      return true;
+    }
+    catch (RepositoryException e) {
+      return false;
+    }
+
+  }
+
+  private void set(String key, String value) {
+
+    try {
+      getContextNode().setProperty(key, value);
+      session.save();
+    }
+    catch (RepositoryException e) {
+      throw new RuntimeException(e);
+    }
+
+  }
+
+  private void set(String key, boolean value) {
+
+    try {
+      getContextNode().setProperty(key, value);
+      session.save();
+    }
+    catch (RepositoryException e) {
+      throw new RuntimeException(e);
+    }
+
+  }
+
+  private void set(String key, Long value) {
+
+    try {
+      getContextNode().setProperty(key, value);
+      session.save();
+    }
+    catch (RepositoryException e) {
+      throw new RuntimeException(e);
+    }
+
+  }
+
+  private String getString(String key) {
+
+    try {
+      return getContextNode().getProperty(key).getString();
+    }
+    catch (RepositoryException e) {
+      return null;
+    }
+
+  }
+
+  private Boolean getBoolean(String key) {
+
+    try {
+      return getContextNode().getProperty(key).getBoolean();
+    }
+    catch (RepositoryException e) {
+      return false;
+    }
+
+  }
+
+  private Long getLong(String key) {
+
+    try {
+      return getContextNode().getProperty(key).getLong();
+    }
+    catch (RepositoryException e) {
+      return 0L;
+    }
+
+  }
+
   
 }

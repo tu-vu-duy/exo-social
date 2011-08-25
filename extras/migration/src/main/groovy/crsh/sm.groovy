@@ -140,6 +140,7 @@ public class sm extends org.crsh.jcr.command.JCRCommand
     );
 
     //
+    ctx?.cleanup();
     ctx = null;
     return done;
 

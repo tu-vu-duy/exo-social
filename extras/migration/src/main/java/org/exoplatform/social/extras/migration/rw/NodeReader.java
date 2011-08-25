@@ -18,6 +18,7 @@
 package org.exoplatform.social.extras.migration.rw;
 
 import org.exoplatform.social.extras.migration.MigrationException;
+import org.exoplatform.social.extras.migration.io.WriterContext;
 
 import javax.jcr.RepositoryException;
 import java.io.IOException;
@@ -29,15 +30,15 @@ import java.io.OutputStream;
  */
 public interface NodeReader {
 
-  void readIdentities(OutputStream os) throws RepositoryException, IOException;
+  void readIdentities(OutputStream os, WriterContext ctx) throws RepositoryException, IOException;
 
-  void readSpaces(OutputStream os) throws RepositoryException, IOException;
+  void readSpaces(OutputStream os, WriterContext ctx) throws RepositoryException, IOException;
 
-  void readProfiles(OutputStream os) throws RepositoryException, IOException;
+  void readProfiles(OutputStream os, WriterContext ctx) throws RepositoryException, IOException;
 
-  void readActivities(OutputStream os) throws RepositoryException, IOException;
+  void readActivities(OutputStream os, WriterContext ctx) throws RepositoryException, IOException;
 
-  void readRelationships(OutputStream os) throws RepositoryException, IOException;
+  void readRelationships(OutputStream os, WriterContext ctx) throws RepositoryException, IOException;
 
   void checkData() throws MigrationException;
 

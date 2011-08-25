@@ -19,6 +19,7 @@ package org.exoplatform.social.extras.migration.rw;
 
 import org.exoplatform.social.extras.migration.MigrationException;
 import org.exoplatform.social.extras.migration.io.NodeStreamHandler;
+import org.exoplatform.social.extras.migration.io.WriterContext;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
@@ -43,31 +44,30 @@ public class NodeReader_11x_12x implements NodeReader {
     this.writer = new NodeStreamHandler();
   }
 
-  public void readIdentities(OutputStream os) throws RepositoryException, IOException {
-    run(new IdentityRunnable(os));
+  public void readIdentities(OutputStream os, WriterContext ctx) throws RepositoryException, IOException {
+    run(new IdentityRunnable(os, ctx));
   }
 
-  public void readSpaces(OutputStream os) throws RepositoryException, IOException {
-    run(new SpaceRunnable(os));
+  public void readSpaces(OutputStream os, WriterContext ctx) throws RepositoryException, IOException {
+    run(new SpaceRunnable(os, ctx));
   }
 
-  public void readProfiles(OutputStream os) throws RepositoryException, IOException {
-    run(new ProfileRunnable(os));
+  public void readProfiles(OutputStream os, WriterContext ctx) throws RepositoryException, IOException {
+    run(new ProfileRunnable(os, ctx));
   }
 
-  public void readActivities(OutputStream os) throws RepositoryException, IOException {
-    run(new ActivityRunnable(os));
+  public void readActivities(OutputStream os, WriterContext ctx) throws RepositoryException, IOException {
+    run(new ActivityRunnable(os, ctx));
   }
 
-  public void readRelationships(OutputStream os) throws RepositoryException, IOException {
-    run(new RelationshipRunnable(os));
+  public void readRelationships(OutputStream os, WriterContext ctx) throws RepositoryException, IOException {
+    run(new RelationshipRunnable(os, ctx));
   }
 
-  private void readFrom(Node node, OutputStream os) throws RepositoryException, IOException {
+  private void readFrom(NodeIterator nodes, OutputStream os) throws RepositoryException, IOException {
 
-    NodeIterator it = node.getNodes();
-    while(it.hasNext()) {
-      writer.writeNode((Node) it.next(), os);
+    while(nodes.hasNext()) {
+      writer.writeNode((Node) nodes.next(), os);
     }
 
   }
@@ -90,15 +90,19 @@ public class NodeReader_11x_12x implements NodeReader {
   class IdentityRunnable implements Runnable {
     
     private OutputStream os;
+    private WriterContext ctx;
 
-    IdentityRunnable(final OutputStream os) {
+    IdentityRunnable(final OutputStream os, final WriterContext ctx) {
       this.os = os;
+      this.ctx = ctx;
     }
 
     public void run() {
       try {
         Node rootIdentity = rootNode.getNode("exo:applications/Social_Identity");
-        readFrom(rootIdentity, os);
+        NodeIterator it = rootIdentity.getNodes();
+        it.skip(ctx.getDone(WriterContext.DataType.IDENTITIES));
+        readFrom(it, os);
         os.close();
       }
       catch (Exception e) {
@@ -111,15 +115,19 @@ public class NodeReader_11x_12x implements NodeReader {
   class RelationshipRunnable implements Runnable {
 
     private OutputStream os;
+    private WriterContext ctx;
 
-    RelationshipRunnable(final OutputStream os) {
+    RelationshipRunnable(final OutputStream os, final WriterContext ctx) {
       this.os = os;
+      this.ctx = ctx;
     }
 
     public void run() {
       try {
         Node rootRelationship = rootNode.getNode("exo:applications/Social_Relationship");
-        readFrom(rootRelationship, os);
+        NodeIterator it = rootRelationship.getNodes();
+        it.skip(ctx.getDone(WriterContext.DataType.RELATIONSHIPS));
+        readFrom(it, os);
         os.close();
       }
       catch (Exception e) {
@@ -132,15 +140,19 @@ public class NodeReader_11x_12x implements NodeReader {
   class SpaceRunnable implements Runnable {
 
     private OutputStream os;
+    private WriterContext ctx;
 
-    SpaceRunnable(final OutputStream os) {
+    SpaceRunnable(final OutputStream os, final WriterContext ctx) {
       this.os = os;
+      this.ctx = ctx;
     }
 
     public void run() {
       try {
         Node rootSpace = rootNode.getNode("exo:applications/Social_Space/Space");
-        readFrom(rootSpace, os);
+        NodeIterator it = rootSpace.getNodes();
+        it.skip(ctx.getDone(WriterContext.DataType.SPACES));
+        readFrom(it, os);
         os.close();
       }
       catch (Exception e) {
@@ -152,19 +164,31 @@ public class NodeReader_11x_12x implements NodeReader {
   class ActivityRunnable implements Runnable {
 
     private OutputStream os;
+    private WriterContext ctx;
 
-    ActivityRunnable(final OutputStream os) {
+    ActivityRunnable(final OutputStream os, final WriterContext ctx) {
       this.os = os;
+      this.ctx = ctx;
     }
 
     public void run() {
+
+      long remaining = ctx.getDone(WriterContext.DataType.ACTIVITIES);
+
       try {
         Node rootOrganizationActivity = rootNode.getNode("exo:applications/Social_Activity/organization");
         NodeIterator userItOrganization = rootOrganizationActivity.getNodes();
         while (userItOrganization.hasNext()) {
+
           Node currentUser = userItOrganization.nextNode();
           Node publishedNode = currentUser.getNode("published");
-          readFrom(publishedNode, os);
+          NodeIterator it = publishedNode.getNodes();
+
+          long itSize = it.getSize();
+          it.skip(remaining);
+          remaining -= itSize;
+          readFrom(it, os);
+
         }
 
         Node rootSpaceActivity = rootNode.getNode("exo:applications/Social_Activity/space");
@@ -172,7 +196,13 @@ public class NodeReader_11x_12x implements NodeReader {
         while(userItSpace.hasNext()) {
           Node currentUser = userItSpace.nextNode();
           Node publishedNode = currentUser.getNode("published");
-          readFrom(publishedNode, os);
+          NodeIterator it = publishedNode.getNodes();
+
+          if (remaining > 0) {
+            it.skip(remaining);
+          }
+          readFrom(it, os);
+
         }
         os.close();
       }
@@ -186,15 +216,19 @@ public class NodeReader_11x_12x implements NodeReader {
   class ProfileRunnable implements Runnable {
 
     private OutputStream os;
+    private WriterContext ctx;
 
-    ProfileRunnable(final OutputStream os) {
+    ProfileRunnable(final OutputStream os, final WriterContext ctx) {
       this.os = os;
+      this.ctx = ctx;
     }
 
     public void run() {
       try {
-        Node rootSpace = rootNode.getNode("exo:applications/Social_Profile");
-        readFrom(rootSpace, os);
+        Node rootProfile = rootNode.getNode("exo:applications/Social_Profile");
+        NodeIterator it = rootProfile.getNodes();
+        it.skip(ctx.getDone(WriterContext.DataType.PROFILES));
+        readFrom(it, os);
         os.close();
       }
       catch (Exception e) {

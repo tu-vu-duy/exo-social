@@ -224,16 +224,36 @@ public class NodeReader_11x_12x implements NodeReader {
     }
 
     public void run() {
+
       try {
+
+        //
         Node rootProfile = rootNode.getNode("exo:applications/Social_Profile");
         NodeIterator it = rootProfile.getNodes();
         it.skip(ctx.getDone(WriterContext.DataType.PROFILES));
-        readFrom(it, os);
+
+        while(it.hasNext()) {
+
+          //
+          Node currentProfile = it.nextNode();
+          writer.writeNode(currentProfile, os);
+
+          //
+          NodeIterator profileDetail = currentProfile.getNodes();
+          while (profileDetail.hasNext()) {
+            writer.writeNode(profileDetail.nextNode(), os);
+          }
+
+        }
+
+        //
         os.close();
+
       }
       catch (Exception e) {
         throw new MigrationException(e);
       }
+
     }
 
   }

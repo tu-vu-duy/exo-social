@@ -54,38 +54,136 @@ import java.util.Map;
  */
 public class NodeWriter_11x_12x implements NodeWriter {
 
+  //
   private final IdentityStorage identityStorage;
   private final RelationshipStorage relationshipStorage;
   private final SpaceStorage spaceStorage;
   private final ActivityStorage activityStorage;
   private final OrganizationService organizationService;
 
+  //
   private final Session session;
+
+  //
+  private final String NT_PROFILE = "exo:profile";
+  private final String NT_PROFILE_DETAIL = "exo:profileKeyValue";
+  private final String NT_PROFILE_XP = "exo:profileExperience";
+
+  // Identity
+  private final String PROP_PROVIDER_ID = "exo:providerId";
+  private final String PROP_REMOTE_ID = "exo:remoteId";
+  private final String PROP_NAME = "exo:name";
+  private final String PROP_DESC = "exo:description";
+  private final String PROP_GROUP_ID = "exo:groupId";
+  private final String PROP_PRIORITY = "exo:priority";
+  private final String PROP_REGISTRATION = "exo:registration";
+  private final String PROP_TYPE = "exo:type";
+  private final String PROP_EURL = "exo:url";
+  private final String PROP_VISIBILITY = "exo:visibility";
+  private final String PROP_USER_PENDING = "exo:pendingUsers";
+  private final String PROP_USER_INVITED = "exo:invitedUsers";
+  private final String PROP_IDENTITY_REF = "exo:identity";
+
+  // Relationship
+  private final String PROP_IDENTITY1_REF = "exo:identity1Id";
+  private final String PROP_IDENTITY2_REF = "exo:identity2Id";
+  private final String PROP_RECIPROCAL_REF = "soc:reciprocal";
+  private final String PROP_STATUS = "exo:status";
+  private final String REL_STATUS_CONFIRMED = "CONFIRM";
+  private final String REL_STATUS_PENDING = "PENDING";
+
+  // Profile
+  private final String PROP_KEY = "key";
+  private final String PROP_VALUE = "value";
+  private final String PROP_IMS = "ims";
+  private final String PROP_PHONES = "phones";
+  private final String PROP_URLS = "urls";
+  private final String PROP_EMAILS = "emails";
+  private final String PROP_POSITION = "position";
+  private final String PROP_DEPARTMENT = "department";
+  private final String PROP_COMPANY = "company";
+  private final String PROP_START_DATE = "startDate";
+  private final String PROP_END_DATE = "endDate";
+  private final String PROP_IS_CURRENT = "isCurrent";
+  private final String PROP_FIRST_NAME = "firstName";
+  private final String PROP_LAST_NAME = "lastName";
+  private final String PROP_USERNAME = "username";
+  private final String PROP_GENDER = "gender";
+  private final String PROP_URL = "Url";
+
+  // Activity
+  private final String PROP_TITLE = "exo:title";
+  private final String PROP_TITLE_TEMPLATE = "exo:titleTemplate";
+  private final String PROP_BODY = "exo:body";
+  private final String PROP_BODY_TEMPLATE = "exo:bodyTemplate";
+  private final String PROP_USER_ID = "exo:userId";
+  private final String PROP_POSTED_TIME = "exo:postedTime";
+  private final String PROP_UPDATED_TIME = "exo:updatedTimestamp";
+  private final String PROP_REPLY = "exo:replyToId";
+  private final String PROP_EXTERNAL_ID = "exo:externalId";
+  private final String PROP_PARAMS = "exo:params";
+  private final String PROP_LIKE = "exo:like";
+
+  //
+  private final String PATH_ACTIVITIES = "/exo:applications/Social_Activity";
+
+  // Organization membership
+  private final String ORGA_MEMBER = "member";
+  private final String ORGA_MANAGER = "manager";
+
+  //
+  private final String PROVIDER_SPACE = "space";
+  private final String PROVIDER_ORGANIZATION = "organization";
+
+  //
+  private final String JCR_PRIMARYTYPE = "jcr:primaryType";
+  private final String JCR_UUID = "jcr:uuid";
+
+  //
+  private final String CTX_UUID = "id";
+  private final String CTX_REMOTE_ID = "remoteId";
 
   private static final Log LOG = ExoLogger.getLogger(NodeWriter_11x_12x.class);
 
-  public NodeWriter_11x_12x(final IdentityStorage identityStorage, final RelationshipStorage relationshipStorage, final SpaceStorage spaceStorage, final ActivityStorage activityStorage, final OrganizationService organizationService, final Session session) {
+  public NodeWriter_11x_12x(
+      final IdentityStorage identityStorage,
+      final RelationshipStorage relationshipStorage,
+      final SpaceStorage spaceStorage,
+      final ActivityStorage activityStorage,
+      final OrganizationService organizationService,
+      final Session session) {
+
     this.identityStorage = identityStorage;
     this.relationshipStorage = relationshipStorage;
     this.spaceStorage = spaceStorage;
     this.activityStorage = activityStorage;
     this.organizationService = organizationService;
     this.session = session;
+
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public void writeIdentities(final InputStream is, final WriterContext ctx) {
 
+    //
     NodeStreamHandler handler = new NodeStreamHandler();
     NodeData currentData;
     while ((currentData = handler.readNode(is)) != null) {
-      String provider = (String) currentData.getProperties().get("exo:providerId");
 
-      if ("space".equals(provider)) {
-        ctx.put((String) currentData.getProperties().get("jcr:uuid"), (String) currentData.getProperties().get("exo:remoteId"));
+      //
+      String provider = (String) currentData.get(PROP_PROVIDER_ID);
+      String uuid = (String) currentData.get(JCR_UUID);
+      String remote = (String) currentData.get(PROP_REMOTE_ID);
+
+      // Add space to context
+      if (PROVIDER_SPACE.equals(provider)) {
+        ctx.put(uuid + "-" + CTX_REMOTE_ID, remote);
         continue;
       }
 
-      String remote = (String) currentData.getProperties().get("exo:remoteId");
+      // Handle identities
       Identity identity = new Identity(provider, remote);
       try {
         identityStorage.saveIdentity(identity);
@@ -96,10 +194,9 @@ public class NodeWriter_11x_12x implements NodeWriter {
         LOG.error(e.getMessage());
       }
 
-      String uuid = (String) currentData.getProperties().get("jcr:uuid");
       if (uuid != null) {
-        ctx.put(uuid, (String) currentData.getProperties().get("exo:remoteId"));
-        ctx.put(uuid + "-newId", identity.getId());
+        ctx.put(uuid + "-" + CTX_REMOTE_ID, (String) currentData.get(PROP_REMOTE_ID));
+        ctx.put(uuid + "-" + CTX_UUID, identity.getId());
       }
 
     }
@@ -108,50 +205,68 @@ public class NodeWriter_11x_12x implements NodeWriter {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public void writeSpaces(final InputStream is, final WriterContext ctx) {
 
+    //
     NodeStreamHandler handler = new NodeStreamHandler();
     NodeData currentData;
     while ((currentData = handler.readNode(is)) != null) {
 
-      String name = (String) currentData.getProperties().get("exo:name");
-      String description = (String) currentData.getProperties().get("exo:description");
-      String groupId = (String) currentData.getProperties().get("exo:groupId");
-      String priority = (String) currentData.getProperties().get("exo:priority");
-      String registration = (String) currentData.getProperties().get("exo:registration");
-      String type = (String) currentData.getProperties().get("exo:type");
-      String url = (String) currentData.getProperties().get("exo:url");
-      String visibility = (String) currentData.getProperties().get("exo:visibility");
+      //
+      String name = (String) currentData.get(PROP_NAME);
+      String description = (String) currentData.get(PROP_DESC);
+      String groupId = (String) currentData.get(PROP_GROUP_ID);
+      String priority = (String) currentData.get(PROP_PRIORITY);
+      String registration = (String) currentData.get(PROP_REGISTRATION);
+      String type = (String) currentData.get(PROP_TYPE);
+      String url = (String) currentData.get(PROP_EURL);
+      String visibility = (String) currentData.get(PROP_VISIBILITY);
 
-      String[] pendingUsers = (String[]) currentData.getProperties().get("exo:pendingUsers");
-      String[] invitedUsers = (String[]) currentData.getProperties().get("exo:invitedUsers");
+      //
+      String[] pendingUsers = (String[]) currentData.get(PROP_USER_PENDING);
+      String[] invitedUsers = (String[]) currentData.get(PROP_USER_INVITED);
       String[] members = null;
       String[] managers = null;
 
       try {
+
+        //
         Group group = organizationService.getGroupHandler().findGroupById(groupId);
         Collection<Membership> memberships = organizationService.getMembershipHandler().findMembershipsByGroup(group);
+
+        //
         List<String> membersList = new ArrayList<String>();
         List<String> managersList = new ArrayList<String>();
         for (Membership membership : memberships) {
-          if ("member".equals(membership.getMembershipType())) {
+
+          if (ORGA_MEMBER.equals(membership.getMembershipType())) {
             membersList.add(membership.getUserName());
           }
-          else if ("manager".equals(membership.getMembershipType())) {
+          else if (ORGA_MANAGER.equals(membership.getMembershipType())) {
             managersList.add(membership.getUserName());
           }
+
         }
+
+        //
         if (membersList.size() > 0) {
           members = membersList.toArray(new String[]{});
         }
+
+        //
         if (managersList.size() > 0) {
           managers = managersList.toArray(new String[]{});
         }
+
       }
       catch (Exception e) {
-        e.printStackTrace(); // TODO : manage
+        LOG.error(e.getMessage());
       }
 
+      //
       Space space = new Space();
       space.setDisplayName(name);
       space.setDescription(description);
@@ -162,26 +277,32 @@ public class NodeWriter_11x_12x implements NodeWriter {
       space.setUrl(url);
       space.setVisibility(visibility);
 
+      //
       space.setPendingUsers(checkUser(pendingUsers));
       space.setInvitedUsers(checkUser(invitedUsers));
       space.setMembers(members);
       space.setManagers(managers);
 
-      Identity identity = new Identity("space", space.getPrettyName());
+      Identity identity = new Identity(PROVIDER_SPACE, space.getPrettyName());
 
       try {
+
         identityStorage.saveIdentity(identity);
         LOG.info("Write space identity " + identity.getProviderId() + "/" + identity.getRemoteId());
+
         spaceStorage.saveSpace(space, true);
         LOG.info("Write space " + space.getGroupId());
+
         ctx.incDone(WriterContext.DataType.SPACES);
+
       }
       catch (Exception e) {
         LOG.error(e.getMessage());
       }
 
-      ctx.put((String) currentData.getProperties().get("jcr:uuid"), space.getPrettyName());
-      ctx.put(currentData.getProperties().get("jcr:uuid") + "-newId", identity.getId());
+      //
+      ctx.put(currentData.get(JCR_UUID) + "-" + CTX_REMOTE_ID, space.getPrettyName());
+      ctx.put(currentData.get(JCR_UUID) + "-" + CTX_UUID, identity.getId());
       
     }
 
@@ -189,39 +310,27 @@ public class NodeWriter_11x_12x implements NodeWriter {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public void writeProfiles(final InputStream is, final WriterContext ctx) {
+
+    Identity currentIdentity = null;
 
     NodeStreamHandler handler = new NodeStreamHandler();
     NodeData currentData;
     while ((currentData = handler.readNode(is)) != null) {
 
-      String url = (String) currentData.getProperties().get("Url");
-      String firstName = (String) currentData.getProperties().get("firstName");
-      String lastName = (String) currentData.getProperties().get("lastName");
-      String position = (String) currentData.getProperties().get("position");
-      String username = (String) currentData.getProperties().get("username");
-      String identityOld = (String) currentData.getProperties().get("exo:identity");
+      if (NT_PROFILE.equals(currentData.get(JCR_PRIMARYTYPE))) {
+        currentIdentity = handleProfileBasic(currentData, ctx);
+      }
 
-      String identityId = ctx.get(identityOld + "-newId");
-      if (identityId != null) {
-        Identity i = identityStorage.findIdentityById(identityId);
+      else if (NT_PROFILE_DETAIL.equals(currentData.get(JCR_PRIMARYTYPE))) {
+        handleProfileContact(currentData, currentIdentity);
+      }
 
-        Profile profile = new Profile(i);
-        profile.setProperty(Profile.URL, url);
-        profile.setProperty(Profile.FIRST_NAME, firstName);
-        profile.setProperty(Profile.LAST_NAME, lastName);
-        profile.setProperty(Profile.POSITION, position);
-        profile.setProperty(Profile.USERNAME, username);
-        i.setProfile(profile);
-
-        try {
-          identityStorage.saveProfile(profile);
-          LOG.info("Write profile " + i.getProviderId() + "/" + i.getRemoteId());
-          ctx.incDone(WriterContext.DataType.PROFILES);
-        }
-        catch (Exception e) {
-          LOG.error(e.getMessage());
-        }
+      else if (NT_PROFILE_XP.equals(currentData.get(JCR_PRIMARYTYPE))) {
+        handleProfileXp(currentData, currentIdentity);
       }
 
     }
@@ -230,14 +339,19 @@ public class NodeWriter_11x_12x implements NodeWriter {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public void writeActivities(final InputStream is, final WriterContext ctx) {
 
+    //
     NodeStreamHandler handler = new NodeStreamHandler();
     NodeData currentData;
     while ((currentData = handler.readNode(is)) != null) {
+      
+      String replyToId = (String) currentData.get(PROP_REPLY);
 
-      String replyToId = (String) currentData.getProperties().get("exo:replyToId");
-
+      // Don't handle directly comments.
       if ("IS_COMMENT".equals(replyToId)) {
         continue;
       }
@@ -245,38 +359,43 @@ public class NodeWriter_11x_12x implements NodeWriter {
       String ownerId = extractOwner(currentData);
       Identity owner;
 
+      // Resolve owner
       if (isOrganizationActivity(currentData)) {
-        owner = identityStorage.findIdentity("organization", ownerId);
+        owner = identityStorage.findIdentity(PROVIDER_ORGANIZATION, ownerId);
       }
       else if (isSpaceActivity(currentData)) {
-        String spaceName = ctx.get(ownerId);
-        owner = identityStorage.findIdentity("space", spaceName);
+        String spaceName = ctx.get(ownerId + "-" + CTX_REMOTE_ID);
+        owner = identityStorage.findIdentity(PROVIDER_SPACE, spaceName);
       }
       else {
         continue;
       }
 
+      //
       ExoSocialActivity activity = new ExoSocialActivityImpl();
 
-      String title = (String) currentData.getProperties().get("exo:title");
-      String titleTemplate = (String) currentData.getProperties().get("exo:titleTemplate");
-      String type = (String) currentData.getProperties().get("exo:type");
-      String userId = (String) currentData.getProperties().get("exo:userId");
-      String postedTime = (String) currentData.getProperties().get("exo:postedTime");
-      String updatedTimestamp = (String) currentData.getProperties().get("exo:updatedTimestamp");
-      String body = (String) currentData.getProperties().get("exo:body");
-      String bodyTemplate = (String) currentData.getProperties().get("exo:bodyTemplate");
-      String url = (String) currentData.getProperties().get("exo:url");
-      String priority = (String) currentData.getProperties().get("exo:priority");
-      String externalId = (String) currentData.getProperties().get("exo:externalId");
+      //
+      String title = (String) currentData.get(PROP_TITLE);
+      String titleTemplate = (String) currentData.get(PROP_TITLE_TEMPLATE);
+      String type = (String) currentData.get(PROP_TYPE);
+      String userId = (String) currentData.get(PROP_USER_ID);
+      String postedTime = (String) currentData.get(PROP_POSTED_TIME);
+      String updatedTimestamp = (String) currentData.get(PROP_UPDATED_TIME);
+      String body = (String) currentData.get(PROP_BODY);
+      String bodyTemplate = (String) currentData.get(PROP_BODY_TEMPLATE);
+      String url = (String) currentData.get(PROP_EURL);
+      String priority = (String) currentData.get(PROP_PRIORITY);
+      String externalId = (String) currentData.get(PROP_EXTERNAL_ID);
+      String[] params = (String[]) currentData.get(PROP_PARAMS);
+      String[] likes = (String[]) currentData.get(PROP_LIKE);
 
-      String[] params = (String[]) currentData.getProperties().get("exo:params");
-      String[] likes = (String[]) currentData.getProperties().get("exo:like");
-
+      //
       Map<String, String> paramMap = readParams(params);
       if (paramMap != null) {
         activity.setTemplateParams(paramMap);
       }
+
+      //
       activity.setTitle(title);
       activity.setTitleId(titleTemplate);
       activity.setBody(body);
@@ -287,39 +406,46 @@ public class NodeWriter_11x_12x implements NodeWriter {
       activity.setPostedTime(Long.parseLong(postedTime));
       activity.setUpdated(new Date(Long.parseLong(updatedTimestamp)));
 
+      // Get likes
       if (likes != null) {
         String[] newLikes = new String[likes.length];
         for (int i = 0; i < likes.length; ++i) {
-          newLikes[i] = ctx.get(likes[i] + "-newId");
+          newLikes[i] = ctx.get(likes[i] + "-" + CTX_UUID);
         }
         activity.setLikeIdentityIds(newLikes);
       }
-      
+
+      //
       if (priority != null) {
         activity.setPriority(Float.parseFloat(priority));
       }
 
+      //
       if (userId == null) {
         activity.setUserId(owner.getId());
       }
-      else {
+      else { // Find poster
 
-        String userName = ctx.get(userId);
-        Identity i = identityStorage.findIdentity("organization", userName);
+        //
+        String userName = ctx.get(userId + "-" + CTX_REMOTE_ID);
+        Identity i = identityStorage.findIdentity(PROVIDER_ORGANIZATION, userName);
+
         if (i != null) {
           activity.setUserId(i.getId());
         }
         else {
+          // Find space poster
           try {
             Node oldSpaceIdentity = session.getNodeByUUID(userId);
-            String oldSpaceId = oldSpaceIdentity.getProperty("exo:remoteId").getString();
-            String spaceName = ctx.get(oldSpaceId);
-            Identity spaceIdentity = identityStorage.findIdentity("space", spaceName);
+            String oldSpaceId = oldSpaceIdentity.getProperty(PROP_REMOTE_ID).getString();
+            String spaceName = ctx.get(oldSpaceId + "-" + CTX_REMOTE_ID);
+            Identity spaceIdentity = identityStorage.findIdentity(PROVIDER_SPACE, spaceName);
             if (spaceIdentity != null) {
               activity.setUserId(spaceIdentity.getId());
             }
           }
           catch (RepositoryException e1) {
+            // No poster found, the poster must be removed.
             LOG.info("Ignore activity : " + activity.getPostedTime());
           }
         }
@@ -327,40 +453,54 @@ public class NodeWriter_11x_12x implements NodeWriter {
       }
 
       try {
+
         activityStorage.saveActivity(owner, activity);
         LOG.info("Write activity " + owner.getRemoteId() + " : " + activity.getPostedTime());
+
         ctx.incDone(WriterContext.DataType.ACTIVITIES);
+
       }
       catch (Exception e) {
         LOG.error(e.getMessage());
       }
-      
+
+
+      // Handle comment
       if (replyToId != null) {
+
+        //
         String[] ids = replyToId.split(",");
 
         for (String id : ids) {
-          
+
+          //
           if ("".equals(id)) {
             continue;
           }
 
           try {
+
+            //
             Node node = session.getNodeByUUID(id);
             ExoSocialActivity comment = buildActivityFromNode(node, ctx);
+
+            //
             if (comment.getUserId() == null) {
               comment.setUserId(activity.getUserId());
             }
 
             try {
+
               activityStorage.saveComment(activity, comment);
               LOG.info("Write comment " + owner.getRemoteId() + " : " + activity.getPostedTime() + "/" + comment.getPostedTime());
+
             }
             catch (Exception e) {
               LOG.error(e.getMessage());
             }
           }
           catch (RepositoryException e) {
-            e.printStackTrace();
+            LOG.error(e);
           }
         }
       }
@@ -371,32 +511,40 @@ public class NodeWriter_11x_12x implements NodeWriter {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public void writeRelationships(final InputStream is, final WriterContext ctx) {
 
+    //
     NodeStreamHandler handler = new NodeStreamHandler();
     NodeData currentData;
     while ((currentData = handler.readNode(is)) != null) {
 
-      String id1 = (String) currentData.getProperties().get("exo:identity1Id");
-      String id2 = (String) currentData.getProperties().get("exo:identity2Id");
-      String status = (String) currentData.getProperties().get("exo:status");
+      //
+      String id1 = (String) currentData.get(PROP_IDENTITY1_REF);
+      String id2 = (String) currentData.get(PROP_IDENTITY2_REF);
+      String status = (String) currentData.get(PROP_STATUS);
 
-      String remoteId1 = ctx.get(id1);
-      String remoteId2 = ctx.get(id2);
+      //
+      String remoteId1 = ctx.get(id1 + "-" + CTX_REMOTE_ID);
+      String remoteId2 = ctx.get(id2 + "-" + CTX_REMOTE_ID);
 
-      Identity i1 = identityStorage.findIdentity("organization", remoteId1);
-      Identity i2 = identityStorage.findIdentity("organization", remoteId2);
+      //
+      Identity i1 = identityStorage.findIdentity(PROVIDER_ORGANIZATION, remoteId1);
+      Identity i2 = identityStorage.findIdentity(PROVIDER_ORGANIZATION, remoteId2);
 
+      // Handle relationship type
       Relationship.Type type = null;
-      if ("CONFIRM".equals(status)) {
+      if (REL_STATUS_CONFIRMED.equals(status)) {
         type = Relationship.Type.CONFIRMED;
       }
-      else if ("PENDING".equals(status)) {
+      else if (REL_STATUS_PENDING.equals(status)) {
         type = Relationship.Type.PENDING;
       }
 
+      //
       Relationship relationship = new Relationship(i1, i2, type);
-
       
       try {
         relationshipStorage.saveRelationship(relationship);
@@ -477,6 +625,7 @@ public class NodeWriter_11x_12x implements NodeWriter {
       node.remove();
 
       session.save();
+
     }
 
   }
@@ -490,7 +639,7 @@ public class NodeWriter_11x_12x implements NodeWriter {
       }
     }
     catch (RepositoryException e) {
-      e.printStackTrace();
+      LOG.error(e);
     }
 
   }
@@ -498,21 +647,21 @@ public class NodeWriter_11x_12x implements NodeWriter {
   private void removeRelationship(Node relationship) {
 
     try {
-      relationship.getProperty("soc:reciprocal").getNode().remove();
+      relationship.getProperty(PROP_RECIPROCAL_REF).getNode().remove();
       relationship.remove();
     }
     catch (RepositoryException e) {
-      e.printStackTrace();
+      LOG.error(e);
     }
 
   }
 
   private boolean isOrganizationActivity(NodeData data) {
-    return data.getPath().startsWith("/exo:applications/Social_Activity/organization");
+    return data.getPath().startsWith(PATH_ACTIVITIES + "/" + PROVIDER_ORGANIZATION);
   }
 
   private boolean isSpaceActivity(NodeData data) {
-    return data.getPath().startsWith("/exo:applications/Social_Activity/space");
+    return data.getPath().startsWith(PATH_ACTIVITIES + "/" + PROVIDER_SPACE);
   }
 
   private String extractOwner(NodeData data) {
@@ -522,8 +671,11 @@ public class NodeWriter_11x_12x implements NodeWriter {
   private Map<String, String> readParams(String[] params) {
 
     if (params != null) {
+
+      //
       Map<String, String> paramMap = new HashMap<String, String>();
       for(String param : params) {
+
         String[] keyValue = param.split("=");
         if (keyValue.length < 2) {
           paramMap.put(keyValue[0], null);
@@ -531,34 +683,45 @@ public class NodeWriter_11x_12x implements NodeWriter {
         else {
           paramMap.put(keyValue[0], keyValue[1]);
         }
+
       }
+
+      //
       if (paramMap.size() > 0) {
         return paramMap;
       }
+
     }
+
+    //
     return null;
+
   }
 
   private ExoSocialActivity buildActivityFromNode(Node node, WriterContext ctx) {
 
+    //
     ExoSocialActivity comment = new ExoSocialActivityImpl();
 
-    String title = getPropertyValye(node, "exo:title");
-    String titleTemplate = getPropertyValye(node, "exo:titleTemplate");
-    String type = getPropertyValye(node, "exo:type");
-    String userId = getPropertyValye(node, "exo:userId");
-    String postedTime = getPropertyValye(node, "exo:postedTime");
-    String updatedTimestamp = getPropertyValye(node, "exo:updatedTimestamp");
+    //
+    String title = getPropertyValue(node, PROP_TITLE);
+    String titleTemplate = getPropertyValue(node, PROP_TITLE_TEMPLATE);
+    String type = getPropertyValue(node, PROP_TYPE);
+    String userId = getPropertyValue(node, PROP_USER_ID);
+    String postedTime = getPropertyValue(node, PROP_POSTED_TIME);
+    String updatedTimestamp = getPropertyValue(node, PROP_UPDATED_TIME);
 
+    //
     comment.setTitle(title);
     comment.setTitleId(titleTemplate);
     comment.setType(type);
     comment.setPostedTime(Long.parseLong(postedTime));
     comment.setUpdated(new Date(Long.parseLong(updatedTimestamp)));
 
+    //
+    String userName = ctx.get(userId + "-" + CTX_REMOTE_ID);
+    Identity newUser = identityStorage.findIdentity(PROVIDER_ORGANIZATION, userName);
 
-    String userName = ctx.get(userId);
-    Identity newUser = identityStorage.findIdentity("organization", userName);
     if (newUser != null) {
       comment.setUserId(newUser.getId());
     }
@@ -566,31 +729,186 @@ public class NodeWriter_11x_12x implements NodeWriter {
     return comment;
   }
 
-  private String getPropertyValye(Node node, String propertyName) {
+  private String getPropertyValue(Node node, String propertyName) {
+
     try {
       return node.getProperty(propertyName).getString();
     }
     catch (RepositoryException e) {
       return null;
     }
+
   }
 
   private String[] checkUser(String[] users) {
 
+    //
     if (users == null) {
       return null;
     }
 
     List<String> checked = new ArrayList<String>();
-
     for (String user : users) {
-        Identity i = identityStorage.findIdentity("organization", user);
+
+        Identity i = identityStorage.findIdentity(PROVIDER_ORGANIZATION, user);
         if (i != null) {
           checked.add(user);
         }
+
       }
 
+    //
     return checked.toArray(new String[]{});
+
+  }
+
+  private Identity handleProfileBasic(NodeData currentData, WriterContext ctx) {
+
+    //
+    Identity currentIdentity = null;
+
+    //
+    String url = (String) currentData.get(PROP_URL);
+    String firstName = (String) currentData.get(PROP_FIRST_NAME);
+    String lastName = (String) currentData.get(PROP_LAST_NAME);
+    String position = (String) currentData.get(PROP_POSITION);
+    String username = (String) currentData.get(PROP_USERNAME);
+    String gender = (String) currentData.get(PROP_GENDER);
+    String identityOld = (String) currentData.get(PROP_IDENTITY_REF);
+
+    String identityId = ctx.get(identityOld + "-" + CTX_UUID);
+    if (identityId != null) {
+
+      //
+      currentIdentity = identityStorage.findIdentityById(identityId);
+      Profile profile = new Profile(currentIdentity);
+
+      //
+      profile.setProperty(Profile.URL, url);
+      profile.setProperty(Profile.FIRST_NAME, firstName);
+      profile.setProperty(Profile.LAST_NAME, lastName);
+      profile.setProperty(Profile.FULL_NAME, firstName + " " + lastName);
+      profile.setProperty(Profile.POSITION, position);
+      profile.setProperty(Profile.USERNAME, username);
+      profile.setProperty(Profile.GENDER, gender);
+      profile.setProperty(Profile.CONTACT_IMS, new ArrayList<Map<String, String>>());
+      profile.setProperty(Profile.CONTACT_PHONES, new ArrayList<Map<String, String>>());
+      profile.setProperty(Profile.CONTACT_URLS, new ArrayList<Map<String, String>>());
+      currentIdentity.setProfile(profile);
+
+      try {
+
+        identityStorage.saveProfile(profile);
+        LOG.info("Write profile " + currentIdentity.getProviderId() + "/" + currentIdentity.getRemoteId());
+
+        ctx.incDone(WriterContext.DataType.PROFILES);
+
+      }
+      catch (Exception e) {
+        LOG.error(e.getMessage());
+      }
+    }
+
+    return currentIdentity;
+  }
+
+  private void handleProfileContact(NodeData currentData, Identity identity) {
+
+    //
+    if (identity == null) {
+      return;
+    }
+
+    //
+    Profile profile = identity.getProfile();
+    profile = identityStorage.loadProfile(profile);
+
+    //
+    String path = currentData.getPath();
+    String key = (String) currentData.get(PROP_KEY);
+    String value = (String) currentData.get(PROP_VALUE);
+
+    //
+    String contactType = null;
+    if (path.endsWith(PROP_IMS)) {
+      contactType = Profile.CONTACT_IMS;
+    }
+    else if (path.endsWith(PROP_PHONES)) {
+      contactType = Profile.CONTACT_PHONES;
+    }
+    else if (path.endsWith(PROP_URLS)) {
+      contactType = Profile.CONTACT_URLS;
+    }
+    else if (path.endsWith(PROP_EMAILS)) {
+
+      profile.setProperty(Profile.EMAIL, value);
+      identityStorage.saveProfile(profile);
+      return;
+
+    }
+    if (contactType == null) {
+      return;
+    }
+
+    //
+    List<Map<String, String>> data = (List<Map<String, String>>) profile.getProperty(contactType);
+    if (data == null) {
+      data = new ArrayList<Map<String, String>>();
+    }
+
+    //
+    Map<String, String> info = new HashMap<String, String>();
+    info.put(PROP_KEY, key);
+    info.put(PROP_VALUE, value);
+    data.add(info);
+
+    //
+    profile.setProperty(contactType, data);
+    identityStorage.saveProfile(profile);
+
+  }
+
+  private void handleProfileXp(NodeData currentData, Identity identity) {
+
+    //
+    if (identity == null) {
+      return;
+    }
+
+    //
+    Profile profile = identity.getProfile();
+    profile = identityStorage.loadProfile(profile);
+
+    String position = (String) currentData.get(PROP_POSITION);
+    String department = (String) currentData.get(PROP_DEPARTMENT);
+    String company = (String) currentData.get(PROP_COMPANY);
+    String startDate = (String) currentData.get(PROP_START_DATE);
+    String endDate = (String) currentData.get(PROP_END_DATE);
+    String isCurrent = (String) currentData.get(PROP_IS_CURRENT);
+    String description = (String) currentData.get(PROP_DESC);
+
+    //
+    List<Map<String, Object>> xps = (List<Map<String, Object>>) profile.getProperty(Profile.EXPERIENCES);
+    if (xps == null) {
+      xps = new ArrayList<Map<String, Object>>();
+    }
+
+    //
+    Map<String, Object> xp = new HashMap<String, Object>();
+    xp.put(Profile.EXPERIENCES_SKILLS, department);
+    xp.put(Profile.EXPERIENCES_POSITION, position);
+    xp.put(Profile.EXPERIENCES_COMPANY, company);
+    xp.put(Profile.EXPERIENCES_DESCRIPTION, description);
+    xp.put(Profile.EXPERIENCES_START_DATE, startDate);
+    xp.put(Profile.EXPERIENCES_END_DATE, endDate);
+    xp.put(Profile.EXPERIENCES_IS_CURRENT, Boolean.valueOf(isCurrent));
+
+    //
+    xps.add(xp);
+
+    //
+    profile.setProperty(Profile.EXPERIENCES, xps);
+    identityStorage.saveProfile(profile);
 
   }
 

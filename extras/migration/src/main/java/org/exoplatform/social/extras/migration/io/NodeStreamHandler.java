@@ -98,7 +98,7 @@ public class NodeStreamHandler {
         break;
 
       case MigrationTool.PROPERTY_SINGLE :
-        data.getProperties().put(dis.readUTF(), dis.readUTF());
+        data.put(dis.readUTF(), dis.readUTF());
         break;
 
       case MigrationTool.PROPERTY_MULTI :
@@ -108,7 +108,7 @@ public class NodeStreamHandler {
         for (int i = 0; i < length; ++i) {
           values[i] = dis.readUTF();
         }
-        data.getProperties().put(propertyName, values);
+        data.put(propertyName, values);
         break;
 
       case MigrationTool.END_NODE :

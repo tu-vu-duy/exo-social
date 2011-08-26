@@ -49,8 +49,12 @@ public class NodeData {
     return childs;
   }
 
-  public Map<String, Object> getProperties() {
-    return properties;
+  public Object get(String key) {
+    return properties.get(key);
+  }
+
+  public void put(String key, Object value) {
+    properties.put(key, value);
   }
 
 }

@@ -27,17 +27,45 @@ import java.io.InputStream;
  * @version $Revision$
  */
 public interface NodeWriter {
-  
+
+  /**
+   *  Identities writing.
+   * @param is data stream
+   * @param ctx migration context
+   */
   void writeIdentities(InputStream is, WriterContext ctx);
 
+  /**
+   *  Spaces writing.
+   * @param is data stream
+   * @param ctx migration context
+   */
   void writeSpaces(InputStream is, WriterContext ctx);
 
+  /**
+   *  Profiles writing.
+   * @param is data stream
+   * @param ctx migration context
+   */
   void writeProfiles(InputStream is, WriterContext ctx);
 
+  /**
+   *  Activities writing.
+   * @param is data stream
+   * @param ctx migration context
+   */
   void writeActivities(InputStream is, WriterContext ctx);
-  
+
+  /**
+   *  Relationship writing.
+   * @param is data stream
+   * @param ctx migration context
+   */
   void writeRelationships(InputStream is, WriterContext ctx);
 
+  /**
+   *  Rollback changes.
+   */
   void rollback() throws RepositoryException;
 
 }

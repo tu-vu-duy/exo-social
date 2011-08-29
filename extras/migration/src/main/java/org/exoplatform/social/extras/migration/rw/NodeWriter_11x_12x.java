@@ -26,6 +26,7 @@ import org.exoplatform.social.core.activity.model.ExoSocialActivity;
 import org.exoplatform.social.core.activity.model.ExoSocialActivityImpl;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.model.Profile;
+import org.exoplatform.social.core.model.AvatarAttachment;
 import org.exoplatform.social.core.relationship.model.Relationship;
 import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.storage.api.ActivityStorage;
@@ -40,6 +41,7 @@ import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.jcr.Workspace;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -138,6 +140,8 @@ public class NodeWriter_11x_12x implements NodeWriter {
   //
   private final String JCR_PRIMARYTYPE = "jcr:primaryType";
   private final String JCR_UUID = "jcr:uuid";
+  private final String JCR_MIME_TYPE = "jcr:mimeType";
+  private final String JCR_DATA = "jcr:data";
 
   //
   private final String CTX_UUID = "id";
@@ -794,7 +798,28 @@ public class NodeWriter_11x_12x implements NodeWriter {
       profile.setProperty(Profile.CONTACT_IMS, new ArrayList<Map<String, String>>());
       profile.setProperty(Profile.CONTACT_PHONES, new ArrayList<Map<String, String>>());
       profile.setProperty(Profile.CONTACT_URLS, new ArrayList<Map<String, String>>());
-      currentIdentity.setProfile(profile);
+
+      //
+      try {
+
+        //
+        Node avatarContent = session.getRootNode().getNode(currentData.getPath().substring(1) + "/avatar/jcr:content");
+        String mime = avatarContent.getProperty(JCR_MIME_TYPE).getString();
+        InputStream contentStream = avatarContent.getProperty(JCR_DATA).getStream();
+
+        //
+        AvatarAttachment avatarAttachment = new AvatarAttachment();
+        avatarAttachment.setMimeType(mime);
+        avatarAttachment.setInputStream(contentStream);
+        profile.setProperty(Profile.AVATAR, avatarAttachment);
+
+        //
+        currentIdentity.setProfile(profile);
+
+      }
+      catch (Exception e) {
+        LOG.error(e.getMessage());
+      }
 
       try {
 
@@ -807,6 +832,7 @@ public class NodeWriter_11x_12x implements NodeWriter {
       catch (Exception e) {
         LOG.error(e.getMessage());
       }
+
     }
 
     return currentIdentity;

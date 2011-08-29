@@ -780,59 +780,77 @@ public class NodeWriter_11x_12x implements NodeWriter {
     String gender = (String) currentData.get(PROP_GENDER);
     String identityOld = (String) currentData.get(PROP_IDENTITY_REF);
 
+    // Is identity
     String identityId = ctx.get(identityOld + "-" + CTX_UUID);
     if (identityId != null) {
-
-      //
       currentIdentity = identityStorage.findIdentityById(identityId);
-      Profile profile = new Profile(currentIdentity);
+    }
+
+    // Is
+    else {
+      String spaceId = ctx.get(identityOld + "-" + CTX_REMOTE_ID);
+      if (spaceId != null) {
+        try {
+          Node node = session.getNodeByUUID(spaceId);
+          String groupId = node.getProperty(PROP_GROUP_ID).getString();
+          int lastSlash = groupId.lastIndexOf("/");
+          String groupName = groupId.substring(lastSlash + 1);
+          currentIdentity = identityStorage.findIdentity(PROVIDER_SPACE, groupName);
+        }
+        catch (RepositoryException e) {
+          LOG.error(e.getMessage());
+        }
+      }
+      else {
+        return null;
+      }
+    }
+
+    //
+    Profile profile = new Profile(currentIdentity);
+    profile.setProperty(Profile.URL, url);
+    profile.setProperty(Profile.FIRST_NAME, firstName);
+    profile.setProperty(Profile.LAST_NAME, lastName);
+    profile.setProperty(Profile.FULL_NAME, firstName + " " + lastName);
+    profile.setProperty(Profile.POSITION, position);
+    profile.setProperty(Profile.USERNAME, username);
+    profile.setProperty(Profile.GENDER, gender);
+    profile.setProperty(Profile.CONTACT_IMS, new ArrayList<Map<String, String>>());
+    profile.setProperty(Profile.CONTACT_PHONES, new ArrayList<Map<String, String>>());
+    profile.setProperty(Profile.CONTACT_URLS, new ArrayList<Map<String, String>>());
+
+    //
+    try {
 
       //
-      profile.setProperty(Profile.URL, url);
-      profile.setProperty(Profile.FIRST_NAME, firstName);
-      profile.setProperty(Profile.LAST_NAME, lastName);
-      profile.setProperty(Profile.FULL_NAME, firstName + " " + lastName);
-      profile.setProperty(Profile.POSITION, position);
-      profile.setProperty(Profile.USERNAME, username);
-      profile.setProperty(Profile.GENDER, gender);
-      profile.setProperty(Profile.CONTACT_IMS, new ArrayList<Map<String, String>>());
-      profile.setProperty(Profile.CONTACT_PHONES, new ArrayList<Map<String, String>>());
-      profile.setProperty(Profile.CONTACT_URLS, new ArrayList<Map<String, String>>());
+      Node avatarContent = session.getRootNode().getNode(currentData.getPath().substring(1) + "/avatar/jcr:content");
+      String mime = avatarContent.getProperty(JCR_MIME_TYPE).getString();
+      InputStream contentStream = avatarContent.getProperty(JCR_DATA).getStream();
 
       //
-      try {
+      AvatarAttachment avatarAttachment = new AvatarAttachment();
+      avatarAttachment.setMimeType(mime);
+      avatarAttachment.setInputStream(contentStream);
+      profile.setProperty(Profile.AVATAR, avatarAttachment);
 
-        //
-        Node avatarContent = session.getRootNode().getNode(currentData.getPath().substring(1) + "/avatar/jcr:content");
-        String mime = avatarContent.getProperty(JCR_MIME_TYPE).getString();
-        InputStream contentStream = avatarContent.getProperty(JCR_DATA).getStream();
+      //
+      currentIdentity.setProfile(profile);
 
-        //
-        AvatarAttachment avatarAttachment = new AvatarAttachment();
-        avatarAttachment.setMimeType(mime);
-        avatarAttachment.setInputStream(contentStream);
-        profile.setProperty(Profile.AVATAR, avatarAttachment);
+    }
+    catch (Exception e) {
+      LOG.error(e.getMessage());
+    }
 
-        //
-        currentIdentity.setProfile(profile);
+    try {
 
-      }
-      catch (Exception e) {
-        LOG.error(e.getMessage());
-      }
+      identityStorage.saveProfile(profile);
+      LOG.info("Write profile " + currentIdentity.getProviderId() + "/" + currentIdentity.getRemoteId());
 
-      try {
+      ctx.incDone(WriterContext.DataType.PROFILES);
 
-        identityStorage.saveProfile(profile);
-        LOG.info("Write profile " + currentIdentity.getProviderId() + "/" + currentIdentity.getRemoteId());
-
-        ctx.incDone(WriterContext.DataType.PROFILES);
-
-      }
-      catch (Exception e) {
-        LOG.error(e.getMessage());
-      }
-
+    }
+    catch (Exception e) {
+      LOG.error(e.getMessage());
     }
 
     return currentIdentity;

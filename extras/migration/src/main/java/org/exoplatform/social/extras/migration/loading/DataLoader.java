@@ -26,7 +26,7 @@ import org.exoplatform.services.organization.OrganizationService;
 import org.exoplatform.services.organization.User;
 import org.staxnav.Naming;
 import org.staxnav.StaxNavigator;
-import org.staxnav.StaxNavigatorImpl;
+import org.staxnav.StaxNavigatorFactory;
 
 import javax.jcr.Item;
 import javax.jcr.Node;
@@ -80,7 +80,7 @@ public class DataLoader {
     try {
       XMLInputFactory factory = XMLInputFactory.newInstance();
       XMLStreamReader stream = factory.createXMLStreamReader(is);
-      navigator = new StaxNavigatorImpl<QName>(new Naming.Qualified(), stream);
+      navigator = StaxNavigatorFactory.create(new Naming.Qualified(), stream);
     }
     catch (XMLStreamException e) {
       throw new RuntimeException(e);

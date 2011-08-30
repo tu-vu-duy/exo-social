@@ -29,7 +29,6 @@
 	float:left; /* orientation=lt */
 	float:right; /* orientation=rt */
 	width:56px;
-	position: relative;
 }
 
 .UIActivity .Avatar img {
@@ -64,7 +63,16 @@
 }
 
 .UIActivity .AvatarCM img {
-	width:38px;
+	width:37px;
+}
+
+.UIActivity .CommentInputBox{
+	margin-left: 50px;
+	padding-right: 15px;
+	border: 1px solid #e1e1e1;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	overflow: hidden;
 }
 
 .UIActivity .AvatarCM span {
@@ -89,6 +97,7 @@
 	padding: 4px 0px;
 	border-bottom: 1px solid #e2ddc7;
 	*margin-left: -74px;
+	margin-left: 1px;
 }
 
 .UIActivity .NormalBox .textarea {
@@ -97,12 +106,11 @@
 }
 
 .UIActivity .NormalBox .CommentBox textarea {
-	width: 91%;
+	width: 100%;
 	font-size: 11px;
-	*margin-left: -74px;
 	padding: 5px;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
+	border: 1px solid white;
+	*margin-left: -50px;
 }
 
 .UIActivity .NormalBox .CommentBox .CommentButton {

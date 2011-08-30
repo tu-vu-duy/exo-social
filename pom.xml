@@ -30,7 +30,7 @@
 
   <groupId>org.exoplatform.social</groupId>
   <artifactId>social-project</artifactId>
-  <version>1.2.1-SNAPSHOT</version>
+  <version>1.2.2-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>eXo Social</name>
   <description>eXo Social - Enterprise Social Networking</description>
@@ -82,10 +82,10 @@
     <org.exoplatform.ws.version>2.2.0-CR4</org.exoplatform.ws.version>
     <org.exoplatform.jcr.version>1.14.0-CR4-CP01</org.exoplatform.jcr.version>
     <org.exoplatform.portal.version>3.2.0-PLF-SNAPSHOT</org.exoplatform.portal.version>
-    <org.exoplatform.ecms.version>2.2.0-GA-SNAPSHOT</org.exoplatform.ecms.version>  
+    <org.exoplatform.ecms.version>2.3.0-GA-SNAPSHOT</org.exoplatform.ecms.version>  
 
    
-    <org.exoplatform.commons.version>1.1.0-Beta03-SNAPSHOT</org.exoplatform.commons.version>
+    <org.exoplatform.commons.version>1.1.1-GA-SNAPSHOT</org.exoplatform.commons.version>
     <org.exoplatform.exopackage.version>1.1.4</org.exoplatform.exopackage.version>
     <org.exoplatform.tool.version>1.0.0</org.exoplatform.tool.version>
 

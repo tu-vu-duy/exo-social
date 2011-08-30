@@ -15,19 +15,26 @@
   font-size: 12px;
 }
 
-.UIComposerLinkExtension #InputLink {
-    border: 1px solid #D7D7D7;
-    float: left;
-    height: 19px;
-    width: 92%;
-  -moz-border-radius: 2px;
+
+.UIComposerLinkExtension .InputLink {
+    margin-right: 75px;
+	overflow: hidden;
+	border: 1px solid #D7D7D7;
+	-moz-border-radius: 2px;
   -webkit-border-radius: 2px;
+}
+
+.UIComposerLinkExtension .InputLink #InputLink {
+    border:1px solid white;
+    height: 19px;
+    width: 100%;
+  height: 16px;
 }
 
 .UIComposerLinkExtension .AttachButton {
   background: #f0f0f0;
   border: 1px solid #b7b7b7;
-  float: left;
+  float: right;
   height: 23px;
   cursor: pointer;
   -moz-border-radius: 2px;
@@ -36,6 +43,7 @@
   font-weight: bold;
   font-size: 11px;
   margin-left: 3px;
+  width: 70px;
 }
 
 .UILinkShareDisplay {

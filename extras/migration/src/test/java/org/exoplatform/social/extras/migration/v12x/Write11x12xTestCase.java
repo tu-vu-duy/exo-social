@@ -99,11 +99,15 @@ public class Write11x12xTestCase extends AbstractMigrationTestCase {
     }
 
     rootNode.getNode("exo:applications").remove();
+    session.save();
+
     NodeIterator providers = rootNode.getNode("production/soc:providers").getNodes();
     while(providers.hasNext()) {
       providers.nextNode().remove();
     }
+    session.save();
 
+    rootNode.getNode("migration_context").remove();
     session.save();
 
     super.tearDown();
@@ -116,10 +120,11 @@ public class Write11x12xTestCase extends AbstractMigrationTestCase {
     PipedInputStream isIdentity = new PipedInputStream(osIdentity);
 
     NodeReader reader = new NodeReader_11x_12x(session);
-    reader.readIdentities(osIdentity);
-
     NodeWriter writer = new NodeWriter_11x_12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
-    writer.writeIdentities(isIdentity, new WriterContext());
+    WriterContext ctx = new WriterContext(session, "11x", "12x");
+
+    reader.readIdentities(osIdentity, ctx);
+    writer.writeIdentities(isIdentity, ctx);
 
     checkIdentity("organization", "user_idA");
     checkIdentity("organization", "user_idB");
@@ -153,12 +158,12 @@ public class Write11x12xTestCase extends AbstractMigrationTestCase {
 
     NodeReader reader = new NodeReader_11x_12x(session);
     NodeWriter writer = new NodeWriter_11x_12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
-    WriterContext ctx = new WriterContext();
+    WriterContext ctx = new WriterContext(session, "11x", "12x");
 
-    reader.readIdentities(osIdentity);
+    reader.readIdentities(osIdentity, ctx);
     writer.writeIdentities(isIdentity, ctx);
 
-    reader.readRelationships(osRelationship);
+    reader.readRelationships(osRelationship, ctx);
     writer.writeRelationships(isRelationship, ctx);
 
     checkRelationship("organization", "user_idC", "user_idB", "relationship");
@@ -191,12 +196,12 @@ public class Write11x12xTestCase extends AbstractMigrationTestCase {
 
     NodeReader reader = new NodeReader_11x_12x(session);
     NodeWriter writer = new NodeWriter_11x_12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
-    WriterContext ctx = new WriterContext();
+    WriterContext ctx = new WriterContext(session, "11x", "12x");
 
-    reader.readIdentities(osIdentity);
+    reader.readIdentities(osIdentity, ctx);
     writer.writeIdentities(isIdentity, ctx);
 
-    reader.readSpaces(osSpace);
+    reader.readSpaces(osSpace, ctx);
     writer.writeSpaces(isSpace, ctx);
 
     checkSpace("a", null, null, new String[]{"user_a", "user_b", "user_d"}, null);
@@ -220,15 +225,15 @@ public class Write11x12xTestCase extends AbstractMigrationTestCase {
 
     NodeReader reader = new NodeReader_11x_12x(session);
     NodeWriter writer = new NodeWriter_11x_12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
-    WriterContext ctx = new WriterContext();
+    WriterContext ctx = new WriterContext(session, "11x", "12x");
 
-    reader.readIdentities(osIdentity);
+    reader.readIdentities(osIdentity, ctx);
     writer.writeIdentities(isIdentity, ctx);
 
-    reader.readSpaces(osSpace);
+    reader.readSpaces(osSpace, ctx);
     writer.writeSpaces(isSpace, ctx);
 
-    reader.readActivities(osActivity);
+    reader.readActivities(osActivity, ctx);
     writer.writeActivities(isActivity, ctx);
 
     String user_aId = rootNode.getNode("production/soc:providers/soc:organization/soc:user_a").getUUID();
@@ -264,12 +269,12 @@ public class Write11x12xTestCase extends AbstractMigrationTestCase {
 
     NodeReader reader = new NodeReader_11x_12x(session);
     NodeWriter writer = new NodeWriter_11x_12x(identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session);
-    WriterContext ctx = new WriterContext();
+    WriterContext ctx = new WriterContext(session, "11x", "12x");
 
-    reader.readIdentities(osIdentity);
+    reader.readIdentities(osIdentity, ctx);
     writer.writeIdentities(isIdentity, ctx);
 
-    reader.readProfiles(osProfile);
+    reader.readProfiles(osProfile, ctx);
     writer.writeProfiles(isProfile, ctx);
 
     checkProfile("a");

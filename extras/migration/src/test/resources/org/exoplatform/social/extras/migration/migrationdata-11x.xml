@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<data xmlns:exo="http://www.exoplatform.com/jcr/exo/1.0" xmlns:loader="loader">
+<data xmlns:exo="http://www.exoplatform.com/jcr/exo/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:loader="loader">
   <exo:applications>
 
     <!-- User identity -->
@@ -96,7 +96,6 @@
             exo:url="nameb"
             exo:visibility="private"
         >
-          <image loader:type="nt:file"/>
           <loader:membership members="user_a,user_b" managers="user_c"/>
           <loader:mixin>mix:referenceable</loader:mixin>
         </exo:space>
@@ -237,7 +236,6 @@
           username="user_a"
           exo:identity="#/exo:applications/Social_Identity/user_a"
           >
-        <avatar loader:type="nt:file"/>
         <emails loader:type="exo:profileKeyValue"
             key="work"
             value="user_a@foo.com"

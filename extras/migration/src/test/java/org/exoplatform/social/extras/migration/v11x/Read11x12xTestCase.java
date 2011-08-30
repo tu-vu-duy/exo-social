@@ -21,6 +21,7 @@ import org.exoplatform.container.PortalContainer;
 import org.exoplatform.services.organization.Group;
 import org.exoplatform.services.organization.OrganizationService;
 import org.exoplatform.social.extras.migration.MigrationTool;
+import org.exoplatform.social.extras.migration.io.WriterContext;
 import org.exoplatform.social.extras.migration.loading.DataLoader;
 import org.exoplatform.social.extras.migration.rw.NodeReader;
 import org.exoplatform.social.extras.migration.rw.NodeReader_11x_12x;
@@ -78,6 +79,10 @@ public class Read11x12xTestCase extends AbstractMigrationTestCase {
     }
 
     rootNode.getNode("exo:applications").remove();
+    session.save();
+
+    rootNode.getNode("migration_context").remove();
+    session.save();
 
     super.tearDown();
 
@@ -92,7 +97,7 @@ public class Read11x12xTestCase extends AbstractMigrationTestCase {
     PipedInputStream in = new PipedInputStream(out);
 
     //
-    reader.readIdentities(out);
+    reader.readIdentities(out, new WriterContext(session, "11x", "12x"));
     DataInputStream dis = new DataInputStream(in);
 
     checkIdentity(dis, "exo:identity", "user_idA", "organization");
@@ -127,7 +132,7 @@ public class Read11x12xTestCase extends AbstractMigrationTestCase {
     PipedInputStream in = new PipedInputStream(out);
 
     //
-    reader.readRelationships(out);
+    reader.readRelationships(out, new WriterContext(session, "11x", "12x"));
     DataInputStream dis = new DataInputStream(in);
 
     checkRelationship(dis, "exo:relationship", "exo:identity[3]", "exo:identity[2]", "CONFIRM");
@@ -149,7 +154,7 @@ public class Read11x12xTestCase extends AbstractMigrationTestCase {
     PipedInputStream in = new PipedInputStream(out);
 
     //
-    reader.readSpaces(out);
+    reader.readSpaces(out, new WriterContext(session, "11x", "12x"));
     DataInputStream dis = new DataInputStream(in);
 
     checkSpace(dis, "exo:space", "a", new String[]{"user_a","user_b","user_d"}, null);
@@ -169,7 +174,7 @@ public class Read11x12xTestCase extends AbstractMigrationTestCase {
     PipedInputStream in = new PipedInputStream(out);
 
     //
-    reader.readActivities(out);
+    reader.readActivities(out, new WriterContext(session, "11x", "12x"));
     DataInputStream dis = new DataInputStream(in);
 
     String like1 = rootNode.getNode("exo:applications/Social_Identity/user_a").getUUID();
@@ -197,7 +202,7 @@ public class Read11x12xTestCase extends AbstractMigrationTestCase {
     PipedInputStream in = new PipedInputStream(out);
 
     //
-    reader.readProfiles(out);
+    reader.readProfiles(out, new WriterContext(session, "11x", "12x"));
     DataInputStream dis = new DataInputStream(in);
 
     checkProfile(dis, "exo:profile", "a");

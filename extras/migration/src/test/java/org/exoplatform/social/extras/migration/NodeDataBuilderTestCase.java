@@ -57,13 +57,12 @@ public class NodeDataBuilderTestCase extends AbstractMigrationTestCase {
     NodeData data = handler.readNode(is);
     assertEquals("/exo:applications/Social_Identity/exo:identity", data.getPath());
     assertEquals(0, data.getChilds().size());
-    assertEquals(5, data.getProperties().size());
-    assertEquals("organization", data.getProperties().get("exo:providerId"));
-    assertEquals("user_idA", data.getProperties().get("exo:remoteId"));
-    assertNotNull(data.getProperties().get("jcr:uuid"));
-    assertEquals(1, ((String[]) data.getProperties().get("jcr:mixinTypes")).length);
-    assertEquals("mix:referenceable", ((String[]) data.getProperties().get("jcr:mixinTypes"))[0]);
-    assertEquals("exo:identity", data.getProperties().get("jcr:primaryType"));
+    assertEquals("organization", data.get("exo:providerId"));
+    assertEquals("user_idA", data.get("exo:remoteId"));
+    assertNotNull(data.get("jcr:uuid"));
+    assertEquals(1, ((String[]) data.get("jcr:mixinTypes")).length);
+    assertEquals("mix:referenceable", ((String[]) data.get("jcr:mixinTypes"))[0]);
+    assertEquals("exo:identity", data.get("jcr:primaryType"));
 
   }
 }

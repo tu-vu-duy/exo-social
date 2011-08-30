@@ -770,6 +770,7 @@ public class NodeWriter_11x_12x implements NodeWriter {
 
     //
     Identity currentIdentity = null;
+    Node avatarContent = null;
 
     //
     String url = (String) currentData.get(PROP_URL);
@@ -784,9 +785,15 @@ public class NodeWriter_11x_12x implements NodeWriter {
     String identityId = ctx.get(identityOld + "-" + CTX_UUID);
     if (identityId != null) {
       currentIdentity = identityStorage.findIdentityById(identityId);
+      try {
+        avatarContent = session.getRootNode().getNode(currentData.getPath().substring(1) + "/avatar/jcr:content");
+      }
+      catch (RepositoryException e) {
+        e.printStackTrace();
+      }
     }
 
-    // Is
+    // Is space
     else {
       String spaceId = ctx.get(identityOld + "-" + CTX_REMOTE_ID);
       if (spaceId != null) {
@@ -796,6 +803,7 @@ public class NodeWriter_11x_12x implements NodeWriter {
           int lastSlash = groupId.lastIndexOf("/");
           String groupName = groupId.substring(lastSlash + 1);
           currentIdentity = identityStorage.findIdentity(PROVIDER_SPACE, groupName);
+          avatarContent = node.getNode("image/jcr:content");
         }
         catch (RepositoryException e) {
           LOG.error(e.getMessage());
@@ -823,7 +831,7 @@ public class NodeWriter_11x_12x implements NodeWriter {
     try {
 
       //
-      Node avatarContent = session.getRootNode().getNode(currentData.getPath().substring(1) + "/avatar/jcr:content");
+
       String mime = avatarContent.getProperty(JCR_MIME_TYPE).getString();
       InputStream contentStream = avatarContent.getProperty(JCR_DATA).getStream();
 

@@ -789,7 +789,7 @@ public class NodeWriter_11x_12x implements NodeWriter {
         avatarContent = session.getRootNode().getNode(currentData.getPath().substring(1) + "/avatar/jcr:content");
       }
       catch (RepositoryException e) {
-        e.printStackTrace();
+        LOG.error(e.getMessage());
       }
     }
 
@@ -798,12 +798,20 @@ public class NodeWriter_11x_12x implements NodeWriter {
       String spaceId = ctx.get(identityOld + "-" + CTX_REMOTE_ID);
       if (spaceId != null) {
         try {
+
+          //
           Node node = session.getNodeByUUID(spaceId);
           String groupId = node.getProperty(PROP_GROUP_ID).getString();
           int lastSlash = groupId.lastIndexOf("/");
           String groupName = groupId.substring(lastSlash + 1);
           currentIdentity = identityStorage.findIdentity(PROVIDER_SPACE, groupName);
           avatarContent = node.getNode("image/jcr:content");
+
+          //
+          Space space = spaceStorage.getSpaceByGroupId(groupId);
+          space.setAvatarLastUpdated(System.currentTimeMillis());
+          spaceStorage.saveSpace(space, false);
+
         }
         catch (RepositoryException e) {
           LOG.error(e.getMessage());

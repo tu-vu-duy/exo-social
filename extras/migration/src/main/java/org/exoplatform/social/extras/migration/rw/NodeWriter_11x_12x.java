@@ -808,9 +808,11 @@ public class NodeWriter_11x_12x implements NodeWriter {
           avatarContent = node.getNode("image/jcr:content");
 
           //
-          Space space = spaceStorage.getSpaceByGroupId(groupId);
-          space.setAvatarLastUpdated(System.currentTimeMillis());
-          spaceStorage.saveSpace(space, false);
+          Space space = spaceStorage.getSpaceByPrettyName(groupName);
+          if (space != null) {
+            space.setAvatarLastUpdated(System.currentTimeMillis());
+            spaceStorage.saveSpace(space, false);
+          }
 
         }
         catch (RepositoryException e) {

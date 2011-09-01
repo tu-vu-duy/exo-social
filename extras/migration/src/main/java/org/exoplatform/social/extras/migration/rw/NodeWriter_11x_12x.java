@@ -74,7 +74,10 @@ public class NodeWriter_11x_12x implements NodeWriter {
   // Identity
   private final String PROP_PROVIDER_ID = "exo:providerId";
   private final String PROP_REMOTE_ID = "exo:remoteId";
+
+  // Space
   private final String PROP_NAME = "exo:name";
+  private final String PROP_APP = "exo:app";
   private final String PROP_DESC = "exo:description";
   private final String PROP_GROUP_ID = "exo:groupId";
   private final String PROP_PRIORITY = "exo:priority";
@@ -124,7 +127,7 @@ public class NodeWriter_11x_12x implements NodeWriter {
   private final String PROP_REPLY = "exo:replyToId";
   private final String PROP_EXTERNAL_ID = "exo:externalId";
   private final String PROP_PARAMS = "exo:params";
-  private final String PROP_LIKE = "exo:like";
+  private final String PROP_LIKE = "exo:likeIdentityIds";
 
   //
   private final String PATH_ACTIVITIES = "/exo:applications/Social_Activity";
@@ -221,6 +224,7 @@ public class NodeWriter_11x_12x implements NodeWriter {
 
       //
       String name = (String) currentData.get(PROP_NAME);
+      String app = (String) currentData.get(PROP_APP);
       String description = (String) currentData.get(PROP_DESC);
       String groupId = (String) currentData.get(PROP_GROUP_ID);
       String priority = (String) currentData.get(PROP_PRIORITY);
@@ -273,6 +277,7 @@ public class NodeWriter_11x_12x implements NodeWriter {
       //
       Space space = new Space();
       space.setDisplayName(name);
+      space.setApp(app);
       space.setDescription(description);
       space.setGroupId(groupId);
       space.setPriority(priority);

@@ -31,6 +31,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.portlet.PortletPreferences;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.poi.ss.usermodel.Footer;
 import org.exoplatform.application.registry.Application;
 import org.exoplatform.application.registry.ApplicationCategory;
 import org.exoplatform.application.registry.ApplicationRegistryService;

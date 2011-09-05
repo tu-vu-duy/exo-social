@@ -17,6 +17,7 @@
 
 package org.exoplatform.social.extras.migration.rw;
 
+import org.exoplatform.services.jcr.core.nodetype.ExtendedNodeTypeManager;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.organization.Group;
@@ -67,9 +68,24 @@ public class NodeWriter_11x_12x implements NodeWriter {
   private final Session session;
 
   //
+  private final String NT_IDENTITY = "exo:identity";
   private final String NT_PROFILE = "exo:profile";
   private final String NT_PROFILE_DETAIL = "exo:profileKeyValue";
   private final String NT_PROFILE_XP = "exo:profileExperience";
+  private final String NT_PROFILE_EDU = "exo:profileEducation";
+  private final String NT_PROFILE_ADDR = "exo:profileAddress";
+  private final String NT_REL_PROP = "exo:relationshipProperty";
+  private final String NT_REL = "exo:relationship";
+  private final String NT_ACTIVITY = "exo:activity";
+  private final String NT_SPACE = "exo:space";
+
+  //
+  private final String PATH_EXO_APPLICATION = "exo:applications";
+  private final String PATH_SOC_ACTIVITY = "Social_Activity";
+  private final String PATH_SOC_RELATIONSHIP = "Social_Relationship";
+  private final String PATH_SOC_PROFILE = "Social_Profile";
+  private final String PATH_SOC_SPACE = "Social_Space/Space";
+  private final String PATH_SOC_IDENTITY = "Social_Identity";
 
   // Identity
   private final String PROP_PROVIDER_ID = "exo:providerId";
@@ -570,7 +586,7 @@ public class NodeWriter_11x_12x implements NodeWriter {
 
   }
 
-  public void rollback() throws RepositoryException {
+  public void rollback(final WriterContext ctx) throws RepositoryException {
 
     NodeIterator itUserActivity = session.getRootNode().getNode("production/soc:providers/soc:organization").getNodes();
     while (itUserActivity.hasNext()) {
@@ -636,6 +652,102 @@ public class NodeWriter_11x_12x implements NodeWriter {
       session.save();
 
     }
+
+    //
+    ctx.cleanup();
+
+  }
+
+  public void commit(final WriterContext ctx) throws RepositoryException {
+
+    NodeIterator itActivity = session.getRootNode().getNode(PATH_EXO_APPLICATION + "/" + PATH_SOC_ACTIVITY).getNodes();
+    while (itActivity.hasNext()) {
+      NodeIterator itActivityProvider = itActivity.nextNode().getNodes();
+      while (itActivityProvider.hasNext()) {
+        NodeIterator itActivityUser = itActivityProvider.nextNode().getNodes();
+        while (itActivityUser.hasNext()) {
+
+          //
+          Node publishedNode = itActivityUser.nextNode();
+          LOG.info("Removing activities " + publishedNode.getPath());
+          publishedNode.remove();
+
+          //
+          session.save();
+
+        }
+
+      }
+    }
+
+    //
+    NodeIterator itRelationship = session.getRootNode().getNode(PATH_EXO_APPLICATION + "/" + PATH_SOC_RELATIONSHIP).getNodes();
+    while (itRelationship.hasNext()) {
+
+      Node relationshipNode = itRelationship.nextNode();
+      LOG.info("Removing relationship " + relationshipNode.getPath());
+      relationshipNode.remove();
+      session.save();
+
+    }
+
+    //
+    NodeIterator itProfile = session.getRootNode().getNode(PATH_EXO_APPLICATION + "/" + PATH_SOC_PROFILE).getNodes();
+    while (itProfile.hasNext()) {
+
+      Node profileNode = itProfile.nextNode();
+      LOG.info("Removing profile " + profileNode.getPath());
+      profileNode.remove();
+      session.save();
+
+    }
+
+    //
+    NodeIterator itSpace = session.getRootNode().getNode(PATH_EXO_APPLICATION + "/" + PATH_SOC_SPACE).getNodes();
+    while (itSpace.hasNext()) {
+
+      Node spaceNode = itSpace.nextNode();
+      LOG.info("Removing space " + spaceNode.getPath());
+      spaceNode.remove();
+      session.save();
+
+    }
+
+    //
+    NodeIterator itIdentity = session.getRootNode().getNode(PATH_EXO_APPLICATION + "/" + PATH_SOC_IDENTITY).getNodes();
+    while (itIdentity.hasNext()) {
+
+      Node identityNode = itIdentity.nextNode();
+      LOG.info("Removing identity " + identityNode.getPath());
+      identityNode.remove();
+      session.save();
+
+    }
+
+    //
+    session.getRootNode().getNode(PATH_EXO_APPLICATION).remove();
+    session.save();
+
+    //
+    /*ExtendedNodeTypeManager nodeTypeManager = (ExtendedNodeTypeManager) session.getWorkspace().getNodeTypeManager();
+    nodeTypeManager.unregisterNodeTypes(
+        new String[]{
+            NT_IDENTITY,
+            NT_PROFILE,
+            NT_PROFILE_DETAIL,
+            NT_PROFILE_XP,
+            NT_PROFILE_EDU,
+            NT_PROFILE_ADDR,
+            NT_REL_PROP,
+            NT_REL,
+            NT_ACTIVITY,
+            NT_SPACE,
+        }
+    );
+    session.save();*/
+
+    //
+    ctx.cleanup();
 
   }
 

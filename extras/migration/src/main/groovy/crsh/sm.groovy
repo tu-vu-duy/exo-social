@@ -140,7 +140,39 @@ public class sm extends org.crsh.jcr.command.JCRCommand
     );
 
     //
-    ctx?.cleanup();
+    ctx = null;
+    return done;
+
+  }
+
+
+  @Usage("Commit migration")
+  @Command
+  public Object commit(InvocationContext<Void, Void> context, @Option(names=["f","force"]) Boolean force) throws ScriptException {
+
+    //
+    if (
+      !force &&
+      (
+        !ctx?.isCompleted(WriterContext.DataType.IDENTITIES) ||
+        !ctx?.isCompleted(WriterContext.DataType.SPACES) ||
+        !ctx?.isCompleted(WriterContext.DataType.PROFILES) ||
+        !ctx?.isCompleted(WriterContext.DataType.RELATIONSHIPS) ||
+        !ctx?.isCompleted(WriterContext.DataType.ACTIVITIES)
+      )
+    ) {
+      return "Migration is not finished, use 'sm status' to get more details or use 'sm commit --force'";
+    }
+
+    //
+    String done = runCmd(
+        {
+          m, r, w ->
+          m.commit(r, w, ctx)
+        }
+    );
+
+    //
     ctx = null;
     return done;
 
@@ -231,7 +263,7 @@ public class sm extends org.crsh.jcr.command.JCRCommand
 
     //
     if (ctx == null) {
-      return "Context not initialized, please use 'sm init'.";
+      return "Context not initialized, please use 'sm init' or 'sm restore'.";
     }
 
     //

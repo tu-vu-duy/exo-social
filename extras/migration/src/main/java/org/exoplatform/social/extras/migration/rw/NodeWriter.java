@@ -66,6 +66,11 @@ public interface NodeWriter {
   /**
    *  Rollback changes.
    */
-  void rollback() throws RepositoryException;
+  void rollback(WriterContext ctx) throws RepositoryException;
+
+  /**
+   *  Commit changes.
+   */
+  void commit(WriterContext ctx) throws RepositoryException;
 
 }

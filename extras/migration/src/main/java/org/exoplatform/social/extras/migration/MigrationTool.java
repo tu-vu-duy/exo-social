@@ -147,7 +147,13 @@ public class MigrationTool {
 
   public void rollback(NodeReader reader, NodeWriter writer, WriterContext ctx) throws RepositoryException {
 
-    writer.rollback();
+    writer.rollback(ctx);
+
+  }
+
+  public void commit(NodeReader reader, NodeWriter writer, WriterContext ctx) throws RepositoryException {
+
+    writer.commit(ctx);
 
   }
 

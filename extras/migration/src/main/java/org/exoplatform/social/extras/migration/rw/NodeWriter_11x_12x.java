@@ -729,7 +729,10 @@ public class NodeWriter_11x_12x implements NodeWriter {
     session.save();
 
     //
-    /*ExtendedNodeTypeManager nodeTypeManager = (ExtendedNodeTypeManager) session.getWorkspace().getNodeTypeManager();
+    ctx.cleanup();
+
+    //
+    ExtendedNodeTypeManager nodeTypeManager = (ExtendedNodeTypeManager) session.getWorkspace().getNodeTypeManager();
     nodeTypeManager.unregisterNodeTypes(
         new String[]{
             NT_IDENTITY,
@@ -744,10 +747,7 @@ public class NodeWriter_11x_12x implements NodeWriter {
             NT_SPACE,
         }
     );
-    session.save();*/
-
-    //
-    ctx.cleanup();
+    session.save();
 
   }
 

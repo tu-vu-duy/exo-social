@@ -313,7 +313,7 @@
                 exo:priority="1"
                 exo:externalId="external id"
                 exo:type="exosocial:relationship"
-                exo:like="#/exo:applications/Social_Identity/user_a,#/exo:applications/Social_Identity/user_b"
+                exo:likeIdentityIds="#/exo:applications/Social_Identity/user_a,#/exo:applications/Social_Identity/user_b"
                 exo:updatedTimestamp="1298642872378"
                 exo:userId="#/exo:applications/Social_Identity/user_a"
               >

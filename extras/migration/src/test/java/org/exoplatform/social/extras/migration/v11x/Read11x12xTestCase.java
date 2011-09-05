@@ -385,7 +385,7 @@ public class Read11x12xTestCase extends AbstractMigrationTestCase {
     if (likes != null) {
       assertEquals(MigrationTool.PROPERTY_MULTI, dis.readInt());
       assertEquals(params.length, dis.readInt());
-      assertEquals("exo:like", dis.readUTF());
+      assertEquals("exo:likeIdentityIds", dis.readUTF());
       for (String like : likes) {
         assertEquals(like, dis.readUTF());
       }

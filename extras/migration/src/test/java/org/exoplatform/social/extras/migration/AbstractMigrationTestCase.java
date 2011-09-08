@@ -22,6 +22,8 @@ import org.exoplatform.component.test.ConfigurationUnit;
 import org.exoplatform.component.test.ConfiguredBy;
 import org.exoplatform.component.test.ContainerScope;
 
+import javax.jcr.Session;
+
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
@@ -36,13 +38,17 @@ import org.exoplatform.component.test.ContainerScope;
 })
 public abstract class AbstractMigrationTestCase extends AbstractKernelTest {
 
+  protected Session session;
+
   @Override
   public void setUp() throws Exception {
     begin();
+    session = Utils.getSession();
   }
 
   @Override
   public void tearDown() throws Exception {
+    session.logout();
     end();
   }
   

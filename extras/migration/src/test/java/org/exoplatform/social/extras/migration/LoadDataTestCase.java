@@ -38,7 +38,6 @@ public class LoadDataTestCase extends AbstractMigrationTestCase {
   public void setUp() throws Exception {
 
     super.setUp();
-    Session session = Utils.getSession();
     loader = new DataLoader("testLoader.xml", session);
     loader.load();
     rootNode = session.getRootNode();
@@ -51,7 +50,11 @@ public class LoadDataTestCase extends AbstractMigrationTestCase {
     rootNode.getNode("fooA").remove();
     rootNode.getNode("fooB").remove();
     rootNode.getNode("fooC").remove();
-    
+    rootNode.getNode("fooD").remove();
+    rootNode.getNode("exo:foo").remove();
+
+    super.tearDown();
+
   }
 
   public void testRoot() throws Exception {
@@ -59,6 +62,8 @@ public class LoadDataTestCase extends AbstractMigrationTestCase {
     assertNotNull(rootNode.getNode("fooA"));
     assertNotNull(rootNode.getNode("fooB"));
     assertNotNull(rootNode.getNode("fooC"));
+    assertNotNull(rootNode.getNode("fooD"));
+    assertNotNull(rootNode.getNode("exo:foo"));
 
   }
 

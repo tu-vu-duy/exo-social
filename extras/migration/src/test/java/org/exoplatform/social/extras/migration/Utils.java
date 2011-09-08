@@ -30,13 +30,11 @@ import javax.jcr.Session;
  */
 public class Utils {
 
-  public final static String DATA_DIR = "org/exoplatform/social/extras/migration/data";
-  
   public static Session getSession() throws RepositoryException {
     PortalContainer container = PortalContainer.getInstance();
     RepositoryService repositoryService = (RepositoryService) container.getComponentInstance(RepositoryService.class);
     ManageableRepository repository = repositoryService.getCurrentRepository();
-    return repository.getSystemSession("portal-test"); // TODO : get workspace name
+    return repository.getSystemSession("portal-test");
   }
 
 }

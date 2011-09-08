@@ -46,14 +46,12 @@ public class Read11x12xTestCase extends AbstractMigrationTestCase {
 
   private DataLoader loader;
   private Node rootNode;
-  private Session session;
   private OrganizationService organizationService;
 
   @Override
   public void setUp() throws Exception {
 
     super.setUp();
-    session = Utils.getSession();
     loader = new DataLoader("migrationdata-11x.xml", session);
     loader.load();
     rootNode = session.getRootNode();

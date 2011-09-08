@@ -59,8 +59,6 @@ public class Write11x12xTestCase extends AbstractMigrationTestCase {
   private ActivityStorage activityStorage;
   private OrganizationService organizationService;
 
-  private Session session;
-
   private Node rootNode;
 
   @Override
@@ -76,7 +74,6 @@ public class Write11x12xTestCase extends AbstractMigrationTestCase {
     activityStorage = (ActivityStorage) container.getComponentInstanceOfType(ActivityStorageImpl.class);
     organizationService = (OrganizationService) container.getComponentInstance(OrganizationService.class);
 
-    session = Utils.getSession();
     rootNode = session.getRootNode();
     DataLoader loader = new DataLoader("migrationdata-11x.xml", session);
     loader.load();

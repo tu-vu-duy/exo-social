@@ -67,6 +67,7 @@
           <value>locale.social.webui.composer.UIComposer</value>
           <value>locale.social.webui.connections.UIInvitations</value>
           <value>locale.social.webui.connections.UIMyConnections</value>
+          <value>locale.social.webui.connections.UIAllPeople</value>
           <value>locale.social.webui.connections.UIPendingRelation</value>
           <value>locale.social.webui.profile.UIBasicInfoSection</value>
           <value>locale.social.webui.profile.UIContactSection</value>
@@ -80,7 +81,7 @@
           <value>locale.social.webui.space.UIManageInvitationSpaces</value>
           <value>locale.social.webui.space.UIManageMySpaces</value>
           <value>locale.social.webui.space.UIManagePendingSpaces</value>
-          <value>locale.social.webui.space.UIManagePublicSpaces</value>
+          <value>locale.social.webui.space.UIManageAllSpaces</value>
           <value>locale.social.webui.space.UISpaceActivitiesDisplay</value>
           <value>locale.social.webui.space.UISpaceAddForm</value>
           <value>locale.social.webui.space.UISpaceApplication</value>
@@ -107,6 +108,7 @@
           <value>locale.social.webui.composer.UIComposer</value>
           <value>locale.social.webui.connections.UIInvitations</value>
           <value>locale.social.webui.connections.UIMyConnections</value>
+          <value>locale.social.webui.connections.UIAllPeople</value>
           <value>locale.social.webui.connections.UIPendingRelation</value>
           <value>locale.social.webui.profile.UIBasicInfoSection</value>
           <value>locale.social.webui.profile.UIContactSection</value>
@@ -120,7 +122,7 @@
           <value>locale.social.webui.space.UIManageInvitationSpaces</value>
           <value>locale.social.webui.space.UIManageMySpaces</value>
           <value>locale.social.webui.space.UIManagePendingSpaces</value>
-          <value>locale.social.webui.space.UIManagePublicSpaces</value>
+          <value>locale.social.webui.space.UIManageAllSpaces</value>
           <value>locale.social.webui.space.UISpaceActivitiesDisplay</value>
           <value>locale.social.webui.space.UISpaceAddForm</value>
           <value>locale.social.webui.space.UISpaceApplication</value>

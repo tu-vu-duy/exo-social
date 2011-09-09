@@ -16,7 +16,6 @@
  */
 package org.exoplatform.social.service.rest.api;
 
-import java.util.HashMap;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -25,88 +24,138 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import org.exoplatform.container.ExoContainerContext;
-import org.exoplatform.container.PortalContainer;
-import org.exoplatform.services.rest.resource.ResourceContainer;
-import org.exoplatform.services.security.ConversationState;
-import org.exoplatform.social.core.identity.model.Identity;
-import org.exoplatform.social.core.identity.model.Profile;
-import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
-import org.exoplatform.social.service.rest.Util;
-import org.exoplatform.social.service.rest.api.VersionResources;
-import org.exoplatform.social.core.manager.IdentityManager;
 
+import org.exoplatform.services.rest.resource.ResourceContainer;
+import org.exoplatform.social.core.manager.IdentityManager;
+import org.exoplatform.social.core.service.LinkProvider;
+import org.exoplatform.social.core.identity.model.Identity;
+import org.exoplatform.social.core.identity.provider.SpaceIdentityProvider;
+import org.exoplatform.social.service.rest.SecurityManager;
+import org.exoplatform.social.service.rest.Util;
+import org.exoplatform.social.service.rest.api.models.IdentityRest;
+import org.exoplatform.social.service.rest.api.models.ProfileRest;
 
 /**
- * Unit test for {@link VersionResources}.
+ * Identity Resources end point. 
  *
  * @author <a href="http://phuonglm.net">PhuongLM</a>
- * @since Jun 29, 2011
+ * @since 1.2.2
  */
-@Path("api/social/" + VersionResources.LATEST_VERSION+ "/{portalContainerName}/identity/")
+@Path("api/social/" + VersionResources.LATEST_VERSION + "/{portalContainerName}/identity/")
 public class IdentityResources implements ResourceContainer {
   private static final String[] SUPPORTED_FORMAT = new String[]{"json"};
   private IdentityManager identityManager;
+  
   /**
-   * Get Comment from existing activity by GET method from a specified activity id. Just returns the Comment List and total number of Comment
-   * in activity.
+   * Gets the identity and its associated profile by the identityId.
    *
    * @param uriInfo the uri request uri
    * @param portalContainerName the associated portal container name
    * @param identityId the specified identityId
    * @param format the expected returned format
    * @return a response object
+   * 
    */
   @GET
   @Path("{identityId}.{format}")
-  public Response getIdentityById(@Context UriInfo uriInfo,
-                                           @PathParam("portalContainerName") String portalContainerName,
-                                           @PathParam("identityId") String identityId,
-                                           @PathParam("format") String format) {
+  public Response getIdentityById( @Context UriInfo uriInfo,
+                                   @PathParam("portalContainerName") String portalContainerName,
+                                   @PathParam("identityId") String identityId,
+                                   @PathParam("format") String format) {
     MediaType mediaType = Util.getMediaType(format, SUPPORTED_FORMAT);
-
-    if(identityId !=null && !identityId.equals("")){
-      PortalContainer portalContainer = getPortalContainer(portalContainerName);
-      identityManager = Util.getIdentityManager();
-      Identity authenticatedUserIdentity = authenticatedUserIdentity();
-      Identity identity = identityManager.getIdentity(identityId, true);
-      if(authenticatedUserIdentity != null){
-        if(portalContainer!=null && identity!=null){
-          HashMap resultHashMap = new HashMap();
-          HashMap resultProfileHashMap = new HashMap();
-          resultHashMap.put("id", identity.getId());
-          resultHashMap.put("providerId",identity.getProviderId());
-          resultHashMap.put("remoteId",identity.getRemoteId());
-          
-          Profile profile = identity.getProfile();
-          resultProfileHashMap.put("fullName", profile.getFullName());
-          resultProfileHashMap.put("avatarUrl", profile.getAvatarUrl());
-          
-          resultHashMap.put("profile",resultProfileHashMap);
-        
-          return Util.getResponse(resultHashMap, uriInfo, mediaType, Response.Status.OK);
-        } else {
-          throw new WebApplicationException(Response.Status.NOT_FOUND);
-        }
-      } else {
-        throw new WebApplicationException(Response.Status.UNAUTHORIZED);
-      }
-    } else {
+    
+    try{
+      identityManager = Util.getIdentityManager(portalContainerName);
+    } catch (Exception e) {
       throw new WebApplicationException(Response.Status.BAD_REQUEST);
+    }
+    
+    if(identityId == null || identityId.equals("")){
+      throw new WebApplicationException(Response.Status.BAD_REQUEST);
+    }
+    
+    if(SecurityManager.getAuthenticatedUserIdentity() == null){ 
+      throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+    }    
+
+    try{
+      Identity identity = identityManager.getIdentity(identityId, true);
+      IdentityRest resultIdentity = new IdentityRest(identity);
+      
+      String restBaseURI = uriInfo.getBaseUri().toString();
+      String restPathURI = uriInfo.getBaseUri().getPath();
+      buildAbsoluteAvatarURL(restBaseURI.substring(0,restBaseURI.length() - restPathURI.length()), resultIdentity);
+      
+      return Util.getResponse(resultIdentity, uriInfo, mediaType, Response.Status.OK);
+    } catch (Exception e) {
+      throw new WebApplicationException(Response.Status.NOT_FOUND);
+    }
+  }
+
+  /**
+   * Gets an identity and its associated profile by specifying its providerId and remoteId.
+   * 
+   * @param uriInfo the uri request uri
+   * @param portalContainerName the associated portal container name
+   * @param providerId the providerId of Identity
+   * @param remoteId the remoteId of Identity
+   * @param format the expected returned format
+   * @return a response object
+   * @since 1.2.2
+   */
+  @GET
+  @Path("{providerId}/{remoteId}.{format}")
+  public Response getIdentityProviderIdAndRemoteId(@Context UriInfo uriInfo,
+                                                   @PathParam("portalContainerName") String portalContainerName,
+                                                   @PathParam("providerId") String providerId,
+                                                   @PathParam("remoteId") String remoteId,
+                                                   @PathParam("format") String format){
+    MediaType mediaType = Util.getMediaType(format, SUPPORTED_FORMAT);
+    
+    try{
+      identityManager = Util.getIdentityManager(portalContainerName);
+    } catch (Exception e) {
+      throw new WebApplicationException(Response.Status.BAD_REQUEST);
+    }
+    
+    if(providerId == null || providerId.equals("") || remoteId == null || remoteId.equals("")){
+      throw new WebApplicationException(Response.Status.BAD_REQUEST);
+    }
+    
+    if(SecurityManager.getAuthenticatedUserIdentity() == null){ 
+      throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+    }
+    
+    try{
+      Identity identity = identityManager.getOrCreateIdentity(providerId, remoteId, true);
+      IdentityRest resultIdentity = new IdentityRest(identity);
+      
+      String restBaseURI = uriInfo.getBaseUri().toString();
+      String restPathURI = uriInfo.getBaseUri().getPath();
+      buildAbsoluteAvatarURL(restBaseURI.substring(0,restBaseURI.length() - restPathURI.length()), resultIdentity);
+      
+      return Util.getResponse(resultIdentity, uriInfo, mediaType, Response.Status.OK);
+    } catch (Exception e) {
+      throw new WebApplicationException(Response.Status.NOT_FOUND);
     }
   }
   
-  private Identity authenticatedUserIdentity() {
-    if(ConversationState.getCurrent()!=null && ConversationState.getCurrent().getIdentity() != null &&
-              ConversationState.getCurrent().getIdentity().getUserId() != null){
-      IdentityManager identityManager =  Util.getIdentityManager();
-      String authenticatedUserRemoteID = ConversationState.getCurrent().getIdentity().getUserId(); 
-      return identityManager.getOrCreateIdentity(OrganizationIdentityProvider.NAME, authenticatedUserRemoteID, false);
-    } else {
-      return null;
+  private void buildAbsoluteAvatarURL(String baseURL, IdentityRest resultIdentity){
+    if(resultIdentity.containsKey(IdentityRest.PROFILE) && 
+        resultIdentity.containsKey(IdentityRest.PROVIDER_ID)){
+      ProfileRest resultProfile =  (ProfileRest) resultIdentity.get(IdentityRest.PROFILE);
+      if(!resultProfile.containsKey(ProfileRest.AVATARURL)){
+        if(resultIdentity.get(IdentityRest.PROVIDER_ID).
+            equals(SpaceIdentityProvider.NAME)){
+          resultProfile.put(ProfileRest.AVATARURL, baseURL + LinkProvider.SPACE_DEFAULT_AVATAR_URL);
+        } else {
+          resultProfile.put(ProfileRest.AVATARURL, baseURL + LinkProvider.PROFILE_DEFAULT_AVATAR_URL);
+        }
+      } else if(!((String)resultProfile.get(ProfileRest.AVATARURL)).startsWith("http://") && 
+                    !((String)resultProfile.get(ProfileRest.AVATARURL)).startsWith("https://")){
+        resultProfile.put(ProfileRest.AVATARURL, baseURL + (String)resultProfile.get(ProfileRest.AVATARURL));
+      }
     }
-  }  
-  private PortalContainer getPortalContainer(String name) {
-    return (PortalContainer) ExoContainerContext.getContainerByName(name);
   }
+
 }

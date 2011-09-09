@@ -586,6 +586,9 @@ public class NodeWriter_11x_12x implements NodeWriter {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public void rollback(final WriterContext ctx) throws RepositoryException {
 
     NodeIterator itUserActivity = session.getRootNode().getNode("production/soc:providers/soc:organization").getNodes();
@@ -658,6 +661,9 @@ public class NodeWriter_11x_12x implements NodeWriter {
 
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public void commit(final WriterContext ctx) throws RepositoryException {
 
     NodeIterator itActivity = session.getRootNode().getNode(PATH_EXO_APPLICATION + "/" + PATH_SOC_ACTIVITY).getNodes();

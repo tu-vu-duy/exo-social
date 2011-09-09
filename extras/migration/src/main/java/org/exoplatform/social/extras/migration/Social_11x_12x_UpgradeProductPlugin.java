@@ -52,7 +52,8 @@ public class Social_11x_12x_UpgradeProductPlugin extends UpgradeProductPlugin {
     //
     PortalContainer portalContainer = PortalContainer.getInstance();
     ChromatticManager manager = (ChromatticManager) portalContainer.getComponentInstanceOfType(ChromatticManager.class);
-    SocialChromatticLifeCycle lifeCycle = (SocialChromatticLifeCycle) manager.getLifeCycle(SocialChromatticLifeCycle.SOCIAL_LIFECYCLE_NAME);
+    SocialChromatticLifeCycle lifeCycle =
+        (SocialChromatticLifeCycle) manager.getLifeCycle(SocialChromatticLifeCycle.SOCIAL_LIFECYCLE_NAME);
 
     //
     Session session = lifeCycle.getSession().getJCRSession();

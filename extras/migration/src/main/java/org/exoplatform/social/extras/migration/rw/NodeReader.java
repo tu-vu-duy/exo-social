@@ -25,21 +25,50 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
+ * Read migraiton data.
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
 public interface NodeReader {
 
+  /**
+   *  Identities reading.
+   * @param os data stream
+   * @param ctx migration context
+   */
   void readIdentities(OutputStream os, WriterContext ctx) throws RepositoryException, IOException;
 
+  /**
+   *  Spaces reading.
+   * @param os data stream
+   * @param ctx migration context
+   */
   void readSpaces(OutputStream os, WriterContext ctx) throws RepositoryException, IOException;
 
+  /**
+   *  Profiles reading.
+   * @param os data stream
+   * @param ctx migration context
+   */
   void readProfiles(OutputStream os, WriterContext ctx) throws RepositoryException, IOException;
 
+  /**
+   *  Activities reading.
+   * @param os data stream
+   * @param ctx migration context
+   */
   void readActivities(OutputStream os, WriterContext ctx) throws RepositoryException, IOException;
 
+  /**
+   *  Relationships reading.
+   * @param os data stream
+   * @param ctx migration context
+   */
   void readRelationships(OutputStream os, WriterContext ctx) throws RepositoryException, IOException;
 
+  /**
+   *  Check migration possibility.
+   */
   void checkData() throws MigrationException;
 
 }

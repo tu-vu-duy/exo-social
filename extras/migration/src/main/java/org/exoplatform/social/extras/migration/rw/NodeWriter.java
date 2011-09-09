@@ -23,6 +23,7 @@ import javax.jcr.RepositoryException;
 import java.io.InputStream;
 
 /**
+ * Write migraiton data.
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */

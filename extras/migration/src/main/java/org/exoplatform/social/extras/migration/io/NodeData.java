@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Migration data.
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */

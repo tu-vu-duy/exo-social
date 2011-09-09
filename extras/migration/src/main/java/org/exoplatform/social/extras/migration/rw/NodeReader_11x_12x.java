@@ -44,22 +44,37 @@ public class NodeReader_11x_12x implements NodeReader {
     this.writer = new NodeStreamHandler();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public void readIdentities(OutputStream os, WriterContext ctx) throws RepositoryException, IOException {
     run(new IdentityRunnable(os, ctx));
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public void readSpaces(OutputStream os, WriterContext ctx) throws RepositoryException, IOException {
     run(new SpaceRunnable(os, ctx));
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public void readProfiles(OutputStream os, WriterContext ctx) throws RepositoryException, IOException {
     run(new ProfileRunnable(os, ctx));
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public void readActivities(OutputStream os, WriterContext ctx) throws RepositoryException, IOException {
     run(new ActivityRunnable(os, ctx));
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public void readRelationships(OutputStream os, WriterContext ctx) throws RepositoryException, IOException {
     run(new RelationshipRunnable(os, ctx));
   }

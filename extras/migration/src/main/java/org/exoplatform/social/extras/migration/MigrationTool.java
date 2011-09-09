@@ -43,6 +43,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 /**
+ * Migration entry point.
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
@@ -72,7 +73,16 @@ public class MigrationTool {
 
   }
 
-  public void runAll(NodeReader reader, NodeWriter writer, WriterContext ctx) throws IOException, RepositoryException {
+  /**
+   * Run full migration.
+   * @param reader data reader
+   * @param writer data writer
+   * @param ctx mavigation context
+   * @throws IOException
+   * @throws RepositoryException
+   */
+  public void runAll(NodeReader reader, NodeWriter writer, WriterContext ctx)
+      throws IOException, RepositoryException {
 
     runIdentities(reader, writer, ctx);
     runSpaces(reader, writer, ctx);
@@ -82,7 +92,16 @@ public class MigrationTool {
 
   }
 
-  public void runIdentities(NodeReader reader, NodeWriter writer, WriterContext ctx) throws IOException, RepositoryException {
+  /**
+   * Run identities migration.
+   * @param reader data reader
+   * @param writer data writer
+   * @param ctx mavigation context
+   * @throws IOException
+   * @throws RepositoryException
+   */
+  public void runIdentities(NodeReader reader, NodeWriter writer, WriterContext ctx)
+      throws IOException, RepositoryException {
 
     reader.checkData();
 
@@ -94,7 +113,16 @@ public class MigrationTool {
 
   }
 
-  public void runProfiles(NodeReader reader, NodeWriter writer, WriterContext ctx) throws IOException, RepositoryException {
+  /**
+   * Run profiles migration.
+   * @param reader data reader
+   * @param writer data writer
+   * @param ctx mavigation context
+   * @throws IOException
+   * @throws RepositoryException
+   */
+  public void runProfiles(NodeReader reader, NodeWriter writer, WriterContext ctx)
+      throws IOException, RepositoryException {
 
     reader.checkData();
 
@@ -106,7 +134,16 @@ public class MigrationTool {
 
   }
 
-  public void runSpaces(NodeReader reader, NodeWriter writer, WriterContext ctx) throws IOException, RepositoryException {
+  /**
+   * Run spaces migration.
+   * @param reader data reader
+   * @param writer data writer
+   * @param ctx mavigation context
+   * @throws IOException
+   * @throws RepositoryException
+   */
+  public void runSpaces(NodeReader reader, NodeWriter writer, WriterContext ctx)
+      throws IOException, RepositoryException {
 
     reader.checkData();
 
@@ -121,7 +158,16 @@ public class MigrationTool {
 
   }
 
-  public void runRelationships(NodeReader reader, NodeWriter writer, WriterContext ctx) throws IOException, RepositoryException {
+  /**
+   * Run relationship migration.
+   * @param reader data reader
+   * @param writer data writer
+   * @param ctx mavigation context
+   * @throws IOException
+   * @throws RepositoryException
+   */
+  public void runRelationships(NodeReader reader, NodeWriter writer, WriterContext ctx)
+      throws IOException, RepositoryException {
 
     reader.checkData();
 
@@ -133,7 +179,16 @@ public class MigrationTool {
 
   }
 
-  public void runActivities(NodeReader reader, NodeWriter writer, WriterContext ctx) throws IOException, RepositoryException {
+  /**
+   * Run activities migration.
+   * @param reader data reader
+   * @param writer data writer
+   * @param ctx mavigation context
+   * @throws IOException
+   * @throws RepositoryException
+   */
+  public void runActivities(NodeReader reader, NodeWriter writer, WriterContext ctx)
+      throws IOException, RepositoryException {
 
     reader.checkData();
 
@@ -145,19 +200,40 @@ public class MigrationTool {
 
   }
 
-  public void rollback(NodeReader reader, NodeWriter writer, WriterContext ctx) throws RepositoryException {
+  /**
+   * Rollback changes.
+   * @param reader data reader
+   * @param writer data writer
+   * @param ctx mavigation context
+   * @throws RepositoryException
+   */
+  public void rollback(NodeReader reader, NodeWriter writer, WriterContext ctx)
+      throws RepositoryException {
 
     writer.rollback(ctx);
 
   }
 
-  public void commit(NodeReader reader, NodeWriter writer, WriterContext ctx) throws RepositoryException {
+  /**
+   * Run commit changes.
+   * @param reader data reader
+   * @param writer data writer
+   * @param ctx mavigation context
+   * @throws RepositoryException
+   */
+  public void commit(NodeReader reader, NodeWriter writer, WriterContext ctx)
+      throws RepositoryException {
 
     writer.commit(ctx);
 
   }
 
-  public NodeReader createReader(String from, String to, Session session) throws RepositoryException {
+  /**
+   * Run create new reader.
+   * @throws IOException
+   */
+  public NodeReader createReader(String from, String to, Session session)
+      throws RepositoryException {
 
     try {
       Class clazz = Class.forName("org.exoplatform.social.extras.migration.rw." + buildName(from, to, "Reader"));
@@ -170,9 +246,15 @@ public class MigrationTool {
 
   }
 
-  public NodeWriter createWriter(String from, String to, Session session) throws RepositoryException {
+  /**
+   * Run create new writer.
+   * @throws IOException
+   */
+  public NodeWriter createWriter(String from, String to, Session session)
+      throws RepositoryException {
 
     try {
+
       Class clazz = Class.forName("org.exoplatform.social.extras.migration.rw." + buildName(from, to, "Writer"));
       Constructor c = clazz.getConstructor(
           IdentityStorage.class,
@@ -184,6 +266,7 @@ public class MigrationTool {
       return (NodeWriter)c.newInstance(
           identityStorage, relationshipStorage, spaceStorage, activityStorage, organizationService, session
       );
+
     }
     catch (Exception e) {
       return null;

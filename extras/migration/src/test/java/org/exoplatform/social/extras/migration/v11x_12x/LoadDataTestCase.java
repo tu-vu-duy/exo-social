@@ -15,13 +15,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.exoplatform.social.extras.migration;
+package org.exoplatform.social.extras.migration.v11x_12x;
 
 import org.exoplatform.social.extras.migration.loading.DataLoader;
 
 import javax.jcr.Node;
 import javax.jcr.Property;
-import javax.jcr.Session;
 import javax.jcr.Value;
 import javax.jcr.nodetype.NodeType;
 

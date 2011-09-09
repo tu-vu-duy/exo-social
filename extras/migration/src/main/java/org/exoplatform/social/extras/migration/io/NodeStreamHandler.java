@@ -31,11 +31,19 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
+ * Stream handler.
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
 public class NodeStreamHandler {
 
+  /**
+   * Write a node to a stream
+   * @param node the node
+   * @param os the stream
+   * @throws RepositoryException
+   * @throws IOException
+   */
   public void writeNode(Node node, OutputStream os) throws RepositoryException, IOException {
 
     // Init stream.
@@ -72,6 +80,11 @@ public class NodeStreamHandler {
     
   }
 
+  /**
+   * Read data from a stream
+   * @param is the stream
+   * @return
+   */
   public NodeData readNode(InputStream is) {
 
     NodeData data = new NodeData();
@@ -88,6 +101,13 @@ public class NodeStreamHandler {
     return data;
   }
 
+  /**
+   * Read binary data from a stream.
+   * @param dis the stream
+   * @param data data to full
+   * @return readed type
+   * @throws IOException
+   */
   private int readData(DataInputStream dis, NodeData data) throws IOException {
 
     int type = dis.readInt();

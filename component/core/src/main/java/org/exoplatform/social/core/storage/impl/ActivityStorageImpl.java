@@ -29,6 +29,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.commons.lang.Validate;
+import org.chromattic.api.query.OrderBy;
 import org.chromattic.api.query.Query;
 import org.chromattic.api.query.QueryBuilder;
 import org.chromattic.api.query.QueryResult;
@@ -582,9 +583,10 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
       }
     }
 
-    whereExpression.orderBy(ActivityEntity.postedTime, Order.DESC);
+    builder.where(whereExpression.toString());
+    builder.orderBy(ActivityEntity.postedTime.getName(), OrderBy.DESC);
 
-    return builder.where(whereExpression.toString()).get();
+    return builder.get();
 
 
   }
@@ -897,9 +899,11 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
     }
 
     whereExpression.and().equals(ActivityEntity.isComment, Boolean.FALSE);
-    whereExpression.orderBy(ActivityEntity.postedTime, Order.DESC);
 
-    QueryResult<ActivityEntity> results = builder.where(whereExpression.toString()).get().objects();
+    builder.where(whereExpression.toString());
+    builder.orderBy(ActivityEntity.postedTime.getName(), OrderBy.DESC);
+
+    QueryResult<ActivityEntity> results = builder.get().objects();
 
     return results.size();
 

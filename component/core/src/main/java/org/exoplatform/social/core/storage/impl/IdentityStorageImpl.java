@@ -18,6 +18,7 @@
 package org.exoplatform.social.core.storage.impl;
 
 import org.chromattic.api.ChromatticSession;
+import org.chromattic.api.query.OrderBy;
 import org.chromattic.api.query.QueryBuilder;
 import org.chromattic.api.query.QueryResult;
 import org.chromattic.ext.ntdef.NTFile;
@@ -238,7 +239,8 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
     whereExpression.and();
     StorageUtils.applyWhereFromIdentity(whereExpression, relations);
 
-    whereExpression.orderBy(ProfileEntity.fullName, Order.ASC);
+    builder.where(whereExpression.toString());
+    builder.orderBy(ProfileEntity.fullName.getName(), OrderBy.ASC);
 
     if(count){
      return builder.where(whereExpression.toString()).get().objects();
@@ -892,9 +894,10 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
     StorageUtils.applyExcludes(whereExpression, excludedIdentityList);
     StorageUtils.applyFilter(whereExpression, profileFilter);
 
-    whereExpression.orderBy(ProfileEntity.fullName, Order.ASC);
+    builder.where(whereExpression.toString());
+    builder.orderBy(ProfileEntity.fullName.getName(), OrderBy.ASC);
 
-    QueryResult<ProfileEntity> results = builder.where(whereExpression.toString()).get().objects(offset, limit);
+    QueryResult<ProfileEntity> results = builder.get().objects(offset, limit);
     while (results.hasNext()) {
 
       ProfileEntity profileEntity = results.next();

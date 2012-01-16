@@ -332,8 +332,8 @@ public class UIProfileUserSearch extends UIForm {
     String defaultPos = resourceBudle.getString("UIProfileUserSearch.label.Position");
     String defaultSkills = resourceBudle.getString("UIProfileUserSearch.label.Skills");
 
-	  UIFormStringInput search = new UIFormStringInput(SEARCH, USER_CONTACT, defaultName);
-	  search.setHTMLAttribute(HTML_ATTRIBUTE_TITLE, defaultName);
+    UIFormStringInput search = new UIFormStringInput(SEARCH, USER_CONTACT, defaultName);
+    search.setHTMLAttribute(HTML_ATTRIBUTE_TITLE, defaultName);
     addUIFormInput(search);
     UIFormStringInput position = new UIFormStringInput(Profile.POSITION, Profile.POSITION, defaultPos);
     position.setHTMLAttribute(HTML_ATTRIBUTE_TITLE, defaultPos);
@@ -420,9 +420,8 @@ public class UIProfileUserSearch extends UIForm {
           }
           uiSearch.setRawSearchConditional("");
           uiSearch.setProfileFilter(filter);
-          
+          uiSearch.setNewSearch(true);
         } else {
-
           uiSearch.setSelectedChar(null);
           StringBuffer rawSearchMessageStringBuffer = new StringBuffer();
           if ((filter.getName() == null) || filter.getName().equals(defaultNameVal)) {
@@ -453,18 +452,11 @@ public class UIProfileUserSearch extends UIForm {
               filter.setSkills("");
               filter.setPosition("");
             }
-          } else {
-            charSearch = ALL_FILTER;
-            uiSearch.setRawSearchConditional(ALL_FILTER);
-            filter.setFirstCharacterOfName(EMPTY_CHARACTER);
-            filter.setName("");
-            filter.setCompany("");
-            filter.setSkills("");
-            filter.setPosition("");
+            uiSearch.setProfileFilter(filter);
+            uiSearch.setNewSearch(true);
           }
-          uiSearch.setProfileFilter(filter);
         }
-        uiSearch.setNewSearch(true);
+        
       } catch (Exception e) {
         uiSearch.setIdentityList(new ArrayList<Identity>());
       }

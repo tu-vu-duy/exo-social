@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.exoplatform.commons.utils.LazyPageList;
+import org.exoplatform.container.ExoContainer;
+import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.portal.application.PortalRequestContext;
 import org.exoplatform.portal.config.UserACL;
@@ -28,6 +30,9 @@ import org.exoplatform.portal.webui.util.Util;
 import org.exoplatform.social.webui.Utils;
 import org.exoplatform.services.organization.OrganizationService;
 import org.exoplatform.services.organization.User;
+import org.exoplatform.social.core.identity.model.Identity;
+import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
+import org.exoplatform.social.core.manager.IdentityManager;
 import org.exoplatform.social.core.space.SpaceException;
 import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.space.spi.SpaceService;
@@ -826,6 +831,21 @@ public class UISpaceMember extends UIForm {
    */
   private String getRemoteUser() throws Exception {
     return Util.getPortalRequestContext().getRemoteUser();
+  }
+  
+  /**
+   * Get full name from userId.
+   * 
+   * @param userId
+   * @return Full name
+   */
+  public String getFullName(String userId) {
+    
+    ExoContainer container = ExoContainerContext.getCurrentContainer();
+    IdentityManager idm = (IdentityManager) container.getComponentInstanceOfType(IdentityManager.class);
+    Identity identity = idm.getOrCreateIdentity(OrganizationIdentityProvider.NAME, userId, true);
+    
+    return identity.getProfile().getFullName();
   }
 
   public boolean isNewSearch() {

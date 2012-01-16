@@ -100,6 +100,11 @@ public class SpaceUtils {
 
   public static final String PLATFORM_USERS_GROUP = "/platform/users";
 
+  /**
+   * @deprecated Use {@link UserACL#getAdminMSType()} instead. 
+   * Will be removed by 1.2.9
+   */
+  @Deprecated
   public static final String MANAGER = "manager";
   
   public static final String MEMBER = "member";
@@ -661,7 +666,7 @@ public class SpaceUtils {
     }
 
     try {
-      // adds user as creator (manager)
+      // adds user as creator (member, manager)
       addCreatorToGroup(creator, groupId);
     } catch (Exception e) {
       // TODO:should rollback what has to be rollback here
@@ -735,7 +740,8 @@ public class SpaceUtils {
    * @throws SpaceException with code UNABLE_TO_ADD_CREATOR
    */
   public static void addCreatorToGroup(String creator, String groupId) {
-    addUserToGroupWithMembership(creator, groupId, MANAGER);
+    addUserToGroupWithMemberMembership(creator, groupId);
+    addUserToGroupWithManagerMembership(creator, groupId);
   }
 
   /**
@@ -750,16 +756,22 @@ public class SpaceUtils {
     OrganizationService organizationService = getOrganizationService();
     try {
       // TODO: checks whether user is already manager?
+      MembershipHandler membershipHandler = organizationService.getMembershipHandler();
+      Membership found = membershipHandler.findMembershipByUserGroupAndType(remoteId, groupId, membership);
+      if (found != null) {
+        LOG.info("user: " + remoteId + " was already added to group: " + groupId + " with membership: " + membership);
+        return;
+      }
       User user = organizationService.getUserHandler().findUserByName(remoteId);
       MembershipType membershipType = organizationService.getMembershipTypeHandler().findMembershipType(membership);
       GroupHandler groupHandler = organizationService.getGroupHandler();
       Group existingGroup = groupHandler.findGroupById(groupId);
-      organizationService.getMembershipHandler().linkMembership(user, existingGroup, membershipType, true);
+      membershipHandler.linkMembership(user, existingGroup, membershipType, true);
     } catch (Exception e) {
       LOG.warn("Unable to add user: " + remoteId + " to group: " + groupId + " with membership: " + membership);
     }
   }
-  
+
   /**
    * Adds the user to group with the membership (member). 
    * 
@@ -779,7 +791,7 @@ public class SpaceUtils {
    * @since 1.2.0-GA
    */
   public static void addUserToGroupWithManagerMembership(String remoteId, String groupId) {
-    addUserToGroupWithMembership(remoteId, groupId, MANAGER);
+    addUserToGroupWithMembership(remoteId, groupId, getUserACL().getAdminMSType());
   }
   
   /**
@@ -797,17 +809,18 @@ public class SpaceUtils {
       if (MEMBER.equals(membership)) {
           Collection<Membership> memberships = memberShipHandler.findMembershipsByUserAndGroup(remoteId, groupId);
           if (memberships.size() == 0) {
-            LOG.warn("User " + remoteId + " is not member");
+            LOG.info("User: " + remoteId + " is not a member of group: " + groupId);
+            return;
           }
           Iterator<Membership> itr = memberships.iterator();
           while (itr.hasNext()) {
             Membership mbShip = itr.next();
             memberShipHandler.removeMembership(mbShip.getId(), true);
           }
-      } else if (MANAGER.equals(membership)) {
-          Membership memberShip = memberShipHandler.findMembershipByUserGroupAndType(remoteId, groupId, MANAGER);
+      } else if (getUserACL().getAdminMSType().equals(membership)) {
+          Membership memberShip = memberShipHandler.findMembershipByUserGroupAndType(remoteId, groupId, getUserACL().getAdminMSType());
           if (memberShip == null) {
-            LOG.warn("User: " + remoteId + " is not manager of group: ");
+            LOG.info("User: " + remoteId + " is not a manager of group: " + groupId);
             return;
           }
           UserHandler userHandler = organizationService.getUserHandler();
@@ -841,7 +854,7 @@ public class SpaceUtils {
    * @since 1.2.0-GA
    */
   public static void removeUserFromGroupWithManagerMembership(String remoteId, String groupId) {
-    removeUserFromGroupWithMembership(remoteId, groupId, MANAGER);
+    removeUserFromGroupWithMembership(remoteId, groupId, getUserACL().getAdminMSType());
   }
   
   /**
@@ -880,7 +893,20 @@ public class SpaceUtils {
       throw new SpaceException(SpaceException.Code.UNABLE_TO_CREAT_NAV, e);
     }
   }
-  
+
+  /**
+   * Refreshes the current user portal (navigation caching refresh).
+   *
+   * @since 1.2.8
+   */
+  public static void refreshNavigation() {
+    UserPortal userPortal = getUserPortal();
+
+    if (userPortal != null) {
+      userPortal.refresh();
+    }
+  }
+
   /**
    * Using this method to get the UserPortal make sure that the data is latest.
    * It's will remove the caching.
@@ -1376,5 +1402,14 @@ public class SpaceUtils {
     }
     
     return checkedPrettyName;
+  }
+  
+  /**
+   * Gets the UserACL which helps to get Membership role to avoid hard code.
+   * @return UserACL object
+   */
+  public static UserACL getUserACL() {
+    ExoContainer container = ExoContainerContext.getCurrentContainer();
+    return (UserACL) container.getComponentInstanceOfType(UserACL.class);
   }
 }

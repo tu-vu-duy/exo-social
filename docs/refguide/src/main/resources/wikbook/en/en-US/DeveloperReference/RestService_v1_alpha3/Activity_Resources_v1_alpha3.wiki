@@ -2,7 +2,7 @@ h1. activity {anchor:id=SOCref.DevelopersReferences.RestService_APIs_v1alpha3.Ac
 
 h2. POST activity.*format*{anchor:id=SOCref.DevelopersReferences.RestService_APIs_v1alpha3.ActivityResource.Activity.Post}
 
-*Description*: Creates an activity to an identity's activity stream. If no _{noformat}identity_id{noformat}_ is specified, the activity will be created to the authenticated identity's activity stream.
+*Description*: Creates an activity to an identity's activity stream. If no _identity\_id_ is specified, the activity will be created to the authenticated identity's activity stream.
 
 *URL*:
 
@@ -10,7 +10,7 @@ h2. POST activity.*format*{anchor:id=SOCref.DevelopersReferences.RestService_API
 
 For example:
 
-* [http://platform35.demo.exoplatform.org/rest/private/api/social/v1-alpha3/portal/activity.json]
+* [http://cloud-workspaces.com/rest/private/api/social/v1-alpha3/portal/activity.json]
 * [http://localhost:8080/rest-socialdemo/private/api/social/v1-alpha3/socialdemo/activity.json]
 
 *Body Data*: The data for an activity
@@ -32,7 +32,7 @@ For example:
 
 *Parameters*:
 * *Optional*
-** *{noformat}identity_id{noformat}*: The identity who posts activities to his stream, to the stream of his connection or the space stream where he is a manager or a member.
+** *identity\_id*: The identity who posts activities to his stream, to the stream of his connection or the space stream where he is a manager or a member.
 *Examples*
 * *JSON*
 
@@ -78,7 +78,7 @@ h2. GET activity/:activityId.format {anchor:id=SOCref.DevelopersReferences.RestS
 
 For example:
 
-* [http://platform35.demo.exoplatform.org/rest/private/api/social/v1-alpha3/portal/activity/1a2b3c4d5e6f7g8h9i.json]
+* [http://cloud-workspaces.com/rest/private/api/social/v1-alpha3/portal/activity/1a2b3c4d5e6f7g8h9i.json]
 * [http://localhost:8080/rest-socialdemo/private/api/social/v1-alpha3/socialdemo/activity/1a2b3c4d5e6f7g8h9i.json]
 
 *Supported Format*: json
@@ -89,10 +89,10 @@ For example:
 * *Required*
 ** *id*: the Id of the existing activity.
 * *Optional*
-** *{noformat}poster_identity{noformat}*: When this parameter is set to *true*, *t* or *1*, the returned activity will provide more information for the user who posted this activity.
-** *{noformat}number_of_comments{noformat}*: Specifies the number of the latest comments to be displayed along with this activity. By default, _{noformat}number_of_comments=0{noformat}_. If _{noformat}number_of_comments{noformat}_ is a positive number, this number is considered as a limit number that must be equal or less than 100. If the total number of comments is less than the provided positive number, the total number of comments must be returned. If the total number of comments is more than 100, it is recommended to use _activity/:id/comments.format_ instead.
-** *{noformat}number_of_likes{noformat}*: Specifies the number of the latest detailed likes to be returned along with this activity. By default, _{noformat}number_of_likes=0{noformat}_. If _{noformat}number_of_likes{noformat}_ is a positive number, this number is considered as a limit number that must be equal or less than 100. If the total number of likes is less than the provided positive number, the  total number of likes must be returned. If the total number of likes is more than 100, it is recommended to use _activity/:activityId/likes.format_ instead.
-** *{noformat}activity_stream{noformat}*: When this parameter is set to *true*, *t* or *1*, the returned activity will provide more information for the activity stream that this activity belongs to.
+** *poster\_identity*: When this parameter is set to *true*, *t* or *1*, the returned activity will provide more information for the user who posted this activity.
+** *number\_of\_comments*: Specifies the number of the latest comments to be displayed along with this activity. By default, *number\_of\_comments=0*. If *number\_of\_comments* is a positive number, this number is considered as a limit number that must be equal or less than 100. If the total number of comments is less than the provided positive number, the total number of comments must be returned. If the total number of comments is more than 100, it is recommended to use _activity/:id/comments.format_ instead.
+** *number\_of\_likes*: Specifies the number of the latest detailed likes to be returned along with this activity. By default, *number\_of\_likes=0*. If *number\_of\_likes* is a positive number, this number is considered as a limit number that must be equal or less than 100. If the total number of likes is less than the provided positive number, the  total number of likes must be returned. If the total number of likes is more than 100, it is recommended to use _activity/:activityId/likes.format_ instead.
+** *activity\_stream*: When this parameter is set to *true*, *t* or *1*, the returned activity will provide more information for the activity stream that this activity belongs to.
 
 *Examples*:
 * *JSON*
@@ -144,7 +144,7 @@ h2. DELETE activity/:activityId.format {anchor:id=SOCref.DevelopersReferences.Re
 {code}http://{domain_name}/{rest_context_name}/private/api/social/{version}/{portal_container_name}/activity/:activityId.format{code}
 
 For example:
-* [http://platform35.demo.exoplatform.org/rest/private/api/social/v1-alpha3/portal/activity/1a2b3c4d5e6f7g8h9i.json]
+* [http://cloud-workspaces.com/rest/private/api/social/v1-alpha3/portal/activity/1a2b3c4d5e6f7g8h9i.json]
 * [http://localhost:8080/rest-socialdemo/private/api/social/v1-alpha3/socialdemo/activity/1a2b3c4d5e6f7g8h9i.json]
 
 *Supported Format*: json
@@ -160,7 +160,7 @@ For example:
 *Request*:
 
 {code:}
-DELETE: http://platform35.demo.exoplatform.org/rest/private/api/social/v1-alpha3/portal/activity/1a2b3c4d5e6f7g8h9i.json
+DELETE: http://cloud-workspaces.com/rest/private/api/social/v1-alpha3/portal/activity/1a2b3c4d5e6f7g8h9i.json
 {code}
 
 *Response*:
@@ -181,7 +181,7 @@ h2. POST activity/destroy/:activityId.format  {anchor:id=SOCref.DevelopersRefere
 
 For example:
 
-[http://platform35.demo.exoplatform.org/rest/private/api/social/v1-alpha3/portal/activity/destroy/1a2b3c4d5e6f7g8h9i.json]
+[http://cloud-workspaces.com/rest/private/api/social/v1-alpha3/portal/activity/destroy/1a2b3c4d5e6f7g8h9i.json]
 
 [http://localhost:8080/rest-socialdemo/private/api/social/v1-alpha3/socialdemo/activity/destroy/1a2b3c4d5e6f7g8h9i.json]
 
@@ -220,7 +220,7 @@ h2. GET activity/:activityId/comments.format {anchor:id=SOCref.DevelopersReferen
 
 For example:
 
-* [http://platform35.demo.exoplatform.org/rest/private/api/social/v1-alpha3/portal/activity/1a2b3c4d5e/comments.json]
+* [http://cloud-workspaces.com/rest/private/api/social/v1-alpha3/portal/activity/1a2b3c4d5e/comments.json]
 * [http://localhost:8080/rest-socialdemo/private/api/social/v1-alpha3/socialdemo/activity/1a2b3c4e5e/comments.json]
 
 *Supported Format*: json
@@ -274,7 +274,7 @@ h2. POST activity/:activityId/comment.format   {anchor:id=SOCref.DevelopersRefer
 
 For example:
 
-* [http://platform35.demo.exoplatform.org/rest/private/api/social/v1-alpha3/portal/activity/1a2b3c4d5e/comment.json]
+* [http://cloud-workspaces.com/rest/private/api/social/v1-alpha3/portal/activity/1a2b3c4d5e/comment.json]
 * [http://localhost:8080/rest-socialdemo/private/api/social/v1-alpha3/socialdemo/activity/1a2b3c4e5e/comment.json]
 
 *Body data*:
@@ -321,7 +321,7 @@ h2. DELETE activity/:activityId/comment/:commentId.format {anchor:id=SOCref.Deve
 
 For example:
 
-* [http://platform35.demo.exoplatform.org/rest/private/api/social/v1-alpha3/portal/activity/1a2b3c4d5e/comment/123456.json]
+* [http://cloud-workspaces.com/rest/private/api/social/v1-alpha3/portal/activity/1a2b3c4d5e/comment/123456.json]
 * [http://localhost:8080/rest-socialdemo/private/api/social/v1-alpha3/socialdemo/activity/1a2b3c4e5e/comment/123456.json]
 
 *Supported Format*: json
@@ -357,7 +357,7 @@ h2. POST activity/:activityId/comment/destroy/:commentId.format {anchor:id=SOCre
 
 For example:
 
-* [http://platform35.demo.exoplatform.org/rest/private/api/social/v1-alpha3/portal/activity/1a2b3c4d5e/comment/destroy/123456.json]
+* [http://cloud-workspaces.com/rest/private/api/social/v1-alpha3/portal/activity/1a2b3c4d5e/comment/destroy/123456.json]
 * [http://localhost:8080/rest-socialdemo/private/api/social/v1-alpha3/socialdemo/activity/1a2b3c4e5e/comment/destroy/123456.json]
 
 *Supported Format*: json
@@ -393,7 +393,7 @@ h2. GET activity/:activityId/likes.format {anchor:id=SOCref.DevelopersReferences
 
 For example:
 
-* [http://platform35.demo.exoplatform.org/rest/private/api/social/v1-alpha3/portal/activity/1a2b3c4d5e/likes.json]
+* [http://cloud-workspaces.com/rest/private/api/social/v1-alpha3/portal/activity/1a2b3c4d5e/likes.json]
 
 * [http://localhost:8080/rest-socialdemo/private/api/social/v1-alpha3/socialdemo/activity/1a2b3c4e5e/likes.json]
 
@@ -443,7 +443,7 @@ h2. POST activity/:activityId/like.format  {anchor:id=SOCref.DevelopersReference
 
 For example:
 
-* [http://platform35.demo.exoplatform.org/rest/private/api/social/v1-alpha3/portal/activity/1a2b3c4d5e/like.json]
+* [http://cloud-workspaces.com/rest/private/api/social/v1-alpha3/portal/activity/1a2b3c4d5e/like.json]
 * [http://localhost:8080/rest-socialdemo/private/api/social/v1-alpha3/socialdemo/activity/1a2b3c4e5e/like.json]
 
 *Supported Format*: json
@@ -479,7 +479,7 @@ h2. DELETE activity/:activityId/like.format {anchor:id=SOCref.DevelopersReferenc
 
 For example:
 
-* [http://platform35.demo.exoplatform.org/rest/private/api/social/v1-alpha3/portal/activity/1a2b3c4d5e/like.json]
+* [http://cloud-workspaces.com/rest/private/api/social/v1-alpha3/portal/activity/1a2b3c4d5e/like.json]
 * [http://localhost:8080/rest-socialdemo/private/api/social/v1-alpha3/socialdemo/activity/1a2b3c4e5e/like.json]
 
 *Supported Format*: json
@@ -515,7 +515,7 @@ h2. POST activity/:activityId/like/destroy.format  {anchor:id=SOCref.DevelopersR
 
 For example:
 
-* [http://platform35.demo.exoplatform.org/rest/private/api/social/v1-alpha3/portal/activity/1a2b3c4d5e/like/destroy.json]
+* [http://cloud-workspaces.com/rest/private/api/social/v1-alpha3/portal/activity/1a2b3c4d5e/like/destroy.json]
 * [http://localhost:8080/rest-socialdemo/private/api/social/v1-alpha3/socialdemo/activity/1a2b3c4e5e/like/destroy.json]
 
 *Supported Format*: json

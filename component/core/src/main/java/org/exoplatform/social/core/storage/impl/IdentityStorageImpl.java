@@ -38,6 +38,7 @@ import org.exoplatform.social.core.identity.SpaceMemberFilterListAccess.Type;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.model.Profile;
 import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
+import org.exoplatform.social.core.identity.provider.SpaceIdentityProvider;
 import org.exoplatform.social.core.model.AvatarAttachment;
 import org.exoplatform.social.core.profile.ProfileFilter;
 import org.exoplatform.social.core.relationship.model.Relationship;
@@ -495,6 +496,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
 
     //
     ProfileEntity profileEntity = _findById(ProfileEntity.class, profile.getId());
+    String providerId = profile.getIdentity().getProviderId();
 
     Map<String, List<String>> phonesData = new HashMap<String, List<String>>();
 
@@ -555,7 +557,7 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
           //need to check here to avoid to set property with name: "void-skills"
           if (Profile.EXPERIENCES_SKILLS.equals(key) == false) {
             if (value != null) {
-              List<String> lvalue = new ArrayList();
+              List<String> lvalue = new ArrayList<String>();
               lvalue.add((String) value);
               profileEntity.setProperty(PropNs.VOID.nameOf(key), lvalue);
             } else {
@@ -568,6 +570,12 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
     
     // TODO : find better
     profileEntity.setParentId(profile.getIdentity().getId());
+
+    // External profile
+    if (!OrganizationIdentityProvider.NAME.equals(providerId) && !SpaceIdentityProvider.NAME.equals(providerId)) {
+      profileEntity.setExternalUrl(profile.getUrl());
+      profileEntity.setExternalAvatarUrl(profile.getAvatarUrl());
+    }
 
     getSession().save();
 
@@ -637,6 +645,12 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
   }
 
   private void populateProfile(final Profile profile, final ProfileEntity profileEntity) {
+
+    IdentityEntity identity = profileEntity.getIdentity();
+
+    String providerId = identity.getProviderId();
+    String remoteId = identity.getRemoteId();
+
     profile.setId(profileEntity.getId());
 
     List<Map<String, String>> phones = new ArrayList<Map<String,String>>();
@@ -664,6 +678,36 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
       }
     }
 
+    if (OrganizationIdentityProvider.NAME.equals(providerId) || SpaceIdentityProvider.NAME.equals(providerId)) {
+
+      //
+      if (OrganizationIdentityProvider.NAME.equals(providerId)) {
+        profile.setUrl(LinkProvider.getUserProfileUri(remoteId));
+      } else if (SpaceIdentityProvider.NAME.equals(providerId)) {
+        profile.setUrl(LinkProvider.getSpaceUri(remoteId));
+      }
+      
+      //
+      NTFile avatar = profileEntity.getAvatar();
+      if (avatar != null) {
+        try {
+          String avatarPath = getSession().getPath(avatar);
+          long lastModified = avatar.getLastModified().getTime();
+          // workaround: as dot character (.) breaks generated url (Ref: SOC-2283)
+          String avatarUrl = StorageUtils.encodeUrl(avatarPath) + "/?upd=" + lastModified;
+          profile.setAvatarUrl(LinkProvider.escapeJCRSpecialCharacters(avatarUrl));
+        } catch (Exception e) {
+          LOG.warn("Failed to build file url from fileResource: " + e.getMessage());
+        }
+      }
+
+    }
+    // External profile
+    else {
+      profile.setUrl(profileEntity.getExternalUrl());
+      profile.setAvatarUrl(profileEntity.getExternalAvatarUrl());
+    }
+
     //
     if (phones.size() > 0) {
       profile.setProperty(Profile.CONTACT_PHONES, phones);
@@ -673,22 +717,6 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
     }
     if (urls.size() > 0) {
       profile.setProperty(Profile.CONTACT_URLS, urls);
-    }
-
-    //
-    NTFile avatar = profileEntity.getAvatar();
-    if (avatar != null) {
-      ChromatticSession chromatticSession = getSession();
-      try {
-        String avatarPath = chromatticSession.getPath(avatar);
-        long lastModified = avatar.getLastModified().getTime();
-        // workaround: as dot character (.) breaks generated url (Ref: SOC-2283)
-        String avatarUrl = StorageUtils.encodeUrl(avatarPath) + "/?upd=" + lastModified;
-        
-        profile.setProperty(Profile.AVATAR_URL, LinkProvider.escapeJCRSpecialCharacters(avatarUrl));
-      } catch (Exception e) {
-        LOG.warn("Failed to build file url from fileResource: " + e.getMessage());
-      }
     }
 
     //

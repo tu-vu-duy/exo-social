@@ -21,6 +21,8 @@ import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.relationship.model.Relationship;
 import org.exoplatform.social.core.storage.impl.IdentityStorageImpl;
 import org.exoplatform.social.core.test.AbstractCoreTest;
+import org.exoplatform.social.core.test.MaxQueryNumber;
+import org.exoplatform.social.core.test.QueryNumberTest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +31,7 @@ import java.util.List;
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
  * @version $Revision$
  */
+@QueryNumberTest
 public class CachedRelationshipStorageTestCase extends AbstractCoreTest {
 
   private CachedRelationshipStorage relationshipStorage;
@@ -61,6 +64,7 @@ public class CachedRelationshipStorageTestCase extends AbstractCoreTest {
     super.tearDown();
   }
 
+  @MaxQueryNumber(150)
   public void testSaveRelationship() throws Exception {
 
     Identity i1 = new Identity("p", "i1");
@@ -78,6 +82,7 @@ public class CachedRelationshipStorageTestCase extends AbstractCoreTest {
 
   }
 
+  @MaxQueryNumber(200)
   public void testRemoveRelationship() throws Exception {
 
     Identity i1 = new Identity("p", "i1");
@@ -91,12 +96,15 @@ public class CachedRelationshipStorageTestCase extends AbstractCoreTest {
     Relationship r = relationshipStorage.saveRelationship(new Relationship(i1, i2));
     assertEquals(1, cacheService.getRelationshipCache().getCacheSize());
     relationshipStorage.getRelationshipsCount(i1);
+    relationshipStorage.getRelationships(i1, 0, 10);
+    relationshipStorage.getRelationships(i2, 0, 10);
     relationshipStorage.removeRelationship(r);
     assertEquals(0, cacheService.getRelationshipCache().getCacheSize());
     assertEquals(0, cacheService.getRelationshipsCount().getCacheSize());
 
   }
 
+  @MaxQueryNumber(150)
   public void testGetRelationship() throws Exception {
 
     Identity i1 = new Identity("p", "i1");
@@ -119,6 +127,7 @@ public class CachedRelationshipStorageTestCase extends AbstractCoreTest {
     
   }
 
+  @MaxQueryNumber(150)
   public void testName() throws Exception {
 
     Identity i1 = new Identity("p", "i1");

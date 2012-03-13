@@ -55,6 +55,13 @@ public interface ActivityStorage {
   public ExoSocialActivity getActivity(String activityId) throws ActivityStorageException;
 
   /**
+   * Load an activity by its id.
+   *
+   * @return the activity
+   */
+  public ExoSocialActivity getNamedActivity(Identity identity, String name) throws ActivityStorageException;
+
+  /**
    * Gets all the activities by identity.
    *
    * @param owner the identity
@@ -98,6 +105,21 @@ public interface ActivityStorage {
      * @since 1.1.1
      */
   public ExoSocialActivity saveActivity(Identity owner, ExoSocialActivity activity) throws ActivityStorageException;
+
+  /**
+     * Saves an activity into a stream.
+     * Note that the field {@link org.exoplatform.social.core.activity.model.ExoSocialActivity#setUserId(String)}
+     * should be the id of an identity {@link Identity#getId()}
+     * @param owner owner of the stream where this activity is bound.
+     *              Usually a user or space identity
+     * @param activity the activity to save
+     * @param name the activity name
+     * @return stored activity
+     * @throws ActivityStorageException activity storage exception with type:
+     * ActivityStorageException.Type.FAILED_TO_SAVE_ACTIVITY
+     * @since 1.1.1
+     */
+  public ExoSocialActivity saveActivity(Identity owner, ExoSocialActivity activity, String name) throws ActivityStorageException;
 
   public ExoSocialActivity getParentActivity(ExoSocialActivity comment) throws ActivityStorageException;
 

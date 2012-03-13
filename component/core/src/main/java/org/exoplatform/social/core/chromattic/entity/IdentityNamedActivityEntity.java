@@ -17,38 +17,23 @@
 
 package org.exoplatform.social.core.chromattic.entity;
 
-import org.chromattic.api.annotations.Create;
-import org.chromattic.api.annotations.FormattedBy;
-import org.chromattic.api.annotations.Name;
-import org.chromattic.api.annotations.NamingPrefix;
-import org.chromattic.api.annotations.OneToMany;
-import org.chromattic.api.annotations.Path;
+import org.chromattic.api.annotations.MappedBy;
+import org.chromattic.api.annotations.OneToOne;
+import org.chromattic.api.annotations.Owner;
 import org.chromattic.api.annotations.PrimaryType;
-import org.chromattic.ext.format.BaseEncodingObjectFormatter;
 
 import java.util.Map;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
- * @version $Revision$
  */
-@PrimaryType(name="soc:providerdefinition")
-@FormattedBy(BaseEncodingObjectFormatter.class)
-@NamingPrefix("soc")
-public abstract class ProviderEntity {
+@PrimaryType(name = "soc:identityintegration")
+public abstract class IdentityNamedActivityEntity extends IdentityEntity {
+
+  @MappedBy("soc:activities")
+  @OneToOne
+  @Owner
+  public abstract ActivityNamedList getActivityNamedList();
+  public abstract void setActivityNamedList(ActivityNamedList activityListEntity);
   
-  @Name
-  public abstract String getName();
-
-  @Path
-  public abstract String getPath();
-
-  @OneToMany
-  public abstract Map<String, IdentityEntity> getIdentities();
-
-  @Create
-  public abstract IdentityEntity createIdentity();
-
-  @Create
-  public abstract IdentityNamedActivityEntity createIntegrationIdentity();
 }

@@ -64,6 +64,22 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
    * {@inheritDoc}
    */
   @Override
+  public ExoSocialActivity getNamedActivity(final Identity identity, final String name) throws ActivityStorageException {
+
+    boolean created = startSynchronization();
+    try {
+      return super.getNamedActivity(identity, name);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public List<ExoSocialActivity> getUserActivities(final Identity owner) throws ActivityStorageException {
 
     boolean created = startSynchronization();
@@ -124,6 +140,24 @@ public class SynchronizedActivityStorage extends ActivityStorageImpl {
     }
 
   }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public ExoSocialActivity saveActivity(final Identity owner, final ExoSocialActivity activity, final String name) throws ActivityStorageException {
+
+    boolean created = startSynchronization();
+    try {
+      return super.saveActivity(owner, activity, name);
+    }
+    finally {
+      stopSynchronization(created);
+    }
+
+  }
+
+
 
   /**
    * {@inheritDoc}

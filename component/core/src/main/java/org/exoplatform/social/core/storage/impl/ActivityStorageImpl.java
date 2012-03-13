@@ -46,6 +46,7 @@ import org.exoplatform.social.core.chromattic.entity.ActivityEntity;
 import org.exoplatform.social.core.chromattic.entity.ActivityListEntity;
 import org.exoplatform.social.core.chromattic.entity.ActivityParameters;
 import org.exoplatform.social.core.chromattic.entity.IdentityEntity;
+import org.exoplatform.social.core.chromattic.entity.IdentityNamedActivityEntity;
 import org.exoplatform.social.core.chromattic.utils.ActivityIterator;
 import org.exoplatform.social.core.chromattic.utils.ActivityList;
 import org.exoplatform.social.core.identity.model.Identity;
@@ -93,7 +94,7 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
    * Internal
    */
 
-  protected void _createActivity(Identity owner, ExoSocialActivity activity) throws NodeNotFoundException {
+  protected void _createActivity(Identity owner, ExoSocialActivity activity, String name) throws NodeNotFoundException {
 
     IdentityEntity identityEntity = _findById(IdentityEntity.class, owner.getId());
 
@@ -105,17 +106,25 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
       posterIdentityEntity = identityEntity;
     }
 
-    // Get ActivityList
-    ActivityListEntity activityListEntity = identityEntity.getActivityList();
-
-    //
-    Collection<ActivityEntity> entities = new ActivityList(activityListEntity);
-
-    // Create activity
     long currentMillis = System.currentTimeMillis();
     long activityMillis = (activity.getPostedTime() != null ? activity.getPostedTime() : currentMillis);
-    ActivityEntity activityEntity = activityListEntity.createActivity(String.valueOf(activityMillis));
-    entities.add(activityEntity);
+    ActivityEntity activityEntity = null;
+    if (IdentityNamedActivityEntity.class.isAssignableFrom(posterIdentityEntity.getClass())) {
+      IdentityNamedActivityEntity i = (IdentityNamedActivityEntity) posterIdentityEntity;
+      activityEntity = i.getActivityNamedList().getActivity(name);
+    }
+    else {
+      
+       // Get ActivityList
+      ActivityListEntity activityListEntity = identityEntity.getActivityList();
+      Collection<ActivityEntity> entities = new ActivityList(activityListEntity);
+
+      // Create activity
+      activityEntity = activityListEntity.createActivity(String.valueOf(activityMillis));
+      entities.add(activityEntity);
+
+    }
+
     activityEntity.setIdentity(identityEntity);
     activityEntity.setComment(Boolean.FALSE);
     activityEntity.setPostedTime(activityMillis);
@@ -311,6 +320,31 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
   /**
    * {@inheritDoc}
    */
+  public ExoSocialActivity getNamedActivity(Identity identity, String name) throws ActivityStorageException {
+
+    String path = String.format(
+        "soc:providers/soc:%s/soc:%s/soc:activities/soc:%s",
+        identity.getProviderId(),
+        identity.getRemoteId(),
+        name
+    );
+
+    ActivityEntity a = getSession().findByPath(ActivityEntity.class, path);
+    if (a != null) {
+      ExoSocialActivity activity = new ExoSocialActivityImpl();
+      fillActivityFromEntity(a, activity);
+      processActivity(activity);
+      return activity;
+
+    }
+
+    return null;
+
+  }
+
+  /**
+   * {@inheritDoc}
+   */
   public List<ExoSocialActivity> getUserActivities(Identity owner) throws ActivityStorageException {
 
     return getUserActivities(owner, 0, 0);
@@ -408,6 +442,13 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
    * {@inheritDoc}
    */
   public ExoSocialActivity saveActivity(Identity owner, ExoSocialActivity activity) throws ActivityStorageException {
+    return saveActivity(owner, activity, null);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public ExoSocialActivity saveActivity(Identity owner, ExoSocialActivity activity, String name) throws ActivityStorageException {
     try {
       Validate.notNull(owner, "owner must not be null.");
       Validate.notNull(activity, "activity must not be null.");
@@ -422,8 +463,8 @@ public class ActivityStorageImpl extends AbstractStorage implements ActivityStor
 
       if (activity.getId() == null) {
 
-        _createActivity(owner, activity);
-        
+        _createActivity(owner, activity, name);
+
       }
       else {
 

@@ -19,10 +19,8 @@ package org.exoplatform.social.core.chromattic.entity;
 
 import org.chromattic.api.annotations.Create;
 import org.chromattic.api.annotations.FormattedBy;
-import org.chromattic.api.annotations.Name;
 import org.chromattic.api.annotations.NamingPrefix;
 import org.chromattic.api.annotations.OneToMany;
-import org.chromattic.api.annotations.Path;
 import org.chromattic.api.annotations.PrimaryType;
 import org.chromattic.ext.format.BaseEncodingObjectFormatter;
 
@@ -30,25 +28,26 @@ import java.util.Map;
 
 /**
  * @author <a href="mailto:alain.defrance@exoplatform.com">Alain Defrance</a>
- * @version $Revision$
  */
-@PrimaryType(name="soc:providerdefinition")
+@PrimaryType(name = "soc:activitynamedlist")
 @FormattedBy(BaseEncodingObjectFormatter.class)
 @NamingPrefix("soc")
-public abstract class ProviderEntity {
-  
-  @Name
-  public abstract String getName();
-
-  @Path
-  public abstract String getPath();
+public abstract class ActivityNamedList {
 
   @OneToMany
-  public abstract Map<String, IdentityEntity> getIdentities();
+  protected abstract Map<String, ActivityEntity> getActivities();
 
   @Create
-  public abstract IdentityEntity createIdentity();
+  protected abstract ActivityEntity createActivity();
 
-  @Create
-  public abstract IdentityNamedActivityEntity createIntegrationIdentity();
+  public ActivityEntity getActivity(String name) {
+    ActivityEntity got = getActivities().get(name);
+    if (got == null) {
+      got = createActivity();
+      getActivities().put(name, got);
+    }
+
+    return got;
+  }
+  
 }

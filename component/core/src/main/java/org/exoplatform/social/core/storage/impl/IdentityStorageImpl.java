@@ -36,6 +36,7 @@ import org.exoplatform.social.core.chromattic.entity.SpaceRef;
 import org.exoplatform.social.core.identity.SpaceMemberFilterListAccess.Type;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.model.Profile;
+import org.exoplatform.social.core.identity.provider.IntegrationIdentityProvider;
 import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
 import org.exoplatform.social.core.identity.provider.SpaceIdentityProvider;
 import org.exoplatform.social.core.model.AvatarAttachment;
@@ -263,7 +264,16 @@ public class IdentityStorageImpl extends AbstractStorage implements IdentityStor
       throw new NodeAlreadyExistsException("Identity " + identity.getRemoteId() + " already exists");
     }
 
-    IdentityEntity identityEntity = providerEntity.createIdentity();
+    //
+    IdentityEntity identityEntity;
+    if (IntegrationIdentityProvider.NAME.equals(identity.getProviderId())) {
+      identityEntity = providerEntity.createIntegrationIdentity();
+    }
+    else {
+      identityEntity = providerEntity.createIdentity();
+    }
+
+    //
     providerEntity.getIdentities().put(identity.getRemoteId(), identityEntity);
     identityEntity.setProviderId(identity.getProviderId());
     identityEntity.setRemoteId(identity.getRemoteId());

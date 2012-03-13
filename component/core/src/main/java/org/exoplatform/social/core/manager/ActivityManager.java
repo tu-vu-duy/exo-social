@@ -57,6 +57,17 @@ public interface ActivityManager {
    */
   void saveActivityNoReturn(Identity streamOwner, ExoSocialActivity newActivity);
 
+  /**
+   * Saves a new created activity to a stream. Note that the Activity.userId will be set to the owner's identity if it
+   * has not already set.
+   *
+   * @param streamOwner the activity stream owner
+   * @param newActivity the activity to be saved
+   * @param name the activity name
+   * @return the saved activity
+   * @since  1.2.0-GA
+   */
+  void saveActivityNoReturn(Identity streamOwner, ExoSocialActivity newActivity, String name);
 
   /**
    * Saves a new created activity to the stream of that activity's userId stream. The userId of the created activity
@@ -85,6 +96,15 @@ public interface ActivityManager {
    * @param activityTitle the activity title
    */
   void saveActivity(Identity streamOwner, String activityType, String activityTitle);
+
+  /**
+   * Create an integration point. This activity will be used for activity portlet.
+   *
+   * @param integrationIdentity   the integration activity stream owner. This instance have to be created by IdentityManager#getIntegrationIdentity(String name).
+   * @param name the activity name
+   * @return The created activity considered as integration point.
+   */
+  ExoSocialActivity getNamedActivity(Identity integrationIdentity, String name);
 
   /**
    * Gets an activity by its id.

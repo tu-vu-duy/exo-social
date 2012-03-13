@@ -80,13 +80,20 @@ public class ActivityManagerImpl implements ActivityManager {
    * {@inheritDoc}
    */
   public void saveActivityNoReturn(Identity streamOwner, ExoSocialActivity newActivity) {
+    saveActivityNoReturn(streamOwner, newActivity, null);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void saveActivityNoReturn(Identity streamOwner, ExoSocialActivity newActivity, String name) {
     long currentTime = System.currentTimeMillis();
     newActivity.setUpdated(new Date(currentTime));
     //new activity
     if (newActivity.getId() == null) {
       newActivity.setPostedTime(currentTime);
     }
-    activityStorage.saveActivity(streamOwner, newActivity);
+    activityStorage.saveActivity(streamOwner, newActivity, name);
   }
 
   /**
@@ -95,6 +102,10 @@ public class ActivityManagerImpl implements ActivityManager {
   public void saveActivityNoReturn(ExoSocialActivity newActivity) {
     Identity owner = getStreamOwner(newActivity);
     saveActivityNoReturn(owner, newActivity);
+  }
+
+  public ExoSocialActivity getNamedActivity(final Identity integrationIdentity, final String name) {
+    return activityStorage.getNamedActivity(integrationIdentity, name);
   }
 
   /**
@@ -255,7 +266,15 @@ public class ActivityManagerImpl implements ActivityManager {
    * {@inheritDoc}
    */
   public ExoSocialActivity saveActivity(Identity streamOwner, ExoSocialActivity newActivity) {
-    saveActivityNoReturn(streamOwner, newActivity);
+    saveActivityNoReturn(streamOwner, newActivity, null);
+    return newActivity;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public ExoSocialActivity saveActivity(Identity streamOwner, ExoSocialActivity newActivity, String name) {
+    saveActivityNoReturn(streamOwner, newActivity, name);
     return newActivity;
   }
 

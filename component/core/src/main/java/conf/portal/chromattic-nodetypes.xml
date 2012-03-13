@@ -109,6 +109,36 @@
       </childNodeDefinition>
     </childNodeDefinitions>
   </nodeType>
+  <!-- Node type generated for the class org.exoplatform.social.core.chromattic.entity.ActivityNamedList -->
+  <nodeType name="soc:activitynamedlist" isMixin="false" hasOrderableChildNodes="false">
+    <supertypes>
+      <supertype>nt:base</supertype>
+      <supertype>mix:referenceable</supertype>
+    </supertypes>
+    <propertyDefinitions/>
+    <childNodeDefinitions>
+      <childNodeDefinition name="*" defaultPrimaryType="soc:activity" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" sameNameSiblings="false">
+        <requiredPrimaryTypes>
+          <requiredPrimaryType>soc:activity</requiredPrimaryType>
+        </requiredPrimaryTypes>
+      </childNodeDefinition>
+    </childNodeDefinitions>
+  </nodeType>
+  <!-- Node type generated for the class org.exoplatform.social.core.chromattic.entity.IntegrationIdentityEntity -->
+  <nodeType name="soc:identityintegration" isMixin="false" hasOrderableChildNodes="false">
+    <supertypes>
+      <supertype>soc:identitydefinition</supertype>
+      <supertype>mix:referenceable</supertype>
+    </supertypes>
+    <propertyDefinitions/>
+    <childNodeDefinitions>
+      <childNodeDefinition name="soc:activities" defaultPrimaryType="soc:activitynamedlist" autoCreated="true" mandatory="false" onParentVersion="COPY" protected="false" sameNameSiblings="false">
+        <requiredPrimaryTypes>
+          <requiredPrimaryType>soc:activitynamedlist</requiredPrimaryType>
+        </requiredPrimaryTypes>
+      </childNodeDefinition>
+    </childNodeDefinitions>
+  </nodeType>
   <!-- Node type generated for the class org.exoplatform.social.core.chromattic.entity.ProviderEntity -->
   <nodeType name="soc:providerdefinition" isMixin="false" hasOrderableChildNodes="false">
     <supertypes>

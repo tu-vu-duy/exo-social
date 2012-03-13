@@ -173,7 +173,12 @@ public class CachedActivityStorage implements ActivityStorage {
     return activity.build();
 
   }
-  
+
+  public ExoSocialActivity getNamedActivity(final Identity identity, final String name) throws ActivityStorageException {
+    // TODO : need cache
+    return storage.getNamedActivity(identity, name);
+  }
+
   /**
    * {@inheritDoc}
    */
@@ -238,6 +243,11 @@ public class CachedActivityStorage implements ActivityStorage {
     //
     return a;
 
+  }
+
+  public ExoSocialActivity saveActivity(final Identity owner, final ExoSocialActivity activity, final String name) throws ActivityStorageException {
+    // TODO : need cache
+    return storage.saveActivity(owner, activity, name);
   }
 
   /**
